@@ -14,7 +14,7 @@ public class MainActivity extends ListActivity
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-
+        setTitle("Hotlist");
         setListAdapter(new ArrayAdapter<String>(this, R.layout.list_item, R.id.list_item_title, items));
     }
 
