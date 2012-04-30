@@ -7,7 +7,7 @@ import android.view.*;
 
 public class MainActivity extends ListActivity
 {
-    private final String[] items = {"item 1", "item 2"};
+    private final String[] items = {"やること #1", "やること＃２", "Item #3", "Important!!! item #4"};
 
     /** Called when the activity is first created. */
     @Override
