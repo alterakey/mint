@@ -9,4 +9,15 @@
   />
 
   <import file="${runner.dir}/build.xml" />
+
+  <target name="test">
+    <subant>
+      <fileset dir="test" includes="build.xml" />
+      <target name="clean" />
+      <target name="debug" />
+      <target name="uninstall" />
+      <target name="install" />
+      <target name="test" />
+    </subant>
+  </target>
 </project>
