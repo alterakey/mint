@@ -1,23 +1,17 @@
 <?xml version="1.0"?>
 <project name="runner">
-  <loadproperties srcFile="secure.properties" />
+  <property file="runner.properties" />
 
-  <!-- quick check on runner.dir -->
+  <!-- quick check on runner.at -->
   <fail
-          message="runner.dir is missing. Make sure to inject it through an env var"
-          unless="runner.dir"
+          message="runner.at is missing. Make sure to inject it through an env var"
+          unless="runner.at"
   />
 
-  <import file="${runner.dir}/build.xml" />
+  <property name="runner.dir" location="${runner.at}" />
+  <dirname property="runner.target.dir" file="${ant.file}" />
 
-  <target name="test">
-    <subant>
-      <fileset dir="test" includes="build.xml" />
-      <target name="clean" />
-      <target name="debug" />
-      <target name="uninstall" />
-      <target name="install" />
-      <target name="test" />
-    </subant>
-  </target>
+  <import file="${runner.dir}/runner.xml" />
+  <import file="${runner.dir}/test-unit.xml" />
+  <import file="${runner.dir}/test-functional.xml" />
 </project>

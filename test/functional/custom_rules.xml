@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<project name="test_runner">
+  <loadproperties srcFile="${tested.project.dir}/secure.properties" />
+</project>
