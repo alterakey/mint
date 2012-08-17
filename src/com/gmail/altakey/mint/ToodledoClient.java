@@ -1,5 +1,7 @@
 package com.gmail.altakey.mint;
 
+import java.io.OutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import org.apache.http.HttpResponse;
@@ -10,7 +12,9 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
 public class ToodledoClient {
-    public static void main(String args[]) throws IOException, NoSuchAlgorithmException {
+    public byte[] getFolders() throws IOException, NoSuchAlgorithmException {
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+
         HttpClient client = new DefaultHttpClient();
         Authenticator authenticator = new Authenticator();
 
@@ -25,7 +29,9 @@ public class ToodledoClient {
         );
         HttpResponse response = client.execute(req);
         HttpEntity entity = response.getEntity();
-        entity.writeTo(System.out);
+        entity.writeTo(os);
         entity.consumeContent();
+
+        return os.toByteArray();
     }
 }
