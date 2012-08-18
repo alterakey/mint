@@ -12,9 +12,9 @@ import spock.lang.*
 class AuthenticatorTest extends Specification {
     @Test void test_000() {
         Robolectric.addPendingHttpResponse(200, "{\"token\":\"abcdefg\"}")
-        def o = new Authenticator()
 
         when:
+        def o = new Authenticator()
         o.authenticate()
 
         then:
@@ -23,9 +23,9 @@ class AuthenticatorTest extends Specification {
 
     @Test void test_001() {
         Robolectric.addPendingHttpResponse(200, "{}")
-        def o = new Authenticator()
 
         when:
+        def o = new Authenticator()
         o.authenticate()
 
         then:
