@@ -12,9 +12,8 @@ import spock.lang.*
 @RunWith(TestRunner)
 class ToodledoClientTest {
     @Test void test_000() {
-        Robolectric.addPendingHttpResponse(200, "{\"token\":\"abcdefg\"}")
         Robolectric.addPendingHttpResponse(200, "{\"a\", \"b\", \"c\"}")
-        def o = new ToodledoClient()
+        def o = new ToodledoClient("abcdefg")
 
         when:
         byte[] bytes = o.getFolders()
