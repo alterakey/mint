@@ -15,13 +15,24 @@ import org.apache.commons.codec.binary.Hex;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+
 public class Authenticator {
+    private static final String PREFERENCE_KEY = "auth_token";
+
     public static final String APP_NAME = "mint";
     public static final String USER_ID = "";
     public static final String APP_ID = "api4f508532c789a";
     public static final String USER_PASSWORD = "";
 
     private String mToken;
+    private Context mContext;
+
+    public Authenticator(Context c) {
+        mContext = c;
+    }
 
     public String authenticate() throws IOException, NoSuchAlgorithmException {
         Gson gson = new Gson();
@@ -29,27 +40,33 @@ public class Authenticator {
         HttpGet req;
         HttpResponse response;
         HttpEntity entity;
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(mContext);
 
         if (mToken != null)
             return mToken;
 
-        req = new HttpGet(
-            String.format(
-                "http://api.toodledo.com/2/account/token.php?"
-                + "appid=%s&"
-                + "userid=%s&"
-                + "sig=%s",
-                APP_NAME,
-                USER_ID,
-                getSignature()
-                )
-            );
-        response = client.execute(req);
-        entity = response.getEntity();
-        HashMap<String, String> tokenResponse = gson.fromJson(new InputStreamReader(entity.getContent()), new TypeToken<HashMap<String, String>>() {}.getType());
-        entity.consumeContent();
-        System.out.println(tokenResponse);
-        mToken = tokenResponse.get("token");
+        mToken = pref.getString(PREFERENCE_KEY, null);
+
+        if (mToken == null) {
+            req = new HttpGet(
+                String.format(
+                    "http://api.toodledo.com/2/account/token.php?"
+                    + "appid=%s&"
+                    + "userid=%s&"
+                    + "sig=%s",
+                    APP_NAME,
+                    USER_ID,
+                    getSignature()
+                    )
+                );
+            response = client.execute(req);
+            entity = response.getEntity();
+            HashMap<String, String> tokenResponse = gson.fromJson(new InputStreamReader(entity.getContent()), new TypeToken<HashMap<String, String>>() {}.getType());
+            entity.consumeContent();
+            System.out.println(tokenResponse);
+            mToken = tokenResponse.get("token");
+            pref.edit().putString(PREFERENCE_KEY, mToken).commit();
+        }
         return mToken;
     }
 
