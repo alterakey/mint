@@ -10,10 +10,14 @@ import com.xtremelabs.robolectric.Robolectric
 import spock.lang.*
 
 @RunWith(TestRunner)
-class ToodledoClientTest {
+class ToodledoClientTest extends Specification {
     @Test void test_000() {
+        Authenticator auth = Mock()
+        auth.authenticate() >>> "abcdefg"
+
         Robolectric.addPendingHttpResponse(200, "{\"a\", \"b\", \"c\"}")
-        def o = new ToodledoClient("abcdefg")
+
+        def o = new ToodledoClient(auth)
 
         when:
         byte[] bytes = o.getFolders()
@@ -21,5 +25,6 @@ class ToodledoClientTest {
 
         then:
         message == "{\"a\", \"b\", \"c\"}"
+        1 * auth.authenticate()
     }
 }

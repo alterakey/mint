@@ -12,10 +12,10 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
 public class ToodledoClient {
-    private String mKey;
+    private Authenticator mAuth;
 
-    public ToodledoClient(String key) {
-        mKey = key;
+    public ToodledoClient(Authenticator auth) {
+        mAuth = auth;
     }
 
     public byte[] getFolders() throws IOException, NoSuchAlgorithmException {
@@ -27,7 +27,7 @@ public class ToodledoClient {
             String.format(
                 "http://api.toodledo.com/2/folders/get.php?"
                 + "key=%s",
-                mKey
+                mAuth.authenticate()
             )
         );
         HttpResponse response = client.execute(req);

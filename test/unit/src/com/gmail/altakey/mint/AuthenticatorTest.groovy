@@ -15,10 +15,10 @@ class AuthenticatorTest extends Specification {
 
         when:
         def o = new Authenticator()
-        o.authenticate()
+        def token = o.authenticate()
 
         then:
-        o.token == "abcdefg"
+        token == "abcdefg"
     }
 
     @Test void test_001() {
@@ -26,9 +26,9 @@ class AuthenticatorTest extends Specification {
 
         when:
         def o = new Authenticator()
-        o.authenticate()
+        def token = o.authenticate()
 
         then:
-        o.token == null
+        token == null
     }
 }

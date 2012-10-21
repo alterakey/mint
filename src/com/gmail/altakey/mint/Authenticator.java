@@ -21,14 +21,17 @@ public class Authenticator {
     public static final String APP_ID = "api4f508532c789a";
     public static final String USER_PASSWORD = "";
 
-    private String token;
+    private String mToken;
 
-    public void authenticate() throws IOException, NoSuchAlgorithmException {
+    public String authenticate() throws IOException, NoSuchAlgorithmException {
         Gson gson = new Gson();
         HttpClient client = new DefaultHttpClient();
         HttpGet req;
         HttpResponse response;
         HttpEntity entity;
+
+        if (mToken != null)
+            return mToken;
 
         req = new HttpGet(
             String.format(
@@ -46,7 +49,8 @@ public class Authenticator {
         HashMap<String, String> tokenResponse = gson.fromJson(new InputStreamReader(entity.getContent()), new TypeToken<HashMap<String, String>>() {}.getType());
         entity.consumeContent();
         System.out.println(tokenResponse);
-        this.token = tokenResponse.get("token");
+        mToken = tokenResponse.get("token");
+        return mToken;
     }
 
     public String getKey() throws NoSuchAlgorithmException {
@@ -57,7 +61,7 @@ public class Authenticator {
         md.reset();
         md.update(hashed_password.getBytes());
         md.update(APP_ID.getBytes());
-        md.update(this.token.getBytes());
+        md.update(mToken.getBytes());
         return Hex.encodeHexString(md.digest());
     }
 
