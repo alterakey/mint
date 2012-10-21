@@ -70,6 +70,11 @@ public class Authenticator {
         return mToken;
     }
 
+    public void revoke() {
+        mToken = null;
+        PreferenceManager.getDefaultSharedPreferences(mContext).edit().putString(PREFERENCE_KEY, null).commit();
+    }
+
     public String getKey() throws NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance("MD5");
         md.update(USER_PASSWORD.getBytes());
