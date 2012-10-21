@@ -11,6 +11,11 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import java.util.List;
+import java.io.UnsupportedEncodingException;
+
 public class ToodledoClient {
     private Authenticator mAuth;
 
@@ -18,7 +23,7 @@ public class ToodledoClient {
         mAuth = auth;
     }
 
-    public byte[] getFolders() throws IOException, NoSuchAlgorithmException {
+    public List<Folder> getFolders() throws IOException, NoSuchAlgorithmException {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
 
         HttpClient client = new DefaultHttpClient();
@@ -35,6 +40,10 @@ public class ToodledoClient {
         entity.writeTo(os);
         entity.consumeContent();
 
-        return os.toByteArray();
+        try {
+            return new Gson().fromJson(os.toString("UTF-8"), List.class);
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

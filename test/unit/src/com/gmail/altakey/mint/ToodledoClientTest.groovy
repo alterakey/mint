@@ -16,16 +16,17 @@ class ToodledoClientTest extends Specification {
     @Test void test_000() {
         final def token = "abcdefg"
         def auth = when(mock(Authenticator).authenticate()).thenReturn(token).getMock()
+        def corpse = new File("test/unit/fixtures/toodledo.folders.1.json").getBytes()
 
-        Robolectric.addHttpResponseRule("GET", "http://api.toodledo.com/2/folders/get.php?key=${token}", new TestHttpResponse(200, "{\"a\", \"b\", \"c\"}"));
+        Robolectric.addHttpResponseRule("GET", "http://api.toodledo.com/2/folders/get.php?key=${token}", new TestHttpResponse(200, corpse));
 
         def o = new ToodledoClient(auth)
 
         when:
-        byte[] bytes = o.getFolders()
-        def message = new String(bytes, "UTF-8")
+        def folders = o.getFolders()
 
         then:
-        message == "{\"a\", \"b\", \"c\"}"
+        folders.collect() { it.id } == ["6077681"]
+        folders.collect() { it.name } == ["2013カレンダー"]
     }
 }
