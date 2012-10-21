@@ -6,16 +6,18 @@ import org.junit.Before
 import org.junit.After
 
 import com.xtremelabs.robolectric.Robolectric
+import com.xtremelabs.robolectric.tester.org.apache.http.TestHttpResponse;
+import static org.mockito.Mockito.*;
 
 import spock.lang.*
 
 @RunWith(TestRunner)
 class ToodledoClientTest extends Specification {
     @Test void test_000() {
-        Authenticator auth = Mock()
-        auth.authenticate() >>> "abcdefg"
+        final def token = "abcdefg"
+        def auth = when(mock(Authenticator).authenticate()).thenReturn(token).getMock()
 
-        Robolectric.addPendingHttpResponse(200, "{\"a\", \"b\", \"c\"}")
+        Robolectric.addHttpResponseRule("GET", "http://api.toodledo.com/2/folders/get.php?key=${token}", new TestHttpResponse(200, "{\"a\", \"b\", \"c\"}"));
 
         def o = new ToodledoClient(auth)
 
@@ -25,6 +27,5 @@ class ToodledoClientTest extends Specification {
 
         then:
         message == "{\"a\", \"b\", \"c\"}"
-        1 * auth.authenticate()
     }
 }
