@@ -74,7 +74,6 @@ public class Authenticator {
             entity = response.getEntity();
             HashMap<String, String> tokenResponse = gson.fromJson(new InputStreamReader(entity.getContent()), new TypeToken<HashMap<String, String>>() {}.getType());
             entity.consumeContent();
-            System.out.println(tokenResponse);
             mToken = tokenResponse.get("token");
             mNotAfter = now + TTL;
             pref.edit()
