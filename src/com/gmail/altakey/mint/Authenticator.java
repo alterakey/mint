@@ -23,7 +23,7 @@ import android.os.SystemClock;
 public class Authenticator {
     private static final String PREFERENCE_KEY = "auth_token";
     private static final String PREFERENCE_NOT_AFTER = "auth_not_after";
-    private static final long TTL = 4 * 3600 * 1000;
+    private static final long TTL = 3 * 3600 * 1000;
 
     public static final String APP_NAME = "mint";
     public static final String USER_ID = "";
