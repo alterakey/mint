@@ -7,7 +7,7 @@ import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 
 public class Context {
-    public String id;
+    public long id;
     public String name;
 
     public class JsonAdapter extends TypeAdapter<Context> {
@@ -18,7 +18,7 @@ public class Context {
             while (reader.hasNext()) {
                 String name = reader.nextName();
                 if ("id".equals(name)) {
-                    context.id = reader.nextString();
+                    context.id = Long.valueOf(reader.nextString());
                 } else if ("name".equals(name)) {
                     context.name = reader.nextString();
                 }
@@ -32,7 +32,7 @@ public class Context {
             final Context context = Context.this;
             writer
                 .beginObject()
-                .name("id").value(context.id)
+                .name("id").value(String.valueOf(context.id))
                 .name("name").value(context.name)
                 .endObject();
         }

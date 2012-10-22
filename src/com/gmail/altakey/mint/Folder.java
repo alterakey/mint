@@ -7,11 +7,11 @@ import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 
 public class Folder {
-    public String id;
+    public long id;
     public String name;
-    public String private_;
-    public String archived;
-    public String ord;
+    public long private_;
+    public long archived;
+    public long ord;
 
     public class JsonAdapter extends TypeAdapter<Folder> {
         @Override
@@ -21,15 +21,15 @@ public class Folder {
             while (reader.hasNext()) {
                 String name = reader.nextName();
                 if ("id".equals(name)) {
-                    folder.id = reader.nextString();
+                    folder.id = Long.valueOf(reader.nextString());
                 } else if ("name".equals(name)) {
                     folder.name = reader.nextString();
                 } else if ("private".equals(name)) {
-                    folder.private_ = reader.nextString();
+                    folder.private_ = Long.valueOf(reader.nextString());
                 } else if ("archived".equals(name)) {
-                    folder.archived = reader.nextString();
+                    folder.archived = Long.valueOf(reader.nextString());
                 } else if ("ord".equals(name)) {
-                    folder.ord = reader.nextString();
+                    folder.ord = Long.valueOf(reader.nextString());
                 }
             }
             reader.endObject();
@@ -41,11 +41,11 @@ public class Folder {
             final Folder folder = Folder.this;
             writer
                 .beginObject()
-                .name("id").value(folder.id)
+                .name("id").value(String.valueOf(folder.id))
                 .name("name").value(folder.name)
-                .name("private").value(folder.private_)
-                .name("archived").value(folder.archived)
-                .name("ord").value(folder.ord)
+                .name("private").value(String.valueOf(folder.private_))
+                .name("archived").value(String.valueOf(folder.archived))
+                .name("ord").value(String.valueOf(folder.ord))
                 .endObject();
         }
     }

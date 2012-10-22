@@ -7,14 +7,14 @@ import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 
 public class Task {
-    public String id;
+    public long id;
     public String title;
     public long modified;
-    public String completed;
-    public String folder;
-    public String context;
-    public String priority;
-    public String star;
+    public long completed;
+    public long folder;
+    public long context;
+    public long priority;
+    public long star;
 
     public class JsonAdapter extends TypeAdapter<Task> {
         @Override
@@ -24,21 +24,21 @@ public class Task {
             while (reader.hasNext()) {
                 String name = reader.nextName();
                 if ("id".equals(name)) {
-                    task.id = reader.nextString();
+                    task.id = Long.valueOf(reader.nextString());
                 } else if ("title".equals(name)) {
                     task.title = reader.nextString();
                 } else if ("modified".equals(name)) {
-                    task.modified = reader.nextLong();
+                    task.modified = Long.valueOf(reader.nextLong());
                 } else if ("completed".equals(name)) {
-                    task.completed = reader.nextString();
+                    task.completed = Long.valueOf(reader.nextString());
                 } else if ("folder".equals(name)) {
-                    task.folder = reader.nextString();
+                    task.folder = Long.valueOf(reader.nextString());
                 } else if ("context".equals(name)) {
-                    task.context = reader.nextString();
+                    task.context = Long.valueOf(reader.nextString());
                 } else if ("priority".equals(name)) {
-                    task.priority = reader.nextString();
+                    task.priority = Long.valueOf(reader.nextString());
                 } else if ("star".equals(name)) {
-                    task.star = reader.nextString();
+                    task.star = Long.valueOf(reader.nextString());
                 }
             }
             reader.endObject();
@@ -50,14 +50,14 @@ public class Task {
             final Task task = Task.this;
             writer
                 .beginObject()
-                .name("id").value(task.id)
+                .name("id").value(String.valueOf(task.id))
                 .name("title").value(task.title)
-                .name("modified").value(task.modified)
-                .name("completed").value(task.completed)
-                .name("folder").value(task.folder)
-                .name("context").value(task.context)
-                .name("priority").value(task.priority)
-                .name("star").value(task.star)
+                .name("modified").value(String.valueOf(task.modified))
+                .name("completed").value(String.valueOf(task.completed))
+                .name("folder").value(String.valueOf(task.folder))
+                .name("context").value(String.valueOf(task.context))
+                .name("priority").value(String.valueOf(task.priority))
+                .name("star").value(String.valueOf(task.star))
                 .endObject();
         }
     }
