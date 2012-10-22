@@ -18,9 +18,12 @@ import com.google.gson.reflect.TypeToken;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.os.SystemClock;
 
 public class Authenticator {
     private static final String PREFERENCE_KEY = "auth_token";
+    private static final String PREFERENCE_NOT_AFTER = "auth_not_after";
+    private static final long TTL = 4 * 3600 * 1000;
 
     public static final String APP_NAME = "mint";
     public static final String USER_ID = "";
@@ -28,6 +31,7 @@ public class Authenticator {
     public static final String USER_PASSWORD = "";
 
     private String mToken;
+    private long mNotAfter;
     private Context mContext;
 
     public Authenticator(Context c) {
@@ -42,12 +46,15 @@ public class Authenticator {
         HttpEntity entity;
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(mContext);
 
-        if (mToken != null)
+        long now = SystemClock.elapsedRealtime();
+
+        if (!invalid(now))
             return mToken;
 
         mToken = pref.getString(PREFERENCE_KEY, null);
+        mNotAfter = pref.getLong(PREFERENCE_NOT_AFTER, 0);
 
-        if (mToken == null) {
+        if (invalid(now)) {
             req = new HttpGet(
                 String.format(
                     "http://api.toodledo.com/2/account/token.php?"
@@ -65,14 +72,23 @@ public class Authenticator {
             entity.consumeContent();
             System.out.println(tokenResponse);
             mToken = tokenResponse.get("token");
-            pref.edit().putString(PREFERENCE_KEY, mToken).commit();
+            mNotAfter = now + TTL;
+            pref.edit()
+                .putString(PREFERENCE_KEY, mToken)
+                .putLong(PREFERENCE_NOT_AFTER, mNotAfter)
+                .commit();
         }
         return mToken;
     }
 
     public void revoke() {
         mToken = null;
-        PreferenceManager.getDefaultSharedPreferences(mContext).edit().putString(PREFERENCE_KEY, null).commit();
+        mNotAfter = 0;
+        PreferenceManager.getDefaultSharedPreferences(mContext)
+            .edit()
+            .putString(PREFERENCE_KEY, null)
+            .putLong(PREFERENCE_NOT_AFTER, 0)
+            .commit();
     }
 
     public String getKey() throws NoSuchAlgorithmException {
@@ -94,4 +110,7 @@ public class Authenticator {
         return Hex.encodeHexString(md.digest());
     }
 
+    private boolean invalid(long at) {
+        return (mToken == null || mNotAfter < at);
+    }
 }
