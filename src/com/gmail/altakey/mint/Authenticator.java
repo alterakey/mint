@@ -61,7 +61,7 @@ public class Authenticator {
         if (invalid(now)) {
             req = new HttpGet(
                 String.format(
-                    "http://api.toodledo.com/2/account/token.php?"
+                    "https://api.toodledo.com/2/account/token.php?"
                     + "appid=%s&"
                     + "userid=%s&"
                     + "sig=%s",
@@ -101,7 +101,7 @@ public class Authenticator {
         if (mUserId == null) {
             req = new HttpGet(
                 String.format(
-                    "http://api.toodledo.com/2/account/lookup.php?"
+                    "https://api.toodledo.com/2/account/lookup.php?"
                     + "appid=%s&"
                     + "email=%s&"
                     + "pass=%s&"
