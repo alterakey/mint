@@ -22,20 +22,24 @@ import android.os.SystemClock;
 
 public class Authenticator {
     private static final String PREFERENCE_KEY = "auth_token";
+    private static final String PREFERENCE_USER_ID = "auth_user_id";
     private static final String PREFERENCE_NOT_AFTER = "auth_not_after";
     private static final long TTL = 3 * 3600 * 1000;
 
     public static final String APP_NAME = "mint";
-    public static final String USER_ID = "";
     public static final String APP_ID = "api4f508532c789a";
-    public static final String USER_PASSWORD = "";
 
     private String mToken;
     private long mNotAfter;
     private Context mContext;
+    private String mUserId;
+    private String mEmail;
+    private String mPassword;
 
-    public Authenticator(Context c) {
+    public Authenticator(Context c, String email, String password) {
         mContext = c;
+        mEmail = email;
+        mPassword = password;
     }
 
     public String authenticate() throws IOException, NoSuchAlgorithmException {
@@ -62,7 +66,7 @@ public class Authenticator {
                     + "userid=%s&"
                     + "sig=%s",
                     APP_NAME,
-                    USER_ID,
+                    lookup(),
                     getSignature()
                     )
                 );
@@ -81,6 +85,45 @@ public class Authenticator {
         return mToken;
     }
 
+    private String lookup() throws IOException, NoSuchAlgorithmException {
+        Gson gson = new Gson();
+        HttpClient client = new DefaultHttpClient();
+        HttpGet req;
+        HttpResponse response;
+        HttpEntity entity;
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(mContext);
+
+        if (mUserId != null)
+            return mUserId;
+
+        mUserId = pref.getString(PREFERENCE_USER_ID, null);
+
+        if (mUserId == null) {
+            req = new HttpGet(
+                String.format(
+                    "http://api.toodledo.com/2/account/lookup.php?"
+                    + "appid=%s&"
+                    + "email=%s&"
+                    + "pass=%s&"
+                    + "sig=%s",
+                    APP_NAME,
+                    mEmail,
+                    mPassword,
+                    getLookupSignature()
+                    )
+                );
+            response = client.execute(req);
+            entity = response.getEntity();
+            HashMap<String, String> tokenResponse = gson.fromJson(new InputStreamReader(entity.getContent()), new TypeToken<HashMap<String, String>>() {}.getType());
+            entity.consumeContent();
+            mUserId = tokenResponse.get("userid");
+            pref.edit()
+                .putString(PREFERENCE_USER_ID, mUserId)
+                .commit();
+        }
+        return mUserId;
+    }
+
     public void revoke() {
         mToken = null;
         mNotAfter = 0;
@@ -91,21 +134,25 @@ public class Authenticator {
             .commit();
     }
 
-    public String getKey() throws NoSuchAlgorithmException {
-        MessageDigest md = MessageDigest.getInstance("MD5");
-        md.update(USER_PASSWORD.getBytes());
-        String hashed_password = Hex.encodeHexString(md.digest());
+    public void unlink() {
+        revoke();
+        mUserId = null;
+        PreferenceManager.getDefaultSharedPreferences(mContext)
+            .edit()
+            .putString(PREFERENCE_USER_ID, null)
+            .commit();
+    }
 
-        md.reset();
-        md.update(hashed_password.getBytes());
+    private final String getSignature() throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance("MD5");
+        md.update(mUserId.getBytes());
         md.update(APP_ID.getBytes());
-        md.update(mToken.getBytes());
         return Hex.encodeHexString(md.digest());
     }
 
-    private static final String getSignature() throws NoSuchAlgorithmException {
+    private final String getLookupSignature() throws NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance("MD5");
-        md.update(USER_ID.getBytes());
+        md.update(mEmail.getBytes());
         md.update(APP_ID.getBytes());
         return Hex.encodeHexString(md.digest());
     }

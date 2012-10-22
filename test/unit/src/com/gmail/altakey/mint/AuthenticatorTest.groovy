@@ -14,11 +14,15 @@ import android.app.Activity
 
 @RunWith(TestRunner)
 class AuthenticatorTest extends Specification {
+    private static final EMAIL = "test@example.org";
+    private static final PASSWORD = "test";
+
     @Test void test_000() {
+        Robolectric.addPendingHttpResponse(200, "{\"userid\":\"test\"}")
         Robolectric.addPendingHttpResponse(200, "{\"token\":\"abcdefg\"}")
 
         when:
-        def o = new Authenticator(new Activity())
+        def o = new Authenticator(new Activity(), EMAIL, PASSWORD)
         def token = o.authenticate()
 
         then:
@@ -26,10 +30,11 @@ class AuthenticatorTest extends Specification {
     }
 
     @Test void test_001() {
+        Robolectric.addPendingHttpResponse(200, "{\"userid\":\"test\"}")
         Robolectric.addPendingHttpResponse(200, "{}")
 
         when:
-        def o = new Authenticator(new Activity())
+        def o = new Authenticator(new Activity(), EMAIL, PASSWORD)
         def token = o.authenticate()
 
         then:
@@ -37,10 +42,11 @@ class AuthenticatorTest extends Specification {
     }
 
     @Test void test_002() {
+        Robolectric.addPendingHttpResponse(200, "{\"userid\":\"test\"}")
         Robolectric.addPendingHttpResponse(200, "{\"token\":\"abcdefg\"}")
 
         when:
-        def o = new Authenticator(new Activity())
+        def o = new Authenticator(new Activity(), EMAIL, PASSWORD)
         o.authenticate()
         def token = PreferenceManager.getDefaultSharedPreferences(Robolectric.application).getString(Authenticator.PREFERENCE_KEY, null)
 
@@ -49,10 +55,11 @@ class AuthenticatorTest extends Specification {
     }
 
     @Test void test_003() {
+        Robolectric.addPendingHttpResponse(200, "{\"userid\":\"test\"}")
         Robolectric.addPendingHttpResponse(200, "{\"token\":\"abcdefg\"}")
 
         when:
-        def o = new Authenticator(new Activity())
+        def o = new Authenticator(new Activity(), EMAIL, PASSWORD)
         o.authenticate()
         o.revoke()
         def token = PreferenceManager.getDefaultSharedPreferences(Robolectric.application).getString(Authenticator.PREFERENCE_KEY, null)
