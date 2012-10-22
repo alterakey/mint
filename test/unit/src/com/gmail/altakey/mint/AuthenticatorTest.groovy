@@ -67,4 +67,18 @@ class AuthenticatorTest extends Specification {
         then:
         token == null
     }
+
+    @Test void test_004() {
+        Robolectric.addPendingHttpResponse(200, "{\"userid\":\"test\"}")
+        Robolectric.addPendingHttpResponse(200, "{\"token\":\"abcdefg\"}")
+
+        when:
+        def o = new Authenticator(new Activity(), EMAIL, PASSWORD)
+        o.authenticate()
+        o.unlink()
+        def token = PreferenceManager.getDefaultSharedPreferences(Robolectric.application).getString(Authenticator.PREFERENCE_USER_ID, null)
+
+        then:
+        token == null
+    }
 }
