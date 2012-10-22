@@ -46,7 +46,7 @@ public class Authenticator {
         HttpEntity entity;
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(mContext);
 
-        long now = SystemClock.elapsedRealtime();
+        long now = System.currentTimeMillis();
 
         if (!invalid(now))
             return mToken;
