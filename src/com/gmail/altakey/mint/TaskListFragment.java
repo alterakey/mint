@@ -51,7 +51,7 @@ public class TaskListFragment extends ListFragment
         }
     }
 
-    private static class TaskListLoadTask extends AsyncTask<Void, Void, Void> {
+    private static class TaskListLoadTask extends AsyncTask<Void, Void, List<Task>> {
         private ArrayAdapter<String> mmAdapter;
         private Activity mmActivity;
         private Exception mmError;
@@ -62,12 +62,9 @@ public class TaskListFragment extends ListFragment
         }
 
         @Override
-        public Void doInBackground(Void... params) {
+        public List<Task> doInBackground(Void... params) {
             try {
-                for (Task t : new ToodledoClient(getAuthenticator(), mmActivity).getTasks()) {
-                    mmAdapter.add(t.title);
-                }
-                return null;
+                return new ToodledoClient(getAuthenticator(), mmActivity).getTasks();
             } catch (IOException e) {
                 mmError = e;
                 return null;
@@ -81,12 +78,14 @@ public class TaskListFragment extends ListFragment
         }
 
         @Override
-        public void onPostExecute(Void ret) {
+        public void onPostExecute(List<Task> tasks) {
             if (mmError != null) {
                 Log.e("TLF", "fetch failure", mmError);
                 Toast.makeText(mmActivity, String.format("fetch failure: %s", mmError.getMessage()), Toast.LENGTH_LONG).show();
             } else {
-                mmAdapter.notifyDataSetChanged();
+                for (Task t : tasks) {
+                    mmAdapter.add(t.title);
+                }
             }
         }
 
