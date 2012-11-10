@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">MainActivity</string>
+    <string name="app_name">Project Mint</string>
+    <string name="app_version">0.0.1</string>
+    <string name="config_title_version">Project Mint</string>
+    <string name="config_title_user_id">User ID</string>
+    <string name="config_title_user_password">User Password</string>
 </resources>

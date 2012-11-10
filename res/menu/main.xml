@@ -11,4 +11,7 @@
   <item android:id="@+id/main_add"
 	android:icon="@android:drawable/ic_menu_save"
 	android:title="Create task" />
+  <item android:id="@+id/main_preferences"
+	android:icon="@android:drawable/ic_menu_preferences"
+	android:title="Preferences" />
 </menu>
