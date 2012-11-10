@@ -11,7 +11,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
-import org.apache.commons.codec.binary.Hex;
+import com.apache.commons.codec.binary.Hex;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
