@@ -43,6 +43,13 @@ public class Authenticator {
     }
 
     public String authenticate() throws IOException, NoSuchAlgorithmException, BogusException {
+        openSession();
+        if (bogus())
+            throw new BogusException();
+        return getKey();
+    }
+
+    public String openSession() throws IOException, NoSuchAlgorithmException, BogusException {
         Gson gson = new Gson();
         HttpClient client = new DefaultHttpClient();
         HttpGet req;
@@ -158,6 +165,16 @@ public class Authenticator {
         MessageDigest md = MessageDigest.getInstance("MD5");
         md.update(mEmail.getBytes());
         md.update(APP_ID.getBytes());
+        return Hex.encodeHexString(md.digest());
+    }
+
+    private final String getKey() throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance("MD5");
+        MessageDigest md2 = MessageDigest.getInstance("MD5");
+        md2.update(mPassword.getBytes());
+        md.update(Hex.encodeHexString(md2.digest()).getBytes());
+        md.update(APP_ID.getBytes());
+        md.update(mToken.getBytes());
         return Hex.encodeHexString(md.digest());
     }
 
