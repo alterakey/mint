@@ -42,7 +42,7 @@ public class Authenticator {
         mPassword = password;
     }
 
-    public String authenticate() throws IOException, NoSuchAlgorithmException {
+    public String authenticate() throws IOException, NoSuchAlgorithmException, BogusException {
         Gson gson = new Gson();
         HttpClient client = new DefaultHttpClient();
         HttpGet req;
@@ -59,6 +59,7 @@ public class Authenticator {
         mNotAfter = pref.getLong(PREFERENCE_NOT_AFTER, 0);
 
         if (invalid(now)) {
+            lookup();
             req = new HttpGet(
                 String.format(
                     "https://api.toodledo.com/2/account/token.php?"
@@ -84,7 +85,7 @@ public class Authenticator {
         return mToken;
     }
 
-    private String lookup() throws IOException, NoSuchAlgorithmException {
+    private String lookup() throws IOException, NoSuchAlgorithmException, BogusException {
         Gson gson = new Gson();
         HttpClient client = new DefaultHttpClient();
         HttpGet req;
@@ -98,6 +99,10 @@ public class Authenticator {
         mUserId = pref.getString(PREFERENCE_USER_ID, null);
 
         if (mUserId == null) {
+            if (bogus()) {
+                throw new BogusException();
+            }
+
             req = new HttpGet(
                 String.format(
                     "https://api.toodledo.com/2/account/lookup.php?"
@@ -158,5 +163,12 @@ public class Authenticator {
 
     private boolean invalid(long at) {
         return (mToken == null || mNotAfter < at);
+    }
+
+    private boolean bogus() {
+        return (mEmail == null || mPassword == null);
+    }
+
+    public static class BogusException extends Exception {
     }
 }

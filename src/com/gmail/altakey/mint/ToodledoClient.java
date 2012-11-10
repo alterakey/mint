@@ -34,11 +34,11 @@ public class ToodledoClient {
         mContext = context;
     }
 
-    public List<Folder> getFolders() throws IOException, NoSuchAlgorithmException {
+    public List<Folder> getFolders() throws IOException, NoSuchAlgorithmException, Authenticator.BogusException {
         return getFoldersAfter(0);
     }
 
-    public List<Folder> getFoldersAfter(long time) throws IOException, NoSuchAlgorithmException {
+    public List<Folder> getFoldersAfter(long time) throws IOException, NoSuchAlgorithmException, Authenticator.BogusException {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
 
         HttpClient client = new DefaultHttpClient();
@@ -62,11 +62,11 @@ public class ToodledoClient {
         }
     }
 
-    public List<Context> getContexts() throws IOException, NoSuchAlgorithmException {
+    public List<Context> getContexts() throws IOException, NoSuchAlgorithmException, Authenticator.BogusException {
         return getContextsAfter(0);
     }
 
-    public List<Context> getContextsAfter(long time) throws IOException, NoSuchAlgorithmException {
+    public List<Context> getContextsAfter(long time) throws IOException, NoSuchAlgorithmException, Authenticator.BogusException {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
 
         HttpClient client = new DefaultHttpClient();
@@ -90,11 +90,11 @@ public class ToodledoClient {
         }
     }
 
-    public List<Task> getTasks() throws IOException, NoSuchAlgorithmException {
+    public List<Task> getTasks() throws IOException, NoSuchAlgorithmException, Authenticator.BogusException {
         return getTasksAfter(0);
     }
 
-    public List<Task> getTasksAfter(long time) throws IOException, NoSuchAlgorithmException {
+    public List<Task> getTasksAfter(long time) throws IOException, NoSuchAlgorithmException, Authenticator.BogusException {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
 
         HttpClient client = new DefaultHttpClient();
@@ -121,7 +121,7 @@ public class ToodledoClient {
         }
     }
 
-    public Status getStatus() throws IOException, NoSuchAlgorithmException {
+    public Status getStatus() throws IOException, NoSuchAlgorithmException, Authenticator.BogusException {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
 
         HttpClient client = new DefaultHttpClient();
@@ -145,7 +145,7 @@ public class ToodledoClient {
         }
     }
 
-    public void update() throws IOException, NoSuchAlgorithmException {
+    public void update() throws IOException, NoSuchAlgorithmException, Authenticator.BogusException {
         DB db = null;
         try {
             db = new DB(mContext);
