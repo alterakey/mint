@@ -19,6 +19,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.WeakHashMap;
 import android.widget.BaseAdapter;
 import android.widget.SimpleAdapter;
 
@@ -76,12 +77,19 @@ public class TaskListFragment extends ListFragment
         @Override
         public Void doInBackground(Void... params) {
             try {
-                for (Task t : new ToodledoClient(getAuthenticator(), mmActivity).getTasks()) {
+                ToodledoClient client = new ToodledoClient(getAuthenticator(), mmActivity);
+                Map<Long, Context> contextById = new WeakHashMap<Long, Context>();
+                for (Context c : client.getContexts()) {
+                    contextById.put(c.id, c);
+                }
+
+                for (Task t : client.getTasks()) {
+                    Context c = contextById.get(t.context);
+
                     Map<String, Object> map = new HashMap<String, Object>();
                     map.put("title", t.title);
-                    map.put("context_0", "@here");
-                    //map.put("context_1", "@here");
-                    //map.put("context_2", "@here");
+                    if (c != null)
+                        map.put("context_0", String.format("@%s", c.name));
                     map.put("due", "2012-11-11 11:11:11");
                     map.put("timer_flag", "(on)");
                     mmData.add(map);
