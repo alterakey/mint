@@ -100,7 +100,7 @@ public class TaskListFragment extends ListFragment
                     if (t.duedate > 0) {
                         map.put("due", new Formatter().format("%1$tY-%1$tm-%1$td", new Date(t.duedate * 1000)).toString());
                     }
-                    map.put("timer_flag", "(on)");
+                    //map.put("timer_flag", "(on)");
                     mmData.add(map);
                 }
                 return null;
