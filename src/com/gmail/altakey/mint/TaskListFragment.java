@@ -94,8 +94,9 @@ public class TaskListFragment extends ListFragment
 
                     Map<String, Object> map = new HashMap<String, Object>();
                     map.put("title", t.title);
-                    if (c != null)
+                    if (c != null) {
                         map.put("context_0", String.format("@%s", c.name));
+                    }
                     if (t.duedate > 0) {
                         map.put("due", new Formatter().format("%1$tY-%1$tm-%1$td", new Date(t.duedate * 1000)).toString());
                     }
