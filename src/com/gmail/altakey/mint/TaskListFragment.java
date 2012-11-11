@@ -17,6 +17,10 @@ import android.widget.Toast;
 import android.app.Activity;
 import android.os.AsyncTask;
 import android.util.Log;
+import java.util.Map;
+import java.util.HashMap;
+import android.widget.BaseAdapter;
+import android.widget.SimpleAdapter;
 
 public class TaskListFragment extends ListFragment
 {
@@ -45,26 +49,44 @@ public class TaskListFragment extends ListFragment
 
     public class TaskListAdapterBuilder {
         public ListAdapter build() {
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.list_item, R.id.list_item_title, new ArrayList<String>());
-            new TaskListLoadTask(getActivity(), adapter).execute();
+            final List<Map<String, ?>> data = new ArrayList<Map<String, ?>>();
+            SimpleAdapter adapter = new SimpleAdapter(
+                getActivity(),
+                data,
+                R.layout.list_item,
+                new String[] { "title", "context_0", "context_1", "context_2", "due", "timer_flag" },
+                new int[] { R.id.list_task_title, R.id.list_task_context_0, R.id.list_task_context_1, R.id.list_task_context_2, R.id.list_task_due, R.id.list_task_timer_flag } );
+            new TaskListLoadTask(getActivity(), adapter, data).execute();
             return adapter;
         }
     }
 
-    private static class TaskListLoadTask extends AsyncTask<Void, Void, List<Task>> {
-        private ArrayAdapter<String> mmAdapter;
+    private static class TaskListLoadTask extends AsyncTask<Void, Void, Void> {
+        private BaseAdapter mmAdapter;
+        private List<Map<String, ?>> mmData;
         private Activity mmActivity;
         private Exception mmError;
 
-        public TaskListLoadTask(Activity activity, ArrayAdapter<String> adapter) {
+        public TaskListLoadTask(Activity activity, BaseAdapter adapter, List<Map<String, ?>> data) {
             mmAdapter = adapter;
+            mmData = data;
             mmActivity = activity;
         }
 
         @Override
-        public List<Task> doInBackground(Void... params) {
+        public Void doInBackground(Void... params) {
             try {
-                return new ToodledoClient(getAuthenticator(), mmActivity).getTasks();
+                for (Task t : new ToodledoClient(getAuthenticator(), mmActivity).getTasks()) {
+                    Map<String, Object> map = new HashMap<String, Object>();
+                    map.put("title", t.title);
+                    map.put("context_0", "@here");
+                    //map.put("context_1", "@here");
+                    //map.put("context_2", "@here");
+                    map.put("due", "2012-11-11 11:11:11");
+                    map.put("timer_flag", "(on)");
+                    mmData.add(map);
+                }
+                return null;
             } catch (IOException e) {
                 mmError = e;
                 return null;
@@ -78,14 +100,12 @@ public class TaskListFragment extends ListFragment
         }
 
         @Override
-        public void onPostExecute(List<Task> tasks) {
+        public void onPostExecute(Void ret) {
             if (mmError != null) {
                 Log.e("TLF", "fetch failure", mmError);
                 Toast.makeText(mmActivity, String.format("fetch failure: %s", mmError.getMessage()), Toast.LENGTH_LONG).show();
             } else {
-                for (Task t : tasks) {
-                    mmAdapter.add(t.title);
-                }
+                mmAdapter.notifyDataSetChanged();
             }
         }
 
