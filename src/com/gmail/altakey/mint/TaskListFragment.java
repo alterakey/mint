@@ -84,6 +84,9 @@ public class TaskListFragment extends ListFragment
                 }
 
                 for (Task t : client.getTasks()) {
+                    if (t.completed != 0)
+                        continue;
+
                     Context c = contextById.get(t.context);
 
                     Map<String, Object> map = new HashMap<String, Object>();
