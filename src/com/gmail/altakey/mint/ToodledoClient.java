@@ -102,7 +102,7 @@ public class ToodledoClient {
         HttpGet req = new HttpGet(
             String.format(
                 "http://api.toodledo.com/2/tasks/get.php?"
-                + "key=%s&modafter=%s&fields=folder,context,star,priority",
+                + "key=%s&modafter=%s&fields=folder,context,star,priority,duedate",
                 mAuth.authenticate(),
                 String.valueOf(time)
             )

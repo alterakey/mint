@@ -23,6 +23,9 @@ import java.util.WeakHashMap;
 import android.widget.BaseAdapter;
 import android.widget.SimpleAdapter;
 
+import java.util.Date;
+import java.util.Formatter;
+
 public class TaskListFragment extends ListFragment
 {
     @Override
@@ -93,7 +96,9 @@ public class TaskListFragment extends ListFragment
                     map.put("title", t.title);
                     if (c != null)
                         map.put("context_0", String.format("@%s", c.name));
-                    map.put("due", "2012-11-11 11:11:11");
+                    if (t.duedate > 0) {
+                        map.put("due", new Formatter().format("%1$tY-%1$tm-%1$td", new Date(t.duedate * 1000)).toString());
+                    }
                     map.put("timer_flag", "(on)");
                     mmData.add(map);
                 }

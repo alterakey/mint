@@ -15,6 +15,7 @@ public class Task {
     public long context;
     public long priority;
     public long star;
+    public long duedate;
 
     public class JsonAdapter extends TypeAdapter<Task> {
         @Override
@@ -39,6 +40,8 @@ public class Task {
                     task.priority = Long.valueOf(reader.nextString());
                 } else if ("star".equals(name)) {
                     task.star = Long.valueOf(reader.nextString());
+                } else if ("duedate".equals(name)) {
+                    task.duedate = Long.valueOf(reader.nextString());
                 }
             }
             reader.endObject();
@@ -58,6 +61,7 @@ public class Task {
                 .name("context").value(String.valueOf(task.context))
                 .name("priority").value(String.valueOf(task.priority))
                 .name("star").value(String.valueOf(task.star))
+                .name("duedate").value(String.valueOf(task.duedate))
                 .endObject();
         }
     }
