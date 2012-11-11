@@ -54,14 +54,50 @@ public class TaskListFragment extends ListFragment
     public class TaskListAdapterBuilder {
         public ListAdapter build() {
             final List<Map<String, ?>> data = new ArrayList<Map<String, ?>>();
-            SimpleAdapter adapter = new SimpleAdapter(
+            TaskListAdapter adapter = new TaskListAdapter(
                 getActivity(),
-                data,
-                R.layout.list_item,
-                new String[] { "title", "context_0", "context_1", "context_2", "due", "timer_flag" },
-                new int[] { R.id.list_task_title, R.id.list_task_context_0, R.id.list_task_context_1, R.id.list_task_context_2, R.id.list_task_due, R.id.list_task_timer_flag } );
+                data
+            );
             new TaskListLoadTask(getActivity(), adapter, data).execute();
             return adapter;
+        }
+
+        private class TaskListAdapter extends SimpleAdapter {
+            private List<? extends Map<String, ?>> mmmData;
+
+            public TaskListAdapter(android.content.Context ctx, List<? extends Map<String, ?>> data) {
+                super(ctx,
+                      data,
+                      R.layout.list_item,
+                      new String[] { "title", "context_0", "context_1", "context_2", "due", "timer_flag" },
+                      new int[] { R.id.list_task_title, R.id.list_task_context_0, R.id.list_task_context_1, R.id.list_task_context_2, R.id.list_task_due, R.id.list_task_timer_flag });
+                mmmData = data;
+            }
+
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                convertView = super.getView(position, convertView, parent);
+                View priority = convertView.findViewById(R.id.list_task_prio);
+                switch (((Long)mmmData.get(position).get("priority")).intValue()) {
+                case -1:
+                    priority.setBackgroundColor(0xff0000ff);
+                    break;
+                case 0:
+                    priority.setBackgroundColor(0xff00ff00);
+                    break;
+                case 1:
+                    priority.setBackgroundColor(0xffffff00);
+                    break;
+                case 2:
+                    priority.setBackgroundColor(0xffff8800);
+                    break;
+                case 3:
+                default:
+                    priority.setBackgroundColor(0xffff0000);
+                    break;
+                }
+                return convertView;
+            }
         }
     }
 
@@ -94,6 +130,7 @@ public class TaskListFragment extends ListFragment
 
                     Map<String, Object> map = new HashMap<String, Object>();
                     map.put("title", t.title);
+                    map.put("priority", t.priority);
                     if (c != null) {
                         map.put("context_0", String.format("@%s", c.name));
                     }

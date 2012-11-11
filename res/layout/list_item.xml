@@ -11,6 +11,7 @@
       android:padding="1dp"
       >
     <View
+	android:id="@+id/list_task_prio"
 	android:layout_width="fill_parent"
 	android:layout_height="fill_parent"
 	android:background="#ffff0000"
