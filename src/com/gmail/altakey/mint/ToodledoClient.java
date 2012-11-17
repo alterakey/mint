@@ -235,6 +235,7 @@ public class ToodledoClient {
         }
     }
 
+    // Primarily cares synchronizers
     public static class DB {
         public static SQLiteDatabase conn = null;
         private static int ssRefs = 0;
