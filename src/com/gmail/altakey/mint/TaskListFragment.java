@@ -127,13 +127,19 @@ public class TaskListFragment extends ListFragment
                         continue;
 
                     Context c = resolver.contextMap.get(t.context);
+                    Folder f = resolver.folderMap.get(t.folder);
 
                     Map<String, Object> map = new HashMap<String, Object>();
                     map.put("title", t.title);
                     map.put("priority", t.priority);
-                    if (c != null) {
-                        map.put("context_0", String.format("@%s", c.name));
+
+                    if (f != null) {
+                        map.put("context_0", String.format("%s", f.name));
                     }
+                    if (c != null) {
+                        map.put("context_1", String.format("@%s", c.name));
+                    }
+
                     if (t.duedate > 0) {
                         map.put("due", new Formatter().format("%1$tY-%1$tm-%1$td", new Date(t.duedate * 1000)).toString());
                     }
