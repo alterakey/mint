@@ -1,5 +1,7 @@
 package com.gmail.altakey.mint;
 
+import android.database.Cursor;
+
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
@@ -9,6 +11,13 @@ import java.io.IOException;
 public class Context {
     public long id;
     public String name;
+
+    public static Context fromCursor(Cursor c, int offset) {
+        Context context = new Context();
+        context.id = c.getLong(0 + offset);
+        context.name = c.getString(1 + offset);
+        return context;
+    }
 
     public class JsonAdapter extends TypeAdapter<Context> {
         @Override

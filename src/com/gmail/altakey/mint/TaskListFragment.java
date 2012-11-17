@@ -127,8 +127,8 @@ public class TaskListFragment extends ListFragment
                         if (t.completed != 0)
                             continue;
 
-                        Context c = db.getContextById(t.context);
-                        Folder f = db.getFolderById(t.folder);
+                        Context c = t.resolved.context;
+                        Folder f = t.resolved.folder;
 
                         Map<String, Object> map = new HashMap<String, Object>();
                         map.put("title", t.title);

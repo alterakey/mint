@@ -1,5 +1,7 @@
 package com.gmail.altakey.mint;
 
+import android.database.Cursor;
+
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
@@ -16,6 +18,26 @@ public class Task {
     public long priority;
     public long star;
     public long duedate;
+    public Resolved resolved = new Resolved();
+
+    public class Resolved {
+        Folder folder;
+        Context context;
+    };
+
+    public static Task fromCursor(Cursor c, int offset) {
+        Task task = new Task();
+        task.id = c.getLong(0 + offset);
+        task.title = c.getString(1 + offset);
+        task.modified = c.getLong(2 + offset);
+        task.completed = c.getLong(3 + offset);
+        task.folder = c.getLong(4 + offset);
+        task.context = c.getLong(5 + offset);
+        task.priority = c.getLong(6 + offset);
+        task.star = c.getLong(7 + offset);
+        task.duedate = c.getLong(8 + offset);
+        return task;
+    }
 
     public class JsonAdapter extends TypeAdapter<Task> {
         @Override

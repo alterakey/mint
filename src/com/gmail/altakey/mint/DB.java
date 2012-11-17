@@ -27,7 +27,7 @@ public class DB {
             this.conn = new SQLiteOpenHelper(mContext, "toodledo", null, 1) {
                 @Override
                 public void onCreate(SQLiteDatabase db) {
-                    db.execSQL("CREATE TABLE IF NOT EXISTS tasks (task BIGINT PRIMARY KEY, title TEXT, modified BIGINT, completed TEXT, folder BIGINT, context BIGINT, priority INTEGER, star INTEGER)");
+                    db.execSQL("CREATE TABLE IF NOT EXISTS tasks (task BIGINT PRIMARY KEY, title TEXT, modified BIGINT, completed TEXT, folder BIGINT, context BIGINT, priority INTEGER, star INTEGER, duedate BIGINT)");
                     db.execSQL("CREATE TABLE IF NOT EXISTS folders (folder BIGINT PRIMARY KEY, name TEXT, private TEXT, archived TEXT, ord TEXT)");
                     db.execSQL("CREATE TABLE IF NOT EXISTS contexts (context BIGINT PRIMARY KEY, name TEXT)");
                     db.execSQL("CREATE TABLE IF NOT EXISTS status (status TEXT PRIMARY KEY, lastedit_folder BIGINT, lastedit_context BIGINT, lastedit_goal BIGINT, lastedit_location BIGINT, lastedit_task BIGINT, lastdelete_task BIGINT, lastedit_notebook BIGINT, lastdelete_notebook BIGINT)");
@@ -128,7 +128,7 @@ public class DB {
             if (flags.containsKey("task")) {
                 for (Task t : client.getTasksAfter(flags.get("task"))) {
                     conn.execSQL(
-                        "INSERT OR REPLACE INTO tasks (task, title, modified, completed, folder, context, priority, star) VALUES (?,?,?,?,?,?,?,?)",
+                        "INSERT OR REPLACE INTO tasks (task, title, modified, completed, folder, context, priority, star, duedate) VALUES (?,?,?,?,?,?,?,?,?)",
                         new String[] {
                             String.valueOf(t.id),
                             t.title,
@@ -137,7 +137,8 @@ public class DB {
                             String.valueOf(t.folder),
                             String.valueOf(t.context),
                             String.valueOf(t.priority),
-                            String.valueOf(t.star)
+                            String.valueOf(t.star),
+                            String.valueOf(t.duedate)
                         });
                 }
             }
@@ -154,13 +155,7 @@ public class DB {
         try {
             c.moveToFirst();
             while (!c.isAfterLast()) {
-                Folder folder = new Folder();
-                folder.id = c.getLong(0);
-                folder.name = c.getString(1);
-                folder.private_ = c.getLong(2);
-                folder.archived = c.getLong(3);
-                folder.ord = c.getLong(4);
-                ret.add(folder);
+                ret.add(Folder.fromCursor(c, 0));
                 c.moveToNext();
             }
             return ret;
@@ -175,10 +170,7 @@ public class DB {
         try {
             c.moveToFirst();
             while (!c.isAfterLast()) {
-                Context context = new Context();
-                context.id = c.getLong(0);
-                context.name = c.getString(1);
-                ret.add(context);
+                ret.add(Context.fromCursor(c, 0));
                 c.moveToNext();
             }
             return ret;
@@ -190,20 +182,13 @@ public class DB {
     public List<Task> getTasks() {
         List<Task> ret = new LinkedList<Task>();
         Cursor c = conn.rawQuery(
-            "SELECT task,title,modified,completed,folder,context,priority,star FROM tasks", null);
+            "SELECT task,title,modified,completed,folder,context,priority,star,duedate,folder as folder_id,folders.name as folder_name,folders.private as folder_private,folders.archived as folder_archived,folders.ord as folder_ord,context as context_id,contexts.name as context_name FROM tasks join folders using (folder) join contexts using (context)", null);
         try {
             c.moveToFirst();
             while (!c.isAfterLast()) {
-                Task task = new Task();
-                task.id = c.getLong(0);
-                task.title = c.getString(1);
-                task.modified = c.getLong(2);
-                task.completed = c.getLong(3);
-                task.folder = c.getLong(4);
-                task.context = c.getLong(5);
-                task.priority = c.getLong(6);
-                task.star = c.getLong(7);
-                task.duedate = c.getLong(8);
+                Task task = Task.fromCursor(c, 0);
+                task.resolved.folder = Folder.fromCursor(c, 9);
+                task.resolved.context = Context.fromCursor(c, 14);
                 ret.add(task);
                 c.moveToNext();
             }
@@ -212,40 +197,4 @@ public class DB {
             c.close();
         }
     }
-
-    public Folder getFolderById(long id) {
-        Cursor c = conn.rawQuery("SELECT folder,name,private,archived,ord FROM folders WHERE folder=?", new String[] { String.valueOf(id) });
-        try {
-            c.moveToFirst();
-            if (!c.isAfterLast()) {
-                Folder folder = new Folder();
-                folder.id = c.getLong(0);
-                folder.name = c.getString(1);
-                folder.private_ = c.getLong(2);
-                folder.archived = c.getLong(3);
-                folder.ord = c.getLong(4);
-                return folder;
-            }
-            return null;
-        } finally {
-            c.close();
-        }
-    }
-
-    public Context getContextById(long id) {
-        Cursor c = conn.rawQuery("SELECT context,name FROM contexts WHERE context=?", new String[] { String.valueOf(id) } );
-        try {
-            c.moveToFirst();
-            if (!c.isAfterLast()) {
-                Context context = new Context();
-                context.id = c.getLong(0);
-                context.name = c.getString(1);
-                return context;
-            }
-            return null;
-        } finally {
-            c.close();
-        }
-    }
-
 }
