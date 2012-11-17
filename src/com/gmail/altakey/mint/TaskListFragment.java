@@ -117,16 +117,16 @@ public class TaskListFragment extends ListFragment
         public Void doInBackground(Void... params) {
             try {
                 ToodledoClient client = new ToodledoClient(getAuthenticator(), mmActivity);
-                Map<Long, Context> contextById = new WeakHashMap<Long, Context>();
-                for (Context c : client.getContexts()) {
-                    contextById.put(c.id, c);
-                }
+                ToodledoClient.Resolver resolver = client.getResolver();
+
+                client.getFolders();
+                client.getContexts();
 
                 for (Task t : client.getTasks()) {
                     if (t.completed != 0)
                         continue;
 
-                    Context c = contextById.get(t.context);
+                    Context c = resolver.contextMap.get(t.context);
 
                     Map<String, Object> map = new HashMap<String, Object>();
                     map.put("title", t.title);

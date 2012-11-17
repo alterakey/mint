@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.WeakHashMap;
 import java.io.UnsupportedEncodingException;
 
 import android.database.sqlite.SQLiteDatabase;
@@ -34,6 +33,10 @@ public class ToodledoClient {
     public ToodledoClient(Authenticator auth, android.content.Context context) {
         mAuth = auth;
         mContext = context;
+    }
+
+    public Resolver getResolver() {
+        return mResolver;
     }
 
     public List<Folder> getFolders() throws IOException, NoSuchAlgorithmException, Authenticator.BogusException {
@@ -303,8 +306,8 @@ public class ToodledoClient {
     }
 
     public class Resolver {
-        public Map<Long, Context> contextMap = new WeakHashMap<Long, Context>();
-        public Map<Long, Folder> folderMap = new WeakHashMap<Long, Folder>();
+        public Map<Long, Context> contextMap = new HashMap<Long, Context>();
+        public Map<Long, Folder> folderMap = new HashMap<Long, Folder>();
 
         public void feedContexts(List<Context> contexts) {
             for (Context c : contexts) {
