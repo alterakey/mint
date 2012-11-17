@@ -201,7 +201,7 @@ public class DB {
 
     public List<Task> getHotTasks() {
         List<Task> ret = new LinkedList<Task>();
-        String due = String.format("%d", (new Date().getTime() + (4 * 86400 * 1000)) / 1000);
+        String due = String.format("%d", (new Date().getTime() + (7 * 86400 * 1000)) / 1000);
         Cursor c = conn.rawQuery(
             "SELECT task,title,modified,completed,folder,context,priority,star,duedate,folder as folder_id,folders.name as folder_name,folders.private as folder_private,folders.archived as folder_archived,folders.ord as folder_ord,context as context_id,contexts.name as context_name FROM tasks left join folders using (folder) left join contexts using (context) where (priority=3 or (priority>=0 and duedate>0 and duedate<?)) and completed=0 order by priority desc,duedate", new String[] { due });
         try {
