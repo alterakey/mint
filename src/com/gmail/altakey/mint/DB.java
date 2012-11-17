@@ -27,10 +27,10 @@ public class DB {
             this.conn = new SQLiteOpenHelper(mContext, "toodledo", null, 1) {
                 @Override
                 public void onCreate(SQLiteDatabase db) {
-                    db.execSQL("CREATE TABLE IF NOT EXISTS tasks (id BIGINT PRIMARY KEY, title TEXT, modified BIGINT, completed TEXT, folder BIGINT, context BIGINT, priority INTEGER, star INTEGER)");
-                    db.execSQL("CREATE TABLE IF NOT EXISTS folders (id BIGINT PRIMARY KEY, name TEXT, private TEXT, archived TEXT, ord TEXT)");
-                    db.execSQL("CREATE TABLE IF NOT EXISTS contexts (id BIGINT PRIMARY KEY, name TEXT)");
-                    db.execSQL("CREATE TABLE IF NOT EXISTS status (id TEXT PRIMARY KEY, lastedit_folder BIGINT, lastedit_context BIGINT, lastedit_goal BIGINT, lastedit_location BIGINT, lastedit_task BIGINT, lastdelete_task BIGINT, lastedit_notebook BIGINT, lastdelete_notebook BIGINT)");
+                    db.execSQL("CREATE TABLE IF NOT EXISTS tasks (task BIGINT PRIMARY KEY, title TEXT, modified BIGINT, completed TEXT, folder BIGINT, context BIGINT, priority INTEGER, star INTEGER)");
+                    db.execSQL("CREATE TABLE IF NOT EXISTS folders (folder BIGINT PRIMARY KEY, name TEXT, private TEXT, archived TEXT, ord TEXT)");
+                    db.execSQL("CREATE TABLE IF NOT EXISTS contexts (context BIGINT PRIMARY KEY, name TEXT)");
+                    db.execSQL("CREATE TABLE IF NOT EXISTS status (status TEXT PRIMARY KEY, lastedit_folder BIGINT, lastedit_context BIGINT, lastedit_goal BIGINT, lastedit_location BIGINT, lastedit_task BIGINT, lastdelete_task BIGINT, lastedit_notebook BIGINT, lastdelete_notebook BIGINT)");
                 }
 
                 @Override
@@ -81,7 +81,7 @@ public class DB {
             Status st = client.getStatus();
             Map<String, Long> flags = updatedSince(st);
 
-            conn.execSQL("INSERT OR REPLACE INTO status (id, lastedit_folder, lastedit_context, lastedit_goal, lastedit_location, lastedit_task, lastdelete_task, lastedit_notebook, lastdelete_notebook) VALUES (?,?,?,?,?,?,?,?,?)",
+            conn.execSQL("INSERT OR REPLACE INTO status (status, lastedit_folder, lastedit_context, lastedit_goal, lastedit_location, lastedit_task, lastdelete_task, lastedit_notebook, lastdelete_notebook) VALUES (?,?,?,?,?,?,?,?,?)",
                          new String[] {
                              st.id,
                              String.valueOf(st.lastedit_folder),
@@ -103,7 +103,7 @@ public class DB {
             if (flags.containsKey("folder")) {
                 for (Folder t : client.getFoldersAfter(flags.get("folder"))) {
                     conn.execSQL(
-                        "INSERT OR REPLACE INTO folders (id, name, private, archived, ord) VALUES (?,?,?,?,?)",
+                        "INSERT OR REPLACE INTO folders (folder, name, private, archived, ord) VALUES (?,?,?,?,?)",
                         new String[] {
                             String.valueOf(t.id),
                             t.name,
@@ -117,7 +117,7 @@ public class DB {
             if (flags.containsKey("context")) {
                 for (Context t : client.getContextsAfter(flags.get("context"))) {
                     conn.execSQL(
-                        "INSERT OR REPLACE INTO contexts (id, name) VALUES (?,?)",
+                        "INSERT OR REPLACE INTO contexts (context, name) VALUES (?,?)",
                         new String[] {
                             String.valueOf(t.id),
                             t.name
@@ -128,7 +128,7 @@ public class DB {
             if (flags.containsKey("task")) {
                 for (Task t : client.getTasksAfter(flags.get("task"))) {
                     conn.execSQL(
-                        "INSERT OR REPLACE INTO tasks (id, title, modified, completed, folder, context, priority, star) VALUES (?,?,?,?,?,?,?,?)",
+                        "INSERT OR REPLACE INTO tasks (task, title, modified, completed, folder, context, priority, star) VALUES (?,?,?,?,?,?,?,?)",
                         new String[] {
                             String.valueOf(t.id),
                             t.title,
@@ -150,7 +150,7 @@ public class DB {
 
     public List<Folder> getFolders() {
         List<Folder> ret = new LinkedList<Folder>();
-        Cursor c = conn.rawQuery("SELECT id,name,private,archived,ord FROM folders", null);
+        Cursor c = conn.rawQuery("SELECT folder,name,private,archived,ord FROM folders", null);
         try {
             c.moveToFirst();
             while (!c.isAfterLast()) {
@@ -171,7 +171,7 @@ public class DB {
 
     public List<Context> getContext() {
         List<Context> ret = new LinkedList<Context>();
-        Cursor c = conn.rawQuery("SELECT id,name FROM contexts", null);
+        Cursor c = conn.rawQuery("SELECT context,name FROM contexts", null);
         try {
             c.moveToFirst();
             while (!c.isAfterLast()) {
@@ -189,7 +189,8 @@ public class DB {
 
     public List<Task> getTasks() {
         List<Task> ret = new LinkedList<Task>();
-        Cursor c = conn.rawQuery("SELECT id,title,modified,completed,folder,context,priority,star FROM tasks", null);
+        Cursor c = conn.rawQuery(
+            "SELECT task,title,modified,completed,folder,context,priority,star FROM tasks", null);
         try {
             c.moveToFirst();
             while (!c.isAfterLast()) {
@@ -213,7 +214,7 @@ public class DB {
     }
 
     public Folder getFolderById(long id) {
-        Cursor c = conn.rawQuery("SELECT id,name,private,archived,ord FROM folders WHERE id=?", new String[] { String.valueOf(id) });
+        Cursor c = conn.rawQuery("SELECT folder,name,private,archived,ord FROM folders WHERE folder=?", new String[] { String.valueOf(id) });
         try {
             c.moveToFirst();
             if (!c.isAfterLast()) {
@@ -232,7 +233,7 @@ public class DB {
     }
 
     public Context getContextById(long id) {
-        Cursor c = conn.rawQuery("SELECT id,name FROM contexts WHERE id=?", new String[] { String.valueOf(id) } );
+        Cursor c = conn.rawQuery("SELECT context,name FROM contexts WHERE context=?", new String[] { String.valueOf(id) } );
         try {
             c.moveToFirst();
             if (!c.isAfterLast()) {
