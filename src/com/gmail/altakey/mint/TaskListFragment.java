@@ -119,20 +119,16 @@ public class TaskListFragment extends ListFragment
                 DB db = new DB(mmActivity);
                 try {
                     ToodledoClient client = new ToodledoClient(getAuthenticator(), mmActivity);
-                    ToodledoClient.Resolver resolver = client.getResolver();
 
                     db.open();
                     db.update(client);
-
-                    client.getFolders();
-                    client.getContexts();
 
                     for (Task t : client.getTasks()) {
                         if (t.completed != 0)
                             continue;
 
-                        Context c = resolver.contextMap.get(t.context);
-                        Folder f = resolver.folderMap.get(t.folder);
+                        Context c = db.getContextById(t.context);
+                        Folder f = db.getFolderById(t.folder);
 
                         Map<String, Object> map = new HashMap<String, Object>();
                         map.put("title", t.title);

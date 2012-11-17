@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
+import java.util.LinkedList;
 
 // Primarily cares synchronizers
 public class DB {
@@ -145,4 +147,104 @@ public class DB {
             conn.endTransaction();
         }
     }
+
+    public List<Folder> getFolders() {
+        List<Folder> ret = new LinkedList<Folder>();
+        Cursor c = conn.rawQuery("SELECT id,name,private,archived,ord FROM folders", null);
+        try {
+            c.moveToFirst();
+            while (!c.isAfterLast()) {
+                Folder folder = new Folder();
+                folder.id = c.getLong(0);
+                folder.name = c.getString(1);
+                folder.private_ = c.getLong(2);
+                folder.archived = c.getLong(3);
+                folder.ord = c.getLong(4);
+                ret.add(folder);
+                c.moveToNext();
+            }
+            return ret;
+        } finally {
+            c.close();
+        }
+    }
+
+    public List<Context> getContext() {
+        List<Context> ret = new LinkedList<Context>();
+        Cursor c = conn.rawQuery("SELECT id,name FROM contexts", null);
+        try {
+            c.moveToFirst();
+            while (!c.isAfterLast()) {
+                Context context = new Context();
+                context.id = c.getLong(0);
+                context.name = c.getString(1);
+                ret.add(context);
+                c.moveToNext();
+            }
+            return ret;
+        } finally {
+            c.close();
+        }
+    }
+
+    public List<Task> getTasks() {
+        List<Task> ret = new LinkedList<Task>();
+        Cursor c = conn.rawQuery("SELECT id,title,modified,completed,folder,context,priority,star FROM tasks", null);
+        try {
+            c.moveToFirst();
+            while (!c.isAfterLast()) {
+                Task task = new Task();
+                task.id = c.getLong(0);
+                task.title = c.getString(1);
+                task.modified = c.getLong(2);
+                task.completed = c.getLong(3);
+                task.folder = c.getLong(4);
+                task.context = c.getLong(5);
+                task.priority = c.getLong(6);
+                task.star = c.getLong(7);
+                task.duedate = c.getLong(8);
+                ret.add(task);
+                c.moveToNext();
+            }
+            return ret;
+        } finally {
+            c.close();
+        }
+    }
+
+    public Folder getFolderById(long id) {
+        Cursor c = conn.rawQuery("SELECT id,name,private,archived,ord FROM folders WHERE id=?", new String[] { String.valueOf(id) });
+        try {
+            c.moveToFirst();
+            if (!c.isAfterLast()) {
+                Folder folder = new Folder();
+                folder.id = c.getLong(0);
+                folder.name = c.getString(1);
+                folder.private_ = c.getLong(2);
+                folder.archived = c.getLong(3);
+                folder.ord = c.getLong(4);
+                return folder;
+            }
+            return null;
+        } finally {
+            c.close();
+        }
+    }
+
+    public Context getContextById(long id) {
+        Cursor c = conn.rawQuery("SELECT id,name FROM contexts WHERE id=?", new String[] { String.valueOf(id) } );
+        try {
+            c.moveToFirst();
+            if (!c.isAfterLast()) {
+                Context context = new Context();
+                context.id = c.getLong(0);
+                context.name = c.getString(1);
+                return context;
+            }
+            return null;
+        } finally {
+            c.close();
+        }
+    }
+
 }
