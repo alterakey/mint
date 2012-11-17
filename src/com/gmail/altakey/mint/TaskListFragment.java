@@ -116,37 +116,47 @@ public class TaskListFragment extends ListFragment
         @Override
         public Void doInBackground(Void... params) {
             try {
-                ToodledoClient client = new ToodledoClient(getAuthenticator(), mmActivity);
-                ToodledoClient.Resolver resolver = client.getResolver();
+                DB db = new DB(mmActivity);
+                try {
+                    ToodledoClient client = new ToodledoClient(getAuthenticator(), mmActivity);
+                    ToodledoClient.Resolver resolver = client.getResolver();
 
-                client.getFolders();
-                client.getContexts();
+                    db.open();
+                    db.update(client);
 
-                for (Task t : client.getTasks()) {
-                    if (t.completed != 0)
-                        continue;
+                    client.getFolders();
+                    client.getContexts();
 
-                    Context c = resolver.contextMap.get(t.context);
-                    Folder f = resolver.folderMap.get(t.folder);
+                    for (Task t : client.getTasks()) {
+                        if (t.completed != 0)
+                            continue;
 
-                    Map<String, Object> map = new HashMap<String, Object>();
-                    map.put("title", t.title);
-                    map.put("priority", t.priority);
+                        Context c = resolver.contextMap.get(t.context);
+                        Folder f = resolver.folderMap.get(t.folder);
 
-                    if (f != null) {
-                        map.put("context_0", String.format("%s", f.name));
+                        Map<String, Object> map = new HashMap<String, Object>();
+                        map.put("title", t.title);
+                        map.put("priority", t.priority);
+
+                        if (f != null) {
+                            map.put("context_0", String.format("%s", f.name));
+                        }
+                        if (c != null) {
+                            map.put("context_1", String.format("@%s", c.name));
+                        }
+
+                        if (t.duedate > 0) {
+                            map.put("due", new Formatter().format("%1$tY-%1$tm-%1$td", new Date(t.duedate * 1000)).toString());
+                        }
+                        //map.put("timer_flag", "(on)");
+                        mmData.add(map);
                     }
-                    if (c != null) {
-                        map.put("context_1", String.format("@%s", c.name));
+                    return null;
+                } finally {
+                    if (db != null) {
+                        db.close();
                     }
-
-                    if (t.duedate > 0) {
-                        map.put("due", new Formatter().format("%1$tY-%1$tm-%1$td", new Date(t.duedate * 1000)).toString());
-                    }
-                    //map.put("timer_flag", "(on)");
-                    mmData.add(map);
                 }
-                return null;
             } catch (IOException e) {
                 mmError = e;
                 return null;
