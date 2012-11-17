@@ -154,21 +154,30 @@ public class Authenticator {
             .commit();
     }
 
-    private final String getSignature() throws NoSuchAlgorithmException {
+    private final String getSignature() throws NoSuchAlgorithmException, BogusException {
+        if (mUserId == null) {
+            throw new BogusException();
+        }
         MessageDigest md = MessageDigest.getInstance("MD5");
         md.update(mUserId.getBytes());
         md.update(APP_ID.getBytes());
         return Hex.encodeHexString(md.digest());
     }
 
-    private final String getLookupSignature() throws NoSuchAlgorithmException {
+    private final String getLookupSignature() throws NoSuchAlgorithmException, BogusException {
+        if (mEmail == null) {
+            throw new BogusException();
+        }
         MessageDigest md = MessageDigest.getInstance("MD5");
         md.update(mEmail.getBytes());
         md.update(APP_ID.getBytes());
         return Hex.encodeHexString(md.digest());
     }
 
-    private final String getKey() throws NoSuchAlgorithmException {
+    private final String getKey() throws NoSuchAlgorithmException, BogusException {
+        if (mPassword == null || mToken == null) {
+            throw new BogusException();
+        }
         MessageDigest md = MessageDigest.getInstance("MD5");
         MessageDigest md2 = MessageDigest.getInstance("MD5");
         md2.update(mPassword.getBytes());
