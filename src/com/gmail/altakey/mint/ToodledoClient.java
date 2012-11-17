@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.WeakHashMap;
 import java.io.UnsupportedEncodingException;
 
 import android.database.sqlite.SQLiteDatabase;
@@ -28,6 +29,7 @@ import android.database.Cursor;
 public class ToodledoClient {
     private Authenticator mAuth;
     private android.content.Context mContext;
+    private Resolver mResolver = new Resolver();
 
     public ToodledoClient(Authenticator auth, android.content.Context context) {
         mAuth = auth;
@@ -56,7 +58,9 @@ public class ToodledoClient {
         entity.consumeContent();
 
         try {
-            return new Gson().fromJson(os.toString("UTF-8"), new TypeToken<LinkedList<Folder>>(){}.getType());
+            List<Folder> ret = new Gson().fromJson(os.toString("UTF-8"), new TypeToken<LinkedList<Folder>>(){}.getType());
+            mResolver.feedFolders(ret);
+            return ret;
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
@@ -84,7 +88,9 @@ public class ToodledoClient {
         entity.consumeContent();
 
         try {
-            return new Gson().fromJson(os.toString("UTF-8"), new TypeToken<LinkedList<Context>>(){}.getType());
+            List<Context> ret = new Gson().fromJson(os.toString("UTF-8"), new TypeToken<LinkedList<Context>>(){}.getType());
+            mResolver.feedContexts(ret);
+            return ret;
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
@@ -292,6 +298,23 @@ public class ToodledoClient {
                 if (c != null)
                     c.close();
                 close();
+            }
+        }
+    }
+
+    public class Resolver {
+        public Map<Long, Context> contextMap = new WeakHashMap<Long, Context>();
+        public Map<Long, Folder> folderMap = new WeakHashMap<Long, Folder>();
+
+        public void feedContexts(List<Context> contexts) {
+            for (Context c : contexts) {
+                contextMap.put(c.id, c);
+            }
+        }
+
+        public void feedFolders(List<Folder> folders) {
+            for (Folder f : folders) {
+                folderMap.put(f.id, f);
             }
         }
     }
