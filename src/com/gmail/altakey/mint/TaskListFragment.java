@@ -123,7 +123,7 @@ public class TaskListFragment extends ListFragment
                     db.open();
                     db.update(client);
 
-                    for (Task t : client.getTasks()) {
+                    for (Task t : db.getTasks()) {
                         if (t.completed != 0)
                             continue;
 
