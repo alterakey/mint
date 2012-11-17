@@ -16,7 +16,7 @@ public class Context {
         Context context = new Context();
         context.id = c.getLong(0 + offset);
         context.name = c.getString(1 + offset);
-        return context;
+        return context.id != 0 ? context : null;
     }
 
     public class JsonAdapter extends TypeAdapter<Context> {

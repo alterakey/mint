@@ -36,7 +36,7 @@ public class Task {
         task.priority = c.getLong(6 + offset);
         task.star = c.getLong(7 + offset);
         task.duedate = c.getLong(8 + offset);
-        return task;
+        return task.id != 0 ? task : null;
     }
 
     public class JsonAdapter extends TypeAdapter<Task> {

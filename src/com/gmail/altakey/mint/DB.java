@@ -182,7 +182,7 @@ public class DB {
     public List<Task> getTasks() {
         List<Task> ret = new LinkedList<Task>();
         Cursor c = conn.rawQuery(
-            "SELECT task,title,modified,completed,folder,context,priority,star,duedate,folder as folder_id,folders.name as folder_name,folders.private as folder_private,folders.archived as folder_archived,folders.ord as folder_ord,context as context_id,contexts.name as context_name FROM tasks join folders using (folder) join contexts using (context)", null);
+            "SELECT task,title,modified,completed,folder,context,priority,star,duedate,folder as folder_id,folders.name as folder_name,folders.private as folder_private,folders.archived as folder_archived,folders.ord as folder_ord,context as context_id,contexts.name as context_name FROM tasks left join folders using (folder) left join contexts using (context) order by priority desc,duedate", null);
         try {
             c.moveToFirst();
             while (!c.isAfterLast()) {
