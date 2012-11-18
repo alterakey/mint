@@ -7,7 +7,7 @@ import android.view.*;
 import android.content.Intent;
 
 import java.util.List;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import android.content.SharedPreferences;
@@ -53,7 +53,7 @@ public class TaskListFragment extends ListFragment
 
     public class TaskListAdapterBuilder {
         public ListAdapter build() {
-            final List<Map<String, ?>> data = new ArrayList<Map<String, ?>>();
+            final List<Map<String, ?>> data = new LinkedList<Map<String, ?>>();
             TaskListAdapter adapter = new TaskListAdapter(
                 getActivity(),
                 data
