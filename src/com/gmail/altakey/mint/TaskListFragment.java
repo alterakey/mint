@@ -28,12 +28,16 @@ import java.util.Formatter;
 
 public class TaskListFragment extends ListFragment
 {
+    private BaseAdapter mAdapter;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mAdapter = new TaskListAdapterBuilder().build();
+
         setHasOptionsMenu(true);
         getActivity().setTitle("Hotlist");
-        setListAdapter(new TaskListAdapterBuilder().build());
+        setListAdapter(mAdapter);
     }
 
     @Override
@@ -51,8 +55,14 @@ public class TaskListFragment extends ListFragment
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        mAdapter.notifyDataSetChanged();
+    }
+
     public class TaskListAdapterBuilder {
-        public ListAdapter build() {
+        public TaskListAdapter build() {
             final List<Map<String, ?>> data = new LinkedList<Map<String, ?>>();
             TaskListAdapter adapter = new TaskListAdapter(
                 getActivity(),
