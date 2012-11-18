@@ -28,15 +28,10 @@ import android.database.Cursor;
 public class ToodledoClient {
     private Authenticator mAuth;
     private android.content.Context mContext;
-    private Resolver mResolver = new Resolver();
 
     public ToodledoClient(Authenticator auth, android.content.Context context) {
         mAuth = auth;
         mContext = context;
-    }
-
-    public Resolver getResolver() {
-        return mResolver;
     }
 
     public List<Folder> getFolders() throws IOException, NoSuchAlgorithmException, Authenticator.BogusException {
@@ -61,9 +56,7 @@ public class ToodledoClient {
         entity.consumeContent();
 
         try {
-            List<Folder> ret = new Gson().fromJson(os.toString("UTF-8"), new TypeToken<LinkedList<Folder>>(){}.getType());
-            mResolver.feedFolders(ret);
-            return ret;
+            return new Gson().fromJson(os.toString("UTF-8"), new TypeToken<LinkedList<Folder>>(){}.getType());
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
@@ -91,9 +84,7 @@ public class ToodledoClient {
         entity.consumeContent();
 
         try {
-            List<Context> ret = new Gson().fromJson(os.toString("UTF-8"), new TypeToken<LinkedList<Context>>(){}.getType());
-            mResolver.feedContexts(ret);
-            return ret;
+            return new Gson().fromJson(os.toString("UTF-8"), new TypeToken<LinkedList<Context>>(){}.getType());
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
@@ -151,25 +142,6 @@ public class ToodledoClient {
             return new Gson().fromJson(os.toString("UTF-8"), Status.class);
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-
-
-    public class Resolver {
-        public Map<Long, Context> contextMap = new HashMap<Long, Context>();
-        public Map<Long, Folder> folderMap = new HashMap<Long, Folder>();
-
-        public void feedContexts(List<Context> contexts) {
-            for (Context c : contexts) {
-                contextMap.put(c.id, c);
-            }
-        }
-
-        public void feedFolders(List<Folder> folders) {
-            for (Folder f : folders) {
-                folderMap.put(f.id, f);
-            }
         }
     }
 }
