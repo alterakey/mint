@@ -19,13 +19,50 @@ package com.gmail.altakey.mint;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.ListPreference;
+import android.preference.EditTextPreference;
 import android.preference.PreferenceActivity;
 
-public class ConfigActivity extends PreferenceActivity  {
+public class ConfigActivity extends PreferenceActivity implements
+        SharedPreferences.OnSharedPreferenceChangeListener {
+    private EditTextPreference mUserId;
+
+    private EditTextPreference mUserPassword;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.config);
+        mUserId = (EditTextPreference)getPreferenceScreen().findPreference(ConfigKey.USER_ID);
+        mUserPassword = (EditTextPreference)getPreferenceScreen().findPreference(ConfigKey.USER_PASSWORD);
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        SharedPreferences sharedPreferences = getPreferenceScreen().getSharedPreferences();
+        updateSummary(sharedPreferences, ConfigKey.USER_ID);
+        updateSummary(sharedPreferences, ConfigKey.USER_PASSWORD);
+
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        getPreferenceScreen().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(
+                this);
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        updateSummary(sharedPreferences, key);
+    }
+
+    private void updateSummary(SharedPreferences sharedPreferences, String key) {
+        if (key.equals(ConfigKey.USER_ID)) {
+            mUserId.setSummary(mUserId.getText());
+        }
+    }
+
 }

@@ -187,8 +187,8 @@ public class TaskListFragment extends ListFragment
 
         private Authenticator getAuthenticator() {
             SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(mmActivity);
-            String userId = pref.getString("user_id", null);
-            String userPassword = pref.getString("user_password", null);
+            String userId = pref.getString(ConfigKey.USER_ID, null);
+            String userPassword = pref.getString(ConfigKey.USER_PASSWORD, null);
             return new Authenticator(mmActivity, userId, userPassword);
         }
     }
