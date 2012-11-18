@@ -180,10 +180,15 @@ public class DB {
         }
     }
 
-    public List<Task> getTasks() {
+    private final String TASK_QUERY = "SELECT task,title,modified,completed,folder,context,priority,star,duedate,folder as folder_id,folders.name as folder_name,folders.private as folder_private,folders.archived as folder_archived,folders.ord as folder_ord,context as context_id,contexts.name as context_name FROM tasks left join folders using (folder) left join contexts using (context) where %s order by %s";
+    private final String DEFAULT_ORDER = "duedate,priority desc";
+    private final String HOT_FILTER = "(priority=3 or (priority>=0 and duedate>0 and duedate<?)) and completed=0";
+    private final String ALL_FILTER = "1=1";
+
+    public List<Task> getTasks(String filter, String order) {
         List<Task> ret = new LinkedList<Task>();
         Cursor c = conn.rawQuery(
-            "SELECT task,title,modified,completed,folder,context,priority,star,duedate,folder as folder_id,folders.name as folder_name,folders.private as folder_private,folders.archived as folder_archived,folders.ord as folder_ord,context as context_id,contexts.name as context_name FROM tasks left join folders using (folder) left join contexts using (context) order by duedate,priority desc", null);
+            String.format(TASK_QUERY, ALL_FILTER, DEFAULT_ORDER), null);
         try {
             c.moveToFirst();
             while (!c.isAfterLast()) {
@@ -203,7 +208,7 @@ public class DB {
         List<Task> ret = new LinkedList<Task>();
         String due = String.format("%d", (new Date().getTime() + (7 * 86400 * 1000)) / 1000);
         Cursor c = conn.rawQuery(
-            "SELECT task,title,modified,completed,folder,context,priority,star,duedate,folder as folder_id,folders.name as folder_name,folders.private as folder_private,folders.archived as folder_archived,folders.ord as folder_ord,context as context_id,contexts.name as context_name FROM tasks left join folders using (folder) left join contexts using (context) where (priority=3 or (priority>=0 and duedate>0 and duedate<?)) and completed=0 order by duedate,priority desc", new String[] { due });
+            String.format(TASK_QUERY, HOT_FILTER, DEFAULT_ORDER), new String[] { due });
         try {
             c.moveToFirst();
             while (!c.isAfterLast()) {
