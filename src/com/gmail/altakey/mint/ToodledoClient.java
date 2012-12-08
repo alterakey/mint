@@ -121,6 +121,33 @@ public class ToodledoClient {
         }
     }
 
+    public List<Task> getTasksDeletedAfter(long time) throws IOException, NoSuchAlgorithmException, Authenticator.BogusException {
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+        HttpClient client = new DefaultHttpClient();
+
+        HttpGet req = new HttpGet(
+            String.format(
+                "http://api.toodledo.com/2/tasks/deleted.php?"
+                + "key=%s&after=%s",
+                mAuth.authenticate(),
+                String.valueOf(time)
+            )
+        );
+        HttpResponse response = client.execute(req);
+        HttpEntity entity = response.getEntity();
+        entity.writeTo(os);
+        entity.consumeContent();
+
+        try {
+            List<Task> tasks = new Gson().fromJson(os.toString("UTF-8"), new TypeToken<LinkedList<Task>>(){}.getType());
+            tasks.remove(0);
+            return tasks;
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public Status getStatus() throws IOException, NoSuchAlgorithmException, Authenticator.BogusException {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
 

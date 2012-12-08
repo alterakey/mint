@@ -99,6 +99,13 @@ public class DB {
             }
 
             if (flags.containsKey("task_delete")) {
+                for (Task t : client.getTasksDeletedAfter(flags.get("task_delete"))) {
+                    conn.execSQL(
+                        "DELETE FROM tasks WHERE task=?",
+                        new String[] {
+                            String.valueOf(t.id)
+                        });
+                }
             }
 
             if (flags.containsKey("folder")) {
