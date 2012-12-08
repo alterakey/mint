@@ -96,6 +96,13 @@ public class DB {
                          });
 
             if (flags.containsKey("folder_delete")) {
+                for (Folder t : client.getFoldersDeletedAfter(flags.get("folder_delete"))) {
+                    conn.execSQL(
+                        "DELETE FROM folders WHERE folder=?",
+                        new String[] {
+                            String.valueOf(t.id)
+                        });
+                }
             }
 
             if (flags.containsKey("task_delete")) {

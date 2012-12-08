@@ -62,6 +62,30 @@ public class ToodledoClient {
         }
     }
 
+    public List<Folder> getFoldersDeletedAfter(long time) throws IOException, NoSuchAlgorithmException, Authenticator.BogusException {
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+        HttpClient client = new DefaultHttpClient();
+
+        HttpGet req = new HttpGet(
+            String.format(
+                "http://api.toodledo.com/2/folders/deleted.php?"
+                + "key=%s",
+                mAuth.authenticate()
+            )
+        );
+        HttpResponse response = client.execute(req);
+        HttpEntity entity = response.getEntity();
+        entity.writeTo(os);
+        entity.consumeContent();
+
+        try {
+            return new Gson().fromJson(os.toString("UTF-8"), new TypeToken<LinkedList<Folder>>(){}.getType());
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public List<Context> getContexts() throws IOException, NoSuchAlgorithmException, Authenticator.BogusException {
         return getContextsAfter(0);
     }
