@@ -200,6 +200,9 @@ public class ToodledoClient {
     private static Gson getGson() {
         GsonBuilder builder = new GsonBuilder();
         builder.registerTypeAdapter(Status.class, new Status.JsonAdapter());
+        builder.registerTypeAdapter(Folder.class, new Folder.JsonAdapter());
+        builder.registerTypeAdapter(Task.class, new Task.JsonAdapter());
+        builder.registerTypeAdapter(Context.class, new Context.JsonAdapter());
         return builder.create();
     }
 }

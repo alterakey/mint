@@ -19,17 +19,18 @@ public class Context {
         return context.id != 0 ? context : null;
     }
 
-    public class JsonAdapter extends TypeAdapter<Context> {
+    public static class JsonAdapter extends TypeAdapter<Context> {
         @Override
         public Context read(JsonReader reader) throws IOException {
-            final Context context = Context.this;
+            final Context context = new Context();
             reader.beginObject();
             while (reader.hasNext()) {
-                String name = reader.nextName();
+                final String name = reader.nextName();
+                final String value = reader.nextString();
                 if ("id".equals(name)) {
-                    context.id = Long.valueOf(reader.nextString());
+                    context.id = Long.valueOf(value);
                 } else if ("name".equals(name)) {
-                    context.name = reader.nextString();
+                    context.name = value;
                 }
             }
             reader.endObject();
@@ -38,7 +39,7 @@ public class Context {
 
         @Override
         public void write(JsonWriter writer, Context value) throws IOException {
-            final Context context = Context.this;
+            final Context context = value;
             writer
                 .beginObject()
                 .name("id").value(String.valueOf(context.id))

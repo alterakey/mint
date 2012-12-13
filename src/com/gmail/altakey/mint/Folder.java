@@ -25,23 +25,24 @@ public class Folder {
         return folder.id != 0 ? folder : null;
     }
 
-    public class JsonAdapter extends TypeAdapter<Folder> {
+    public static class JsonAdapter extends TypeAdapter<Folder> {
         @Override
         public Folder read(JsonReader reader) throws IOException {
-            final Folder folder = Folder.this;
+            final Folder folder = new Folder();
             reader.beginObject();
             while (reader.hasNext()) {
-                String name = reader.nextName();
+                final String name = reader.nextName();
+                final String value = reader.nextString();
                 if ("id".equals(name)) {
-                    folder.id = Long.valueOf(reader.nextString());
+                    folder.id = Long.valueOf(value);
                 } else if ("name".equals(name)) {
-                    folder.name = reader.nextString();
+                    folder.name = value;
                 } else if ("private".equals(name)) {
-                    folder.private_ = Long.valueOf(reader.nextString());
+                    folder.private_ = Long.valueOf(value);
                 } else if ("archived".equals(name)) {
-                    folder.archived = Long.valueOf(reader.nextString());
+                    folder.archived = Long.valueOf(value);
                 } else if ("ord".equals(name)) {
-                    folder.ord = Long.valueOf(reader.nextString());
+                    folder.ord = Long.valueOf(value);
                 }
             }
             reader.endObject();
@@ -50,7 +51,7 @@ public class Folder {
 
         @Override
         public void write(JsonWriter writer, Folder value) throws IOException {
-            final Folder folder = Folder.this;
+            final Folder folder = value;
             writer
                 .beginObject()
                 .name("id").value(String.valueOf(folder.id))

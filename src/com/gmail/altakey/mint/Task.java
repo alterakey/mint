@@ -39,31 +39,32 @@ public class Task {
         return task.id != 0 ? task : null;
     }
 
-    public class JsonAdapter extends TypeAdapter<Task> {
+    public static class JsonAdapter extends TypeAdapter<Task> {
         @Override
         public Task read(JsonReader reader) throws IOException {
-            final Task task = Task.this;
+            final Task task = new Task();
             reader.beginObject();
             while (reader.hasNext()) {
-                String name = reader.nextName();
+                final String name = reader.nextName();
+                final String value = reader.nextString();
                 if ("id".equals(name)) {
-                    task.id = Long.valueOf(reader.nextString());
+                    task.id = Long.valueOf(value);
                 } else if ("title".equals(name)) {
-                    task.title = reader.nextString();
+                    task.title = value;
                 } else if ("modified".equals(name)) {
-                    task.modified = Long.valueOf(reader.nextLong());
+                    task.modified = Long.valueOf(value);
                 } else if ("completed".equals(name)) {
-                    task.completed = Long.valueOf(reader.nextString());
+                    task.completed = Long.valueOf(value);
                 } else if ("folder".equals(name)) {
-                    task.folder = Long.valueOf(reader.nextString());
+                    task.folder = Long.valueOf(value);
                 } else if ("context".equals(name)) {
-                    task.context = Long.valueOf(reader.nextString());
+                    task.context = Long.valueOf(value);
                 } else if ("priority".equals(name)) {
-                    task.priority = Long.valueOf(reader.nextString());
+                    task.priority = Long.valueOf(value);
                 } else if ("star".equals(name)) {
-                    task.star = Long.valueOf(reader.nextString());
+                    task.star = Long.valueOf(value);
                 } else if ("duedate".equals(name)) {
-                    task.duedate = Long.valueOf(reader.nextString());
+                    task.duedate = Long.valueOf(value);
                 }
             }
             reader.endObject();
@@ -72,7 +73,7 @@ public class Task {
 
         @Override
         public void write(JsonWriter writer, Task value) throws IOException {
-            final Task task = Task.this;
+            final Task task = value;
             writer
                 .beginObject()
                 .name("id").value(String.valueOf(task.id))
