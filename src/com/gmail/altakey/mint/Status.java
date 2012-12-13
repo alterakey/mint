@@ -17,29 +17,30 @@ public class Status {
     public long lastedit_notebook;
     public long lastdelete_notebook;
 
-    public class JsonAdapter extends TypeAdapter<Status> {
+    public static class JsonAdapter extends TypeAdapter<Status> {
         @Override
         public Status read(JsonReader reader) throws IOException {
-            final Status status = Status.this;
+            final Status status = new Status();
             reader.beginObject();
             while (reader.hasNext()) {
-                String name = reader.nextName();
+                final String name = reader.nextName();
+                final String value = reader.nextString();
                 if ("userid".equals(name)) {
-                    status.id = reader.nextString();
+                    status.id = value;
                 } else if ("lastedit_folder".equals(name)) {
-                    status.lastedit_folder = Long.valueOf(reader.nextString());
+                    status.lastedit_folder = Long.valueOf(value);
                 } else if ("lastedit_context".equals(name)) {
-                    status.lastedit_context = Long.valueOf(reader.nextString());
+                    status.lastedit_context = Long.valueOf(value);
                 } else if ("lastedit_goal".equals(name)) {
-                    status.lastedit_goal = Long.valueOf(reader.nextString());
+                    status.lastedit_goal = Long.valueOf(value);
                 } else if ("lastedit_task".equals(name)) {
-                    status.lastedit_task = Long.valueOf(reader.nextString());
+                    status.lastedit_task = Long.valueOf(value);
                 } else if ("lastdelete_task".equals(name)) {
-                    status.lastdelete_task = Long.valueOf(reader.nextString());
+                    status.lastdelete_task = Long.valueOf(value);
                 } else if ("lastedit_notebook".equals(name)) {
-                    status.lastedit_notebook = Long.valueOf(reader.nextString());
+                    status.lastedit_notebook = Long.valueOf(value);
                 } else if ("lastdelete_notebook".equals(name)) {
-                    status.lastdelete_notebook = Long.valueOf(reader.nextString());
+                    status.lastdelete_notebook = Long.valueOf(value);
                 }
             }
             reader.endObject();
@@ -48,7 +49,7 @@ public class Status {
 
         @Override
         public void write(JsonWriter writer, Status value) throws IOException {
-            final Status status = Status.this;
+            final Status status = value;
             writer
                 .beginObject()
                 .name("userid").value(status.id)

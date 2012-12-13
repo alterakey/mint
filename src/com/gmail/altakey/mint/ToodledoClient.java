@@ -12,6 +12,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.reflect.TypeToken;
 import java.util.List;
@@ -56,7 +57,7 @@ public class ToodledoClient {
         entity.consumeContent();
 
         try {
-            return new Gson().fromJson(os.toString("UTF-8"), new TypeToken<LinkedList<Folder>>(){}.getType());
+            return getGson().fromJson(os.toString("UTF-8"), new TypeToken<LinkedList<Folder>>(){}.getType());
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
@@ -80,7 +81,7 @@ public class ToodledoClient {
         entity.consumeContent();
 
         try {
-            return new Gson().fromJson(os.toString("UTF-8"), new TypeToken<LinkedList<Folder>>(){}.getType());
+            return getGson().fromJson(os.toString("UTF-8"), new TypeToken<LinkedList<Folder>>(){}.getType());
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
@@ -108,7 +109,7 @@ public class ToodledoClient {
         entity.consumeContent();
 
         try {
-            return new Gson().fromJson(os.toString("UTF-8"), new TypeToken<LinkedList<Context>>(){}.getType());
+            return getGson().fromJson(os.toString("UTF-8"), new TypeToken<LinkedList<Context>>(){}.getType());
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
@@ -137,7 +138,7 @@ public class ToodledoClient {
         entity.consumeContent();
 
         try {
-            List<Task> tasks = new Gson().fromJson(os.toString("UTF-8"), new TypeToken<LinkedList<Task>>(){}.getType());
+            List<Task> tasks = getGson().fromJson(os.toString("UTF-8"), new TypeToken<LinkedList<Task>>(){}.getType());
             tasks.remove(0);
             return tasks;
         } catch (UnsupportedEncodingException e) {
@@ -164,7 +165,7 @@ public class ToodledoClient {
         entity.consumeContent();
 
         try {
-            List<Task> tasks = new Gson().fromJson(os.toString("UTF-8"), new TypeToken<LinkedList<Task>>(){}.getType());
+            List<Task> tasks = getGson().fromJson(os.toString("UTF-8"), new TypeToken<LinkedList<Task>>(){}.getType());
             tasks.remove(0);
             return tasks;
         } catch (UnsupportedEncodingException e) {
@@ -190,9 +191,15 @@ public class ToodledoClient {
         entity.consumeContent();
 
         try {
-            return new Gson().fromJson(os.toString("UTF-8"), Status.class);
+            return getGson().fromJson(os.toString("UTF-8"), Status.class);
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static Gson getGson() {
+        GsonBuilder builder = new GsonBuilder();
+        builder.registerTypeAdapter(Status.class, new Status.JsonAdapter());
+        return builder.create();
     }
 }
