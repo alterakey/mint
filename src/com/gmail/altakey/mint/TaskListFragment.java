@@ -29,11 +29,13 @@ import java.util.Queue;
 
 public class TaskListFragment extends ListFragment
 {
-    private BaseAdapter mAdapter;
+    private TaskListAdapter mAdapter;
+    private ToodledoClient mClient;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mClient = new ToodledoClient(getAuthenticator(), getActivity());
         mAdapter = new TaskListAdapterBuilder().build();
 
         setHasOptionsMenu(true);
@@ -67,7 +69,7 @@ public class TaskListFragment extends ListFragment
         super.onListItemClick(lv, v, position, id);
         final TaskListAdapter adapter = (TaskListAdapter)getListAdapter();
         final Map<String, ?> e = (Map<String, ?>)adapter.getItem(position);
-        new TaskCompleteTask(getActivity(), adapter, (Task)e.get("task")).execute();
+        new TaskCompleteTask((Task)e.get("task")).execute();
     }
 
     public class TaskListAdapterBuilder {
@@ -77,7 +79,7 @@ public class TaskListFragment extends ListFragment
                 getActivity(),
                 data
             );
-            new TaskListLoadTask(getActivity(), adapter, data).execute();
+            new TaskListLoadTask(data).execute();
             return adapter;
         }
     }
@@ -132,27 +134,21 @@ public class TaskListFragment extends ListFragment
         }
     }
 
-    private static class TaskListLoadTask extends AsyncTask<Void, Void, Void> {
-        private BaseAdapter mmAdapter;
+    private class TaskListLoadTask extends AsyncTask<Void, Void, Void> {
         private List<Map<String, ?>> mmData;
-        private Activity mmActivity;
         private Exception mmError;
 
-        public TaskListLoadTask(Activity activity, BaseAdapter adapter, List<Map<String, ?>> data) {
-            mmAdapter = adapter;
+        public TaskListLoadTask(List<Map<String, ?>> data) {
             mmData = data;
-            mmActivity = activity;
         }
 
         @Override
         public Void doInBackground(Void... params) {
             try {
-                DB db = new DB(mmActivity);
+                DB db = new DB(getActivity());
                 try {
-                    ToodledoClient client = new ToodledoClient(getAuthenticator(), mmActivity);
-
                     db.open();
-                    db.update(client);
+                    db.update(mClient);
 
                     for (Task t : db.getHotTasks()) {
                         if (t.completed != 0)
@@ -201,45 +197,36 @@ public class TaskListFragment extends ListFragment
         public void onPostExecute(Void ret) {
             if (mmError != null) {
                 Log.e("TLF", "fetch failure", mmError);
-                Toast.makeText(mmActivity, String.format("fetch failure: %s", mmError.getMessage()), Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), String.format("fetch failure: %s", mmError.getMessage()), Toast.LENGTH_LONG).show();
             } else {
-                mmAdapter.notifyDataSetChanged();
+                refresh();
             }
-        }
-
-        private Authenticator getAuthenticator() {
-            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(mmActivity);
-            String userId = pref.getString(ConfigKey.USER_ID, null);
-            String userPassword = pref.getString(ConfigKey.USER_PASSWORD, null);
-            return new Authenticator(mmActivity, userId, userPassword);
         }
     }
 
-    private static class TaskCompleteTask extends AsyncTask<Void, Void, Void> {
-        private TaskListAdapter mmAdapter;
+    private class TaskCompleteTask extends AsyncTask<Void, Void, Void> {
         private Task mmTask;
-        private Activity mmActivity;
         private Exception mmError;
 
-        public TaskCompleteTask(Activity activity, TaskListAdapter adapter, Task task) {
-            mmAdapter = adapter;
+        public TaskCompleteTask(Task task) {
             mmTask = task;
-            mmActivity = activity;
+        }
+
+        @Override
+        public void onPreExecute() {
+            strikeout(mmTask);
         }
 
         @Override
         public Void doInBackground(Void... params) {
             try {
-                DB db = new DB(mmActivity);
+                DB db = new DB(getActivity());
                 try {
-                    ToodledoClient client = new ToodledoClient(getAuthenticator(), mmActivity);
-
                     mmTask.markAsDone();
-                    client.updateDone(mmTask);
-                    mmAdapter.removeTask(mmTask);
+                    mClient.updateDone(mmTask);
 
                     db.open();
-                    db.update(client);
+                    db.update(mClient);
                 } finally {
                     if (db != null) {
                         db.close();
@@ -262,19 +249,25 @@ public class TaskListFragment extends ListFragment
         public void onPostExecute(Void ret) {
             if (mmError != null) {
                 Log.e("TLF", "fetch failure", mmError);
-                Toast.makeText(mmActivity, String.format("fetch failure: %s", mmError.getMessage()), Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), String.format("fetch failure: %s", mmError.getMessage()), Toast.LENGTH_LONG).show();
             } else {
-                mmAdapter.notifyDataSetChanged();
+                refresh();
             }
-        }
-
-        private Authenticator getAuthenticator() {
-            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(mmActivity);
-            String userId = pref.getString(ConfigKey.USER_ID, null);
-            String userPassword = pref.getString(ConfigKey.USER_PASSWORD, null);
-            return new Authenticator(mmActivity, userId, userPassword);
         }
     }
 
+    private Authenticator getAuthenticator() {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String userId = pref.getString(ConfigKey.USER_ID, null);
+        String userPassword = pref.getString(ConfigKey.USER_PASSWORD, null);
+        return new Authenticator(getActivity(), userId, userPassword);
+    }
 
+    private void strikeout(Task t) {
+        mAdapter.removeTask(t);
+    }
+
+    private void refresh() {
+        mAdapter.notifyDataSetChanged();
+    }
 }
