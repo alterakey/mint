@@ -112,7 +112,10 @@ public class TaskListFragment extends ListFragment
         public View getView(int position, View convertView, ViewGroup parent) {
             convertView = super.getView(position, convertView, parent);
             View priority = convertView.findViewById(R.id.list_task_prio);
-            switch (((Long)mmmData.get(position).get("priority")).intValue()) {
+            Map<String, ?> map = mmmData.get(position);
+            final Task task = (Task)map.get("task");
+
+            switch (((Long)map.get("priority")).intValue()) {
             case -1:
                 priority.setBackgroundColor(0xff0000ff);
                 break;
@@ -129,6 +132,11 @@ public class TaskListFragment extends ListFragment
             default:
                 priority.setBackgroundColor(0xffff0000);
                 break;
+            }
+            if (task.grayedout) {
+                convertView.setBackgroundColor(0x80ffffff);
+            } else {
+                convertView.setBackgroundColor(0x00000000);
             }
             return convertView;
         }
@@ -214,7 +222,8 @@ public class TaskListFragment extends ListFragment
 
         @Override
         public void onPreExecute() {
-            strikeout(mmTask);
+            startStrikeout(mmTask);
+            refresh();
         }
 
         @Override
@@ -250,10 +259,26 @@ public class TaskListFragment extends ListFragment
             if (mmError != null) {
                 Log.e("TLF", "fetch failure", mmError);
                 Toast.makeText(getActivity(), String.format("fetch failure: %s", mmError.getMessage()), Toast.LENGTH_LONG).show();
+                stopStrikeout(mmTask);
             } else {
-                refresh();
+                completeStrikeout(mmTask);
             }
+
+            refresh();
         }
+
+        private void completeStrikeout(Task t) {
+            mAdapter.removeTask(t);
+        }
+
+        private void startStrikeout(Task t) {
+            t.grayedout = true;
+        }
+
+        private void stopStrikeout(Task t) {
+            t.grayedout = false;
+        }
+
     }
 
     private Authenticator getAuthenticator() {
@@ -261,10 +286,6 @@ public class TaskListFragment extends ListFragment
         String userId = pref.getString(ConfigKey.USER_ID, null);
         String userPassword = pref.getString(ConfigKey.USER_PASSWORD, null);
         return new Authenticator(getActivity(), userId, userPassword);
-    }
-
-    private void strikeout(Task t) {
-        mAdapter.removeTask(t);
     }
 
     private void refresh() {

@@ -20,6 +20,7 @@ public class Task {
     public long star;
     public long duedate;
     public Resolved resolved = new Resolved();
+    public boolean grayedout;
 
     public class Resolved {
         Folder folder;
