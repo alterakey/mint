@@ -7,6 +7,7 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
 import java.io.IOException;
+import java.util.Date;
 
 public class Task {
     public long id;
@@ -24,6 +25,10 @@ public class Task {
         Folder folder;
         Context context;
     };
+
+    public void markAsDone() {
+        completed = new Date().getTime() / 1000;
+    }
 
     public static Task fromCursor(Cursor c, int offset) {
         Task task = new Task();
@@ -76,15 +81,15 @@ public class Task {
             final Task task = value;
             writer
                 .beginObject()
-                .name("id").value(String.valueOf(task.id))
+                .name("id").value(task.id)
                 .name("title").value(task.title)
-                .name("modified").value(String.valueOf(task.modified))
-                .name("completed").value(String.valueOf(task.completed))
-                .name("folder").value(String.valueOf(task.folder))
-                .name("context").value(String.valueOf(task.context))
-                .name("priority").value(String.valueOf(task.priority))
-                .name("star").value(String.valueOf(task.star))
-                .name("duedate").value(String.valueOf(task.duedate))
+                .name("modified").value(task.modified)
+                .name("completed").value(task.completed)
+                .name("folder").value(task.folder)
+                .name("context").value(task.context)
+                .name("priority").value(task.priority)
+                .name("star").value(task.star)
+                .name("duedate").value(task.duedate)
                 .endObject();
         }
     }

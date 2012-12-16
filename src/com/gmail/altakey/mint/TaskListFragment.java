@@ -25,6 +25,7 @@ import android.widget.SimpleAdapter;
 
 import java.util.Date;
 import java.util.Formatter;
+import java.util.Queue;
 
 public class TaskListFragment extends ListFragment
 {
@@ -61,6 +62,14 @@ public class TaskListFragment extends ListFragment
         mAdapter.notifyDataSetChanged();
     }
 
+    @Override
+    public void onListItemClick(ListView lv, View v, int position, long id) {
+        super.onListItemClick(lv, v, position, id);
+        final TaskListAdapter adapter = (TaskListAdapter)getListAdapter();
+        final Map<String, ?> e = (Map<String, ?>)adapter.getItem(position);
+        new TaskCompleteTask(getActivity(), adapter, (Task)e.get("task")).execute();
+    }
+
     public class TaskListAdapterBuilder {
         public TaskListAdapter build() {
             final List<Map<String, ?>> data = new LinkedList<Map<String, ?>>();
@@ -71,43 +80,55 @@ public class TaskListFragment extends ListFragment
             new TaskListLoadTask(getActivity(), adapter, data).execute();
             return adapter;
         }
+    }
 
-        private class TaskListAdapter extends SimpleAdapter {
-            private List<? extends Map<String, ?>> mmmData;
+    private class TaskListAdapter extends SimpleAdapter {
+        private List<? extends Map<String, ?>> mmmData;
 
-            public TaskListAdapter(android.content.Context ctx, List<? extends Map<String, ?>> data) {
-                super(ctx,
-                      data,
-                      R.layout.list_item,
-                      new String[] { "title", "context_0", "context_1", "context_2", "due", "timer_flag" },
-                      new int[] { R.id.list_task_title, R.id.list_task_context_0, R.id.list_task_context_1, R.id.list_task_context_2, R.id.list_task_due, R.id.list_task_timer_flag });
-                mmmData = data;
-            }
+        public TaskListAdapter(android.content.Context ctx, List<? extends Map<String, ?>> data) {
+            super(ctx,
+                  data,
+                  R.layout.list_item,
+                  new String[] { "title", "context_0", "context_1", "context_2", "due", "timer_flag" },
+                  new int[] { R.id.list_task_title, R.id.list_task_context_0, R.id.list_task_context_1, R.id.list_task_context_2, R.id.list_task_due, R.id.list_task_timer_flag });
+            mmmData = data;
+        }
 
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                convertView = super.getView(position, convertView, parent);
-                View priority = convertView.findViewById(R.id.list_task_prio);
-                switch (((Long)mmmData.get(position).get("priority")).intValue()) {
-                case -1:
-                    priority.setBackgroundColor(0xff0000ff);
-                    break;
-                case 0:
-                    priority.setBackgroundColor(0xff00ff00);
-                    break;
-                case 1:
-                    priority.setBackgroundColor(0xffffff00);
-                    break;
-                case 2:
-                    priority.setBackgroundColor(0xffff8800);
-                    break;
-                case 3:
-                default:
-                    priority.setBackgroundColor(0xffff0000);
-                    break;
+        public void removeTask(Task t) {
+            Queue<Map<String, ?>> toBeRemoved = new LinkedList<Map<String, ?>>();
+            for (Map<String, ?> e: mmmData) {
+                if (e.get("task") == t) {
+                    toBeRemoved.add(e);
                 }
-                return convertView;
             }
+            for (Map<String, ?> e: toBeRemoved) {
+                mmmData.remove(e);
+            }
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            convertView = super.getView(position, convertView, parent);
+            View priority = convertView.findViewById(R.id.list_task_prio);
+            switch (((Long)mmmData.get(position).get("priority")).intValue()) {
+            case -1:
+                priority.setBackgroundColor(0xff0000ff);
+                break;
+            case 0:
+                priority.setBackgroundColor(0xff00ff00);
+                break;
+            case 1:
+                priority.setBackgroundColor(0xffffff00);
+                break;
+            case 2:
+                priority.setBackgroundColor(0xffff8800);
+                break;
+            case 3:
+            default:
+                priority.setBackgroundColor(0xffff0000);
+                break;
+            }
+            return convertView;
         }
     }
 
@@ -141,6 +162,7 @@ public class TaskListFragment extends ListFragment
                         Folder f = t.resolved.folder;
 
                         Map<String, Object> map = new HashMap<String, Object>();
+                        map.put("task", t);
                         map.put("title", t.title);
                         map.put("priority", t.priority);
 
@@ -192,5 +214,67 @@ public class TaskListFragment extends ListFragment
             return new Authenticator(mmActivity, userId, userPassword);
         }
     }
+
+    private static class TaskCompleteTask extends AsyncTask<Void, Void, Void> {
+        private TaskListAdapter mmAdapter;
+        private Task mmTask;
+        private Activity mmActivity;
+        private Exception mmError;
+
+        public TaskCompleteTask(Activity activity, TaskListAdapter adapter, Task task) {
+            mmAdapter = adapter;
+            mmTask = task;
+            mmActivity = activity;
+        }
+
+        @Override
+        public Void doInBackground(Void... params) {
+            try {
+                DB db = new DB(mmActivity);
+                try {
+                    ToodledoClient client = new ToodledoClient(getAuthenticator(), mmActivity);
+
+                    mmTask.markAsDone();
+                    client.updateDone(mmTask);
+                    mmAdapter.removeTask(mmTask);
+
+                    db.open();
+                    db.update(client);
+                } finally {
+                    if (db != null) {
+                        db.close();
+                    }
+                }
+                return null;
+            } catch (IOException e) {
+                mmError = e;
+                return null;
+            } catch (NoSuchAlgorithmException e) {
+                mmError = e;
+                return null;
+            } catch (Authenticator.BogusException e) {
+                mmError = e;
+                return null;
+            }
+        }
+
+        @Override
+        public void onPostExecute(Void ret) {
+            if (mmError != null) {
+                Log.e("TLF", "fetch failure", mmError);
+                Toast.makeText(mmActivity, String.format("fetch failure: %s", mmError.getMessage()), Toast.LENGTH_LONG).show();
+            } else {
+                mmAdapter.notifyDataSetChanged();
+            }
+        }
+
+        private Authenticator getAuthenticator() {
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(mmActivity);
+            String userId = pref.getString(ConfigKey.USER_ID, null);
+            String userPassword = pref.getString(ConfigKey.USER_PASSWORD, null);
+            return new Authenticator(mmActivity, userId, userPassword);
+        }
+    }
+
 
 }

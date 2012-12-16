@@ -6,8 +6,10 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpEntity;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
@@ -25,6 +27,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 import android.database.Cursor;
+import java.net.URLEncoder;
 
 public class ToodledoClient {
     private Authenticator mAuth;
@@ -204,5 +207,25 @@ public class ToodledoClient {
         builder.registerTypeAdapter(Task.class, new Task.JsonAdapter());
         builder.registerTypeAdapter(Context.class, new Context.JsonAdapter());
         return builder.create();
+    }
+
+    public void updateDone(Task t) throws IOException, NoSuchAlgorithmException, Authenticator.BogusException {
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+        HttpClient client = new DefaultHttpClient();
+        final String taskDesc = getGson().toJson(new Task[] {t});
+        final String url = String.format(
+                "http://api.toodledo.com/2/tasks/edit.php?key=%s&tasks=%s",
+                mAuth.authenticate(),
+                URLEncoder.encode(taskDesc)
+            );
+
+        HttpPost req = new HttpPost(
+            url
+        );
+        HttpResponse response = client.execute(req);
+        HttpEntity entity = response.getEntity();
+        entity.writeTo(os);
+        entity.consumeContent();
     }
 }
