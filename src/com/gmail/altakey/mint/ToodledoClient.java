@@ -8,6 +8,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -43,21 +44,11 @@ public class ToodledoClient {
     }
 
     public List<Folder> getFoldersAfter(long time) throws IOException, NoSuchAlgorithmException, Authenticator.BogusException {
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-
-        HttpClient client = new DefaultHttpClient();
-
-        HttpGet req = new HttpGet(
-            String.format(
-                "http://api.toodledo.com/2/folders/get.php?"
-                + "key=%s",
-                mAuth.authenticate()
+        final ByteArrayOutputStream os = issueRequest(
+            new HttpGet(
+                getServiceUrl("folders/get", null)
             )
         );
-        HttpResponse response = client.execute(req);
-        HttpEntity entity = response.getEntity();
-        entity.writeTo(os);
-        entity.consumeContent();
 
         try {
             return getGson().fromJson(os.toString("UTF-8"), new TypeToken<LinkedList<Folder>>(){}.getType());
@@ -67,21 +58,11 @@ public class ToodledoClient {
     }
 
     public List<Folder> getFoldersDeletedAfter(long time) throws IOException, NoSuchAlgorithmException, Authenticator.BogusException {
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-
-        HttpClient client = new DefaultHttpClient();
-
-        HttpGet req = new HttpGet(
-            String.format(
-                "http://api.toodledo.com/2/folders/deleted.php?"
-                + "key=%s",
-                mAuth.authenticate()
+        final ByteArrayOutputStream os = issueRequest(
+            new HttpGet(
+                getServiceUrl("folders/deleted", null)
             )
         );
-        HttpResponse response = client.execute(req);
-        HttpEntity entity = response.getEntity();
-        entity.writeTo(os);
-        entity.consumeContent();
 
         try {
             return getGson().fromJson(os.toString("UTF-8"), new TypeToken<LinkedList<Folder>>(){}.getType());
@@ -95,21 +76,11 @@ public class ToodledoClient {
     }
 
     public List<Context> getContextsAfter(long time) throws IOException, NoSuchAlgorithmException, Authenticator.BogusException {
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-
-        HttpClient client = new DefaultHttpClient();
-
-        HttpGet req = new HttpGet(
-            String.format(
-                "http://api.toodledo.com/2/contexts/get.php?"
-                + "key=%s",
-                mAuth.authenticate()
+        final ByteArrayOutputStream os = issueRequest(
+            new HttpGet(
+                getServiceUrl("contexts/get", null)
             )
         );
-        HttpResponse response = client.execute(req);
-        HttpEntity entity = response.getEntity();
-        entity.writeTo(os);
-        entity.consumeContent();
 
         try {
             return getGson().fromJson(os.toString("UTF-8"), new TypeToken<LinkedList<Context>>(){}.getType());
@@ -123,22 +94,11 @@ public class ToodledoClient {
     }
 
     public List<Task> getTasksAfter(long time) throws IOException, NoSuchAlgorithmException, Authenticator.BogusException {
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-
-        HttpClient client = new DefaultHttpClient();
-
-        HttpGet req = new HttpGet(
-            String.format(
-                "http://api.toodledo.com/2/tasks/get.php?"
-                + "key=%s&modafter=%s&fields=folder,context,star,priority,duedate",
-                mAuth.authenticate(),
-                String.valueOf(time)
+        final ByteArrayOutputStream os = issueRequest(
+            new HttpGet(
+                getServiceUrl("tasks/get", String.format("modafter=%s&fields=folder,context,star,priority,duedate", String.valueOf(time)))
             )
         );
-        HttpResponse response = client.execute(req);
-        HttpEntity entity = response.getEntity();
-        entity.writeTo(os);
-        entity.consumeContent();
 
         try {
             List<Task> tasks = getGson().fromJson(os.toString("UTF-8"), new TypeToken<LinkedList<Task>>(){}.getType());
@@ -150,22 +110,11 @@ public class ToodledoClient {
     }
 
     public List<Task> getTasksDeletedAfter(long time) throws IOException, NoSuchAlgorithmException, Authenticator.BogusException {
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-
-        HttpClient client = new DefaultHttpClient();
-
-        HttpGet req = new HttpGet(
-            String.format(
-                "http://api.toodledo.com/2/tasks/deleted.php?"
-                + "key=%s&after=%s",
-                mAuth.authenticate(),
-                String.valueOf(time)
+        final ByteArrayOutputStream os = issueRequest(
+            new HttpGet(
+                getServiceUrl("tasks/deleted", String.format("after=%s", String.valueOf(time)))
             )
         );
-        HttpResponse response = client.execute(req);
-        HttpEntity entity = response.getEntity();
-        entity.writeTo(os);
-        entity.consumeContent();
 
         try {
             List<Task> tasks = getGson().fromJson(os.toString("UTF-8"), new TypeToken<LinkedList<Task>>(){}.getType());
@@ -177,21 +126,11 @@ public class ToodledoClient {
     }
 
     public Status getStatus() throws IOException, NoSuchAlgorithmException, Authenticator.BogusException {
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-
-        HttpClient client = new DefaultHttpClient();
-
-        HttpGet req = new HttpGet(
-            String.format(
-                "http://api.toodledo.com/2/account/get.php?"
-                + "key=%s",
-                mAuth.authenticate()
+        final ByteArrayOutputStream os = issueRequest(
+            new HttpGet(
+                getServiceUrl("account/get", null)
             )
         );
-        HttpResponse response = client.execute(req);
-        HttpEntity entity = response.getEntity();
-        entity.writeTo(os);
-        entity.consumeContent();
 
         try {
             return getGson().fromJson(os.toString("UTF-8"), Status.class);
@@ -210,22 +149,29 @@ public class ToodledoClient {
     }
 
     public void updateDone(Task t) throws IOException, NoSuchAlgorithmException, Authenticator.BogusException {
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-
-        HttpClient client = new DefaultHttpClient();
-        final String taskDesc = getGson().toJson(new Task[] {t});
-        final String url = String.format(
-                "http://api.toodledo.com/2/tasks/edit.php?key=%s&tasks=%s",
-                mAuth.authenticate(),
-                URLEncoder.encode(taskDesc)
-            );
-
-        HttpPost req = new HttpPost(
-            url
+        issueRequest(
+            new HttpPost(
+                getServiceUrl("tasks/edit", String.format("tasks=%s", URLEncoder.encode(getGson().toJson(new Task[] {t}))))
+            )
         );
-        HttpResponse response = client.execute(req);
-        HttpEntity entity = response.getEntity();
+    }
+
+    private ByteArrayOutputStream issueRequest(HttpRequestBase req) throws IOException {
+        final ByteArrayOutputStream os = new ByteArrayOutputStream();
+        final HttpClient client = new DefaultHttpClient();
+        final HttpResponse response = client.execute(req);
+        final HttpEntity entity = response.getEntity();
         entity.writeTo(os);
         entity.consumeContent();
+        return os;
+    }
+
+    private String getServiceUrl(String service, String params) throws IOException, NoSuchAlgorithmException, Authenticator.BogusException {
+        return String.format(
+            "http://api.toodledo.com/2/%s.php?key=%s%s",
+            service,
+            mAuth.authenticate(),
+            params == null ? "" : String.format("&%s", params)
+        );
     }
 }
