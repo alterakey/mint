@@ -5,7 +5,8 @@
     <EditTextPreference
             android:key="user_id"
             android:title="@string/config_title_user_id"
-	    android:inputType="text" />
+	    android:hint="Email address"
+	    android:inputType="textEmailAddress" />
     <EditTextPreference
             android:key="user_password"
             android:title="@string/config_title_user_password"
