@@ -32,10 +32,10 @@ public class Authenticator {
     public static final String APP_NAME = "mint";
     public static final String APP_ID = "api4f508532c789a";
 
-    private String mToken;
-    private long mNotAfter;
+    private static String sToken;
+    private static long sNotAfter;
+    private static String sUserId;
     private Context mContext;
-    private String mUserId;
     private String mEmail;
     private String mPassword;
 
@@ -53,11 +53,9 @@ public class Authenticator {
     }
 
     public static void purge(Activity activity) {
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(activity);
-        pref.edit()
-            .remove(PREFERENCE_KEY)
-            .remove(PREFERENCE_NOT_AFTER)
-            .commit();
+        Authenticator auth = new Authenticator(activity, null, null);
+        auth.revoke();
+        auth.unlink();
     }
 
     public String authenticate() throws IOException, BogusException, FailureException, ErrorException {
@@ -78,10 +76,10 @@ public class Authenticator {
         long now = System.currentTimeMillis();
 
         if (!invalid(now))
-            return mToken;
+            return sToken;
 
-        mToken = pref.getString(PREFERENCE_KEY, null);
-        mNotAfter = pref.getLong(PREFERENCE_NOT_AFTER, 0);
+        sToken = pref.getString(PREFERENCE_KEY, null);
+        sNotAfter = pref.getLong(PREFERENCE_NOT_AFTER, 0);
 
         if (invalid(now)) {
             lookup();
@@ -102,11 +100,11 @@ public class Authenticator {
             entity.consumeContent();
             Log.d("A.oS", String.format("got: %s", tokenResponse.toString()));
             if (tokenResponse.containsKey("token")) {
-                mToken = (String)tokenResponse.get("token");
-                mNotAfter = now + TTL;
+                sToken = (String)tokenResponse.get("token");
+                sNotAfter = now + TTL;
                 pref.edit()
-                    .putString(PREFERENCE_KEY, mToken)
-                    .putLong(PREFERENCE_NOT_AFTER, mNotAfter)
+                    .putString(PREFERENCE_KEY, sToken)
+                    .putLong(PREFERENCE_NOT_AFTER, sNotAfter)
                     .commit();
             } else {
                 Double code = (Double)tokenResponse.get("errorCode");
@@ -118,7 +116,7 @@ public class Authenticator {
                 }
             }
         }
-        return mToken;
+        return sToken;
     }
 
     private String lookup() throws IOException, BogusException, FailureException, ErrorException {
@@ -129,12 +127,12 @@ public class Authenticator {
         HttpEntity entity;
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(mContext);
 
-        if (mUserId != null)
-            return mUserId;
+        if (sUserId != null)
+            return sUserId;
 
-        mUserId = pref.getString(PREFERENCE_USER_ID, null);
+        sUserId = pref.getString(PREFERENCE_USER_ID, null);
 
-        if (mUserId == null) {
+        if (sUserId == null) {
             if (bogus()) {
                 throw new BogusException();
             }
@@ -158,9 +156,9 @@ public class Authenticator {
             entity.consumeContent();
             Log.d("A.l", String.format("got: %s", tokenResponse.toString()));
             if (tokenResponse.containsKey("userid")) {
-                mUserId = (String)tokenResponse.get("userid");
+                sUserId = (String)tokenResponse.get("userid");
                 pref.edit()
-                    .putString(PREFERENCE_USER_ID, mUserId)
+                    .putString(PREFERENCE_USER_ID, sUserId)
                     .commit();
             } else {
                 Double code = (Double)tokenResponse.get("errorCode");
@@ -172,12 +170,12 @@ public class Authenticator {
                 }
             }
         }
-        return mUserId;
+        return sUserId;
     }
 
     public void revoke() {
-        mToken = null;
-        mNotAfter = 0;
+        sToken = null;
+        sNotAfter = 0;
         PreferenceManager.getDefaultSharedPreferences(mContext)
             .edit()
             .putString(PREFERENCE_KEY, null)
@@ -187,7 +185,7 @@ public class Authenticator {
 
     public void unlink() {
         revoke();
-        mUserId = null;
+        sUserId = null;
         PreferenceManager.getDefaultSharedPreferences(mContext)
             .edit()
             .putString(PREFERENCE_USER_ID, null)
@@ -195,12 +193,12 @@ public class Authenticator {
     }
 
     private final String getSignature() throws BogusException {
-        if (mUserId == null) {
+        if (sUserId == null) {
             throw new BogusException();
         }
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
-            md.update(mUserId.getBytes());
+            md.update(sUserId.getBytes());
             md.update(APP_ID.getBytes());
             return Hex.encodeHexString(md.digest());
         } catch (NoSuchAlgorithmException e) {
@@ -223,7 +221,7 @@ public class Authenticator {
     }
 
     private final String getKey() throws BogusException {
-        if (mPassword == null || mToken == null) {
+        if (mPassword == null || sToken == null) {
             throw new BogusException();
         }
         try {
@@ -232,7 +230,7 @@ public class Authenticator {
             md2.update(mPassword.getBytes());
             md.update(Hex.encodeHexString(md2.digest()).getBytes());
             md.update(APP_ID.getBytes());
-            md.update(mToken.getBytes());
+            md.update(sToken.getBytes());
             return Hex.encodeHexString(md.digest());
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
@@ -240,7 +238,7 @@ public class Authenticator {
     }
 
     private boolean invalid(long at) {
-        return (mToken == null || mNotAfter < at);
+        return (sToken == null || sNotAfter < at);
     }
 
     public boolean bogus() {
