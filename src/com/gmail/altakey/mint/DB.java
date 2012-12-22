@@ -74,7 +74,7 @@ public class DB {
         return out;
     }
 
-    public void update(ToodledoClient client) throws IOException, Authenticator.BogusException {
+    public void update(ToodledoClient client) throws IOException, Authenticator.BogusException, Authenticator.FailureException, Authenticator.ErrorException {
         try {
             conn.beginTransaction();
 

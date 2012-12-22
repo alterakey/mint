@@ -4,6 +4,7 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Map;
 import java.util.HashMap;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpEntity;
@@ -20,6 +21,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.os.SystemClock;
+import android.util.Log;
 
 public class Authenticator {
     private static final String PREFERENCE_KEY = "auth_token";
@@ -58,14 +60,14 @@ public class Authenticator {
             .commit();
     }
 
-    public String authenticate() throws IOException, BogusException {
+    public String authenticate() throws IOException, BogusException, FailureException, ErrorException {
         openSession();
         if (bogus())
             throw new BogusException();
         return getKey();
     }
 
-    public String openSession() throws IOException, BogusException {
+    public String openSession() throws IOException, BogusException, FailureException, ErrorException {
         Gson gson = new Gson();
         HttpClient client = new DefaultHttpClient();
         HttpGet req;
@@ -96,19 +98,30 @@ public class Authenticator {
                 );
             response = client.execute(req);
             entity = response.getEntity();
-            HashMap<String, String> tokenResponse = gson.fromJson(new InputStreamReader(entity.getContent()), new TypeToken<HashMap<String, String>>() {}.getType());
+            Map<String, ?> tokenResponse = gson.fromJson(new InputStreamReader(entity.getContent()), new TypeToken<HashMap<String, Object>>() {}.getType());
             entity.consumeContent();
-            mToken = tokenResponse.get("token");
-            mNotAfter = now + TTL;
-            pref.edit()
-                .putString(PREFERENCE_KEY, mToken)
-                .putLong(PREFERENCE_NOT_AFTER, mNotAfter)
-                .commit();
+            Log.d("A.oS", String.format("got: %s", tokenResponse.toString()));
+            if (tokenResponse.containsKey("token")) {
+                mToken = (String)tokenResponse.get("token");
+                mNotAfter = now + TTL;
+                pref.edit()
+                    .putString(PREFERENCE_KEY, mToken)
+                    .putLong(PREFERENCE_NOT_AFTER, mNotAfter)
+                    .commit();
+            } else {
+                Double code = (Double)tokenResponse.get("errorCode");
+                if (code != null && code.intValue() == 2) {
+                    throw new FailureException();
+                } else {
+                    String descriptor = (String)tokenResponse.get("errorDesc");
+                    throw new ErrorException(descriptor);
+                }
+            }
         }
         return mToken;
     }
 
-    private String lookup() throws IOException, BogusException {
+    private String lookup() throws IOException, BogusException, FailureException, ErrorException {
         Gson gson = new Gson();
         HttpClient client = new DefaultHttpClient();
         HttpGet req;
@@ -141,12 +154,23 @@ public class Authenticator {
                 );
             response = client.execute(req);
             entity = response.getEntity();
-            HashMap<String, String> tokenResponse = gson.fromJson(new InputStreamReader(entity.getContent()), new TypeToken<HashMap<String, String>>() {}.getType());
+            Map<String, ?> tokenResponse = gson.fromJson(new InputStreamReader(entity.getContent()), new TypeToken<HashMap<String, Object>>() {}.getType());
             entity.consumeContent();
-            mUserId = tokenResponse.get("userid");
-            pref.edit()
-                .putString(PREFERENCE_USER_ID, mUserId)
-                .commit();
+            Log.d("A.l", String.format("got: %s", tokenResponse.toString()));
+            if (tokenResponse.containsKey("userid")) {
+                mUserId = (String)tokenResponse.get("userid");
+                pref.edit()
+                    .putString(PREFERENCE_USER_ID, mUserId)
+                    .commit();
+            } else {
+                Double code = (Double)tokenResponse.get("errorCode");
+                if (code != null && code.intValue() == 12) {
+                    throw new FailureException();
+                } else {
+                    String descriptor = (String)tokenResponse.get("errorDesc");
+                    throw new ErrorException(descriptor);
+                }
+            }
         }
         return mUserId;
     }
@@ -224,5 +248,14 @@ public class Authenticator {
     }
 
     public static class BogusException extends Exception {
+    }
+
+    public static class FailureException extends Exception {
+    }
+
+    public static class ErrorException extends Exception {
+        public ErrorException(String desc) {
+            super(desc);
+        }
     }
 }

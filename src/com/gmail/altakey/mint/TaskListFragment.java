@@ -146,7 +146,20 @@ public class TaskListFragment extends ListFragment
 
         protected static final int OK = 0;
         protected static final int LOGIN_REQUIRED = 1;
-        protected static final int FAILURE = 2;
+        protected static final int LOGIN_FAILED = 2;
+        protected static final int FAILURE = 3;
+
+        @Override
+        public void onPostExecute(Integer ret) {
+            if (ret == LOGIN_REQUIRED) {
+                showLoginRequired();
+            } else if (ret == LOGIN_FAILED) {
+                showLoginFailed();
+            } else if (ret == FAILURE) {
+                Log.e("TLF", "fetch failure", mmError);
+                Toast.makeText(getActivity(), String.format("fetch failure: %s", mmError.getMessage()), Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     private class TaskListLoadTask extends NetworkTask {
@@ -201,18 +214,20 @@ public class TaskListFragment extends ListFragment
             } catch (Authenticator.BogusException e) {
                 mmError = e;
                 return LOGIN_REQUIRED;
+            } catch (Authenticator.FailureException e) {
+                mmError = e;
+                return LOGIN_FAILED;
+            } catch (Authenticator.ErrorException e) {
+                mmError = e;
+                return FAILURE;
             }
         }
 
         @Override
         public void onPostExecute(Integer ret) {
+            super.onPostExecute(ret);
             if (ret == OK) {
                 refresh();
-            } else if (ret == LOGIN_REQUIRED) {
-                showLoginRequired();
-            } else if (ret == FAILURE) {
-                Log.e("TLF", "fetch failure", mmError);
-                Toast.makeText(getActivity(), String.format("fetch failure: %s", mmError.getMessage()), Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -252,19 +267,22 @@ public class TaskListFragment extends ListFragment
             } catch (Authenticator.BogusException e) {
                 mmError = e;
                 return LOGIN_REQUIRED;
+            } catch (Authenticator.FailureException e) {
+                mmError = e;
+                return LOGIN_FAILED;
+            } catch (Authenticator.ErrorException e) {
+                mmError = e;
+                return FAILURE;
             }
         }
 
         @Override
         public void onPostExecute(Integer ret) {
+            super.onPostExecute(ret);
             if (ret == OK) {
                 completeStrikeout(mmTask);
                 refresh();
-            } else if (ret == LOGIN_REQUIRED) {
-                showLoginRequired();
             } else if (ret == FAILURE) {
-                Log.e("TLF", "fetch failure", mmError);
-                Toast.makeText(getActivity(), String.format("fetch failure: %s", mmError.getMessage()), Toast.LENGTH_LONG).show();
                 stopStrikeout(mmTask);
                 refresh();
             }
@@ -296,6 +314,13 @@ public class TaskListFragment extends ListFragment
         getFragmentManager()
             .beginTransaction()
             .replace(R.id.frag, new LoginRequiredFragment())
+            .commit();
+    }
+
+    private void showLoginFailed() {
+        getFragmentManager()
+            .beginTransaction()
+            .replace(R.id.frag, new LoginFailedFragment())
             .commit();
     }
 }
