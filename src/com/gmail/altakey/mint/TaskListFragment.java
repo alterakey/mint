@@ -209,7 +209,7 @@ public class TaskListFragment extends ListFragment
             if (ret == OK) {
                 refresh();
             } else if (ret == LOGIN_REQUIRED) {
-                showLoginFailed();
+                showLoginRequired();
             } else if (ret == FAILURE) {
                 Log.e("TLF", "fetch failure", mmError);
                 Toast.makeText(getActivity(), String.format("fetch failure: %s", mmError.getMessage()), Toast.LENGTH_LONG).show();
@@ -261,7 +261,7 @@ public class TaskListFragment extends ListFragment
                 completeStrikeout(mmTask);
                 refresh();
             } else if (ret == LOGIN_REQUIRED) {
-                showLoginFailed();
+                showLoginRequired();
             } else if (ret == FAILURE) {
                 Log.e("TLF", "fetch failure", mmError);
                 Toast.makeText(getActivity(), String.format("fetch failure: %s", mmError.getMessage()), Toast.LENGTH_LONG).show();
@@ -292,10 +292,10 @@ public class TaskListFragment extends ListFragment
         mAdapter.notifyDataSetChanged();
     }
 
-    private void showLoginFailed() {
+    private void showLoginRequired() {
         getFragmentManager()
             .beginTransaction()
-            .replace(R.id.frag, new LoginFailureFragment())
+            .replace(R.id.frag, new LoginRequiredFragment())
             .commit();
     }
 }

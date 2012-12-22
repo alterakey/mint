@@ -26,10 +26,10 @@ import java.util.Date;
 import java.util.Formatter;
 import java.util.Queue;
 
-public class LoginFailureFragment extends Fragment {
+public class LoginRequiredFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.login_failure, root, false);
+        View view = inflater.inflate(R.layout.login_required, root, false);
         view.findViewById(R.id.tap_to_set_login).setOnClickListener(new SetLoginAction());
         return view;
     }
