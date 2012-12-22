@@ -29,6 +29,8 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 
 public class LoginFailedFragment extends Fragment {
+    private boolean mTestNeeded = false;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.login_failed, root, false);
@@ -39,7 +41,10 @@ public class LoginFailedFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        new CredentialTestTask().execute();
+        if (mTestNeeded) {
+            new CredentialTestTask().execute();
+            mTestNeeded = false;
+        }
     }
 
     public class CredentialTestTask extends AsyncTask<Void, Void, Void> {
@@ -94,6 +99,7 @@ public class LoginFailedFragment extends Fragment {
         @Override
         public void onClick(View v) {
             startActivity(new Intent(getActivity(), ConfigActivity.class));
+            mTestNeeded = true;
         }
     }
 }
