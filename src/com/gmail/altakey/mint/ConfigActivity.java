@@ -57,6 +57,10 @@ public class ConfigActivity extends PreferenceActivity implements
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         updateSummary(sharedPreferences, key);
+
+        if (ConfigKey.USER_ID.equals(key)) {
+            Authenticator.purge(this);
+        }
     }
 
     private void updateSummary(SharedPreferences sharedPreferences, String key) {

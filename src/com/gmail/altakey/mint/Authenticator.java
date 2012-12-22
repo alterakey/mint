@@ -50,6 +50,14 @@ public class Authenticator {
         return new Authenticator(activity, userId, userPassword);
     }
 
+    public static void purge(Activity activity) {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(activity);
+        pref.edit()
+            .remove(PREFERENCE_KEY)
+            .remove(PREFERENCE_NOT_AFTER)
+            .commit();
+    }
+
     public String authenticate() throws IOException, NoSuchAlgorithmException, BogusException {
         openSession();
         if (bogus())
