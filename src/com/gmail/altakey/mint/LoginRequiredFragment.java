@@ -27,6 +27,8 @@ import java.util.Formatter;
 import java.util.Queue;
 
 public class LoginRequiredFragment extends Fragment {
+    private static final int REQ_SET_LOGIN = 1;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.login_required, root, false);
@@ -35,20 +37,19 @@ public class LoginRequiredFragment extends Fragment {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        if (!Authenticator.create(getActivity()).bogus()) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQ_SET_LOGIN) {
             getFragmentManager()
                 .beginTransaction()
                 .replace(R.id.frag, new TaskListFragment())
-                .commit();
+                .commitAllowingStateLoss();
         }
     }
 
     public class SetLoginAction implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            startActivity(new Intent(getActivity(), ConfigActivity.class));
+            startActivityForResult(new Intent(getActivity(), ConfigActivity.class), REQ_SET_LOGIN);
         }
     }
 }

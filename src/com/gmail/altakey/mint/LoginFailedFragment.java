@@ -29,7 +29,7 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 
 public class LoginFailedFragment extends Fragment {
-    private boolean mTestNeeded = false;
+    private static final int REQ_SET_LOGIN = 1;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
@@ -39,11 +39,9 @@ public class LoginFailedFragment extends Fragment {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        if (mTestNeeded) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQ_SET_LOGIN) {
             new CredentialTestTask().execute();
-            mTestNeeded = false;
         }
     }
 
@@ -90,7 +88,7 @@ public class LoginFailedFragment extends Fragment {
                 getFragmentManager()
                     .beginTransaction()
                     .replace(R.id.frag, new TaskListFragment())
-                    .commit();
+                    .commitAllowingStateLoss();
             }
         }
     }
@@ -98,8 +96,7 @@ public class LoginFailedFragment extends Fragment {
     public class SetLoginAction implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            startActivity(new Intent(getActivity(), ConfigActivity.class));
-            mTestNeeded = true;
+            startActivityForResult(new Intent(getActivity(), ConfigActivity.class), REQ_SET_LOGIN);
         }
     }
 }
