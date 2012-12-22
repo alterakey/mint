@@ -3,7 +3,6 @@ package com.gmail.altakey.mint;
 import java.io.OutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.StringEntity;
@@ -39,11 +38,11 @@ public class ToodledoClient {
         mContext = context;
     }
 
-    public List<Folder> getFolders() throws IOException, NoSuchAlgorithmException, Authenticator.BogusException {
+    public List<Folder> getFolders() throws IOException, Authenticator.BogusException {
         return getFoldersAfter(0);
     }
 
-    public List<Folder> getFoldersAfter(long time) throws IOException, NoSuchAlgorithmException, Authenticator.BogusException {
+    public List<Folder> getFoldersAfter(long time) throws IOException, Authenticator.BogusException {
         final ByteArrayOutputStream os = issueRequest(
             new HttpGet(
                 getServiceUrl("folders/get", null)
@@ -57,7 +56,7 @@ public class ToodledoClient {
         }
     }
 
-    public List<Folder> getFoldersDeletedAfter(long time) throws IOException, NoSuchAlgorithmException, Authenticator.BogusException {
+    public List<Folder> getFoldersDeletedAfter(long time) throws IOException, Authenticator.BogusException {
         final ByteArrayOutputStream os = issueRequest(
             new HttpGet(
                 getServiceUrl("folders/deleted", null)
@@ -71,11 +70,11 @@ public class ToodledoClient {
         }
     }
 
-    public List<Context> getContexts() throws IOException, NoSuchAlgorithmException, Authenticator.BogusException {
+    public List<Context> getContexts() throws IOException, Authenticator.BogusException {
         return getContextsAfter(0);
     }
 
-    public List<Context> getContextsAfter(long time) throws IOException, NoSuchAlgorithmException, Authenticator.BogusException {
+    public List<Context> getContextsAfter(long time) throws IOException, Authenticator.BogusException {
         final ByteArrayOutputStream os = issueRequest(
             new HttpGet(
                 getServiceUrl("contexts/get", null)
@@ -89,11 +88,11 @@ public class ToodledoClient {
         }
     }
 
-    public List<Task> getTasks() throws IOException, NoSuchAlgorithmException, Authenticator.BogusException {
+    public List<Task> getTasks() throws IOException, Authenticator.BogusException {
         return getTasksAfter(0);
     }
 
-    public List<Task> getTasksAfter(long time) throws IOException, NoSuchAlgorithmException, Authenticator.BogusException {
+    public List<Task> getTasksAfter(long time) throws IOException, Authenticator.BogusException {
         final ByteArrayOutputStream os = issueRequest(
             new HttpGet(
                 getServiceUrl("tasks/get", String.format("modafter=%s&fields=folder,context,star,priority,duedate", String.valueOf(time)))
@@ -109,7 +108,7 @@ public class ToodledoClient {
         }
     }
 
-    public List<Task> getTasksDeletedAfter(long time) throws IOException, NoSuchAlgorithmException, Authenticator.BogusException {
+    public List<Task> getTasksDeletedAfter(long time) throws IOException, Authenticator.BogusException {
         final ByteArrayOutputStream os = issueRequest(
             new HttpGet(
                 getServiceUrl("tasks/deleted", String.format("after=%s", String.valueOf(time)))
@@ -125,7 +124,7 @@ public class ToodledoClient {
         }
     }
 
-    public Status getStatus() throws IOException, NoSuchAlgorithmException, Authenticator.BogusException {
+    public Status getStatus() throws IOException, Authenticator.BogusException {
         final ByteArrayOutputStream os = issueRequest(
             new HttpGet(
                 getServiceUrl("account/get", null)
@@ -148,7 +147,7 @@ public class ToodledoClient {
         return builder.create();
     }
 
-    public void updateDone(Task t) throws IOException, NoSuchAlgorithmException, Authenticator.BogusException {
+    public void updateDone(Task t) throws IOException, Authenticator.BogusException {
         issueRequest(
             new HttpPost(
                 getServiceUrl("tasks/edit", String.format("tasks=%s", URLEncoder.encode(getGson().toJson(new Task[] {t}))))
@@ -166,7 +165,7 @@ public class ToodledoClient {
         return os;
     }
 
-    private String getServiceUrl(String service, String params) throws IOException, NoSuchAlgorithmException, Authenticator.BogusException {
+    private String getServiceUrl(String service, String params) throws IOException, Authenticator.BogusException {
         return String.format(
             "http://api.toodledo.com/2/%s.php?key=%s%s",
             service,

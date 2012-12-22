@@ -58,14 +58,14 @@ public class Authenticator {
             .commit();
     }
 
-    public String authenticate() throws IOException, NoSuchAlgorithmException, BogusException {
+    public String authenticate() throws IOException, BogusException {
         openSession();
         if (bogus())
             throw new BogusException();
         return getKey();
     }
 
-    public String openSession() throws IOException, NoSuchAlgorithmException, BogusException {
+    public String openSession() throws IOException, BogusException {
         Gson gson = new Gson();
         HttpClient client = new DefaultHttpClient();
         HttpGet req;
@@ -108,7 +108,7 @@ public class Authenticator {
         return mToken;
     }
 
-    private String lookup() throws IOException, NoSuchAlgorithmException, BogusException {
+    private String lookup() throws IOException, BogusException {
         Gson gson = new Gson();
         HttpClient client = new DefaultHttpClient();
         HttpGet req;
@@ -170,37 +170,49 @@ public class Authenticator {
             .commit();
     }
 
-    private final String getSignature() throws NoSuchAlgorithmException, BogusException {
+    private final String getSignature() throws BogusException {
         if (mUserId == null) {
             throw new BogusException();
         }
-        MessageDigest md = MessageDigest.getInstance("MD5");
-        md.update(mUserId.getBytes());
-        md.update(APP_ID.getBytes());
-        return Hex.encodeHexString(md.digest());
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(mUserId.getBytes());
+            md.update(APP_ID.getBytes());
+            return Hex.encodeHexString(md.digest());
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    private final String getLookupSignature() throws NoSuchAlgorithmException, BogusException {
+    private final String getLookupSignature() throws BogusException {
         if (mEmail == null) {
             throw new BogusException();
         }
-        MessageDigest md = MessageDigest.getInstance("MD5");
-        md.update(mEmail.getBytes());
-        md.update(APP_ID.getBytes());
-        return Hex.encodeHexString(md.digest());
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(mEmail.getBytes());
+            md.update(APP_ID.getBytes());
+            return Hex.encodeHexString(md.digest());
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    private final String getKey() throws NoSuchAlgorithmException, BogusException {
+    private final String getKey() throws BogusException {
         if (mPassword == null || mToken == null) {
             throw new BogusException();
         }
-        MessageDigest md = MessageDigest.getInstance("MD5");
-        MessageDigest md2 = MessageDigest.getInstance("MD5");
-        md2.update(mPassword.getBytes());
-        md.update(Hex.encodeHexString(md2.digest()).getBytes());
-        md.update(APP_ID.getBytes());
-        md.update(mToken.getBytes());
-        return Hex.encodeHexString(md.digest());
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            MessageDigest md2 = MessageDigest.getInstance("MD5");
+            md2.update(mPassword.getBytes());
+            md.update(Hex.encodeHexString(md2.digest()).getBytes());
+            md.update(APP_ID.getBytes());
+            md.update(mToken.getBytes());
+            return Hex.encodeHexString(md.digest());
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private boolean invalid(long at) {

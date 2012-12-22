@@ -9,7 +9,6 @@ import android.content.Intent;
 import java.util.List;
 import java.util.LinkedList;
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.widget.Toast;

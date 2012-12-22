@@ -9,7 +9,6 @@ import android.content.Intent;
 import java.util.List;
 import java.util.LinkedList;
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.widget.Toast;
@@ -199,9 +198,6 @@ public class TaskListFragment extends ListFragment
             } catch (IOException e) {
                 mmError = e;
                 return FAILURE;
-            } catch (NoSuchAlgorithmException e) {
-                mmError = e;
-                return FAILURE;
             } catch (Authenticator.BogusException e) {
                 mmError = e;
                 return LOGIN_REQUIRED;
@@ -251,9 +247,6 @@ public class TaskListFragment extends ListFragment
                 }
                 return OK;
             } catch (IOException e) {
-                mmError = e;
-                return FAILURE;
-            } catch (NoSuchAlgorithmException e) {
                 mmError = e;
                 return FAILURE;
             } catch (Authenticator.BogusException e) {

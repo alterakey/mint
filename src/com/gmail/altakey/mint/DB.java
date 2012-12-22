@@ -6,7 +6,6 @@ import android.util.Log;
 import android.database.Cursor;
 
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
@@ -75,7 +74,7 @@ public class DB {
         return out;
     }
 
-    public void update(ToodledoClient client) throws IOException, NoSuchAlgorithmException, Authenticator.BogusException {
+    public void update(ToodledoClient client) throws IOException, Authenticator.BogusException {
         try {
             conn.beginTransaction();
 
