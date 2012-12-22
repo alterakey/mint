@@ -142,16 +142,23 @@ public class TaskListFragment extends ListFragment
         }
     }
 
-    private class TaskListLoadTask extends AsyncTask<Void, Void, Void> {
+    private abstract class NetworkTask extends AsyncTask<Void, Void, Integer> {
+        protected Exception mmError;
+
+        protected static final int OK = 0;
+        protected static final int LOGIN_REQUIRED = 1;
+        protected static final int FAILURE = 2;
+    }
+
+    private class TaskListLoadTask extends NetworkTask {
         private List<Map<String, ?>> mmData;
-        private Exception mmError;
 
         public TaskListLoadTask(List<Map<String, ?>> data) {
             mmData = data;
         }
 
         @Override
-        public Void doInBackground(Void... params) {
+        public Integer doInBackground(Void... params) {
             try {
                 DB db = new DB(getActivity());
                 try {
@@ -183,7 +190,7 @@ public class TaskListFragment extends ListFragment
                         //map.put("timer_flag", "(on)");
                         mmData.add(map);
                     }
-                    return null;
+                    return OK;
                 } finally {
                     if (db != null) {
                         db.close();
@@ -191,30 +198,31 @@ public class TaskListFragment extends ListFragment
                 }
             } catch (IOException e) {
                 mmError = e;
-                return null;
+                return FAILURE;
             } catch (NoSuchAlgorithmException e) {
                 mmError = e;
-                return null;
+                return FAILURE;
             } catch (Authenticator.BogusException e) {
                 mmError = e;
-                return null;
+                return LOGIN_REQUIRED;
             }
         }
 
         @Override
-        public void onPostExecute(Void ret) {
-            if (mmError != null) {
+        public void onPostExecute(Integer ret) {
+            if (ret == OK) {
+                refresh();
+            } else if (ret == LOGIN_REQUIRED) {
+                showLoginFailed();
+            } else if (ret == FAILURE) {
                 Log.e("TLF", "fetch failure", mmError);
                 Toast.makeText(getActivity(), String.format("fetch failure: %s", mmError.getMessage()), Toast.LENGTH_LONG).show();
-            } else {
-                refresh();
             }
         }
     }
 
-    private class TaskCompleteTask extends AsyncTask<Void, Void, Void> {
+    private class TaskCompleteTask extends NetworkTask {
         private Task mmTask;
-        private Exception mmError;
 
         public TaskCompleteTask(Task task) {
             mmTask = task;
@@ -227,7 +235,7 @@ public class TaskListFragment extends ListFragment
         }
 
         @Override
-        public Void doInBackground(Void... params) {
+        public Integer doInBackground(Void... params) {
             try {
                 DB db = new DB(getActivity());
                 try {
@@ -241,30 +249,32 @@ public class TaskListFragment extends ListFragment
                         db.close();
                     }
                 }
-                return null;
+                return OK;
             } catch (IOException e) {
                 mmError = e;
-                return null;
+                return FAILURE;
             } catch (NoSuchAlgorithmException e) {
                 mmError = e;
-                return null;
+                return FAILURE;
             } catch (Authenticator.BogusException e) {
                 mmError = e;
-                return null;
+                return LOGIN_REQUIRED;
             }
         }
 
         @Override
-        public void onPostExecute(Void ret) {
-            if (mmError != null) {
+        public void onPostExecute(Integer ret) {
+            if (ret == OK) {
+                completeStrikeout(mmTask);
+                refresh();
+            } else if (ret == LOGIN_REQUIRED) {
+                showLoginFailed();
+            } else if (ret == FAILURE) {
                 Log.e("TLF", "fetch failure", mmError);
                 Toast.makeText(getActivity(), String.format("fetch failure: %s", mmError.getMessage()), Toast.LENGTH_LONG).show();
                 stopStrikeout(mmTask);
-            } else {
-                completeStrikeout(mmTask);
+                refresh();
             }
-
-            refresh();
         }
 
         private void completeStrikeout(Task t) {
@@ -282,13 +292,17 @@ public class TaskListFragment extends ListFragment
     }
 
     private Authenticator getAuthenticator() {
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String userId = pref.getString(ConfigKey.USER_ID, null);
-        String userPassword = pref.getString(ConfigKey.USER_PASSWORD, null);
-        return new Authenticator(getActivity(), userId, userPassword);
+        return Authenticator.create(getActivity());
     }
 
     private void refresh() {
         mAdapter.notifyDataSetChanged();
+    }
+
+    private void showLoginFailed() {
+        getFragmentManager()
+            .beginTransaction()
+            .replace(R.id.frag, new LoginFailureFragment())
+            .commit();
     }
 }

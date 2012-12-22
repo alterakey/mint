@@ -15,6 +15,7 @@ import com.apache.commons.codec.binary.Hex;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
@@ -40,6 +41,13 @@ public class Authenticator {
         mContext = c;
         mEmail = email;
         mPassword = password;
+    }
+
+    public static Authenticator create(Activity activity) {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(activity);
+        String userId = pref.getString(ConfigKey.USER_ID, null);
+        String userPassword = pref.getString(ConfigKey.USER_PASSWORD, null);
+        return new Authenticator(activity, userId, userPassword);
     }
 
     public String authenticate() throws IOException, NoSuchAlgorithmException, BogusException {
@@ -191,7 +199,7 @@ public class Authenticator {
         return (mToken == null || mNotAfter < at);
     }
 
-    private boolean bogus() {
+    public boolean bogus() {
         return (mEmail == null || mPassword == null);
     }
 
