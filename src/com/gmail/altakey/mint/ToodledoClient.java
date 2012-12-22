@@ -162,6 +162,7 @@ public class ToodledoClient {
         final HttpEntity entity = response.getEntity();
         entity.writeTo(os);
         entity.consumeContent();
+        Log.d("TC.iR", String.format("got: %s", os.toString()));
         return os;
     }
 
