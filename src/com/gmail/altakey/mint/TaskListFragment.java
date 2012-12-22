@@ -60,7 +60,7 @@ public class TaskListFragment extends ListFragment
     @Override
     public void onResume() {
         super.onResume();
-        mAdapter.notifyDataSetChanged();
+        mAdapter.reload();
     }
 
     @Override
@@ -78,15 +78,14 @@ public class TaskListFragment extends ListFragment
                 getActivity(),
                 data
             );
-            new TaskListLoadTask(data).execute();
             return adapter;
         }
     }
 
     private class TaskListAdapter extends SimpleAdapter {
-        private List<? extends Map<String, ?>> mmmData;
+        private List<Map<String, ?>> mmmData;
 
-        public TaskListAdapter(android.content.Context ctx, List<? extends Map<String, ?>> data) {
+        public TaskListAdapter(android.content.Context ctx, List<Map<String, ?>> data) {
             super(ctx,
                   data,
                   R.layout.list_item,
@@ -105,6 +104,11 @@ public class TaskListFragment extends ListFragment
             for (Map<String, ?> e: toBeRemoved) {
                 mmmData.remove(e);
             }
+        }
+
+        public void reload() {
+            mmmData.clear();
+            new TaskListLoadTask(mmmData).execute();
         }
 
         @Override
