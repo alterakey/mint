@@ -65,7 +65,7 @@ public class TaskListFragment extends ListFragment
     @Override
     public void onResume() {
         super.onResume();
-        mAdapter.reload();
+        reload();
     }
 
     @Override
@@ -78,6 +78,10 @@ public class TaskListFragment extends ListFragment
 
     private Authenticator getAuthenticator() {
         return Authenticator.create(getActivity());
+    }
+
+    private void reload() {
+        mAdapter.reload();
     }
 
     private void refresh() {
@@ -394,8 +398,8 @@ public class TaskListFragment extends ListFragment
         @Override
         protected void onPostExecute(Integer ret) {
             super.onPostExecute(ret);
-            refresh();
             mmDialog.dismiss();
+            reload();
         }
     }
 
