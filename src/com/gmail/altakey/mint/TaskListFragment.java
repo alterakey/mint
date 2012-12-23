@@ -28,6 +28,8 @@ import java.util.Queue;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.app.AlertDialog;
+import android.support.v4.app.DialogFragment;
+import android.app.Dialog;
 
 public class TaskListFragment extends ListFragment
 {
@@ -57,7 +59,8 @@ public class TaskListFragment extends ListFragment
             startActivity(new Intent(getActivity(), ConfigActivity.class));
             return false;
         case R.id.main_post:
-            new PostTaskAction().start();
+            new PostTaskDialog().show(getFragmentManager(), "post_task");
+            return false;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -403,8 +406,9 @@ public class TaskListFragment extends ListFragment
         }
     }
 
-    private class PostTaskAction {
-        public void start() {
+    private class PostTaskDialog extends DialogFragment {
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
             final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             final LayoutInflater inflater = getActivity().getLayoutInflater();
             final View layout = inflater.inflate(
@@ -417,7 +421,7 @@ public class TaskListFragment extends ListFragment
                 .setTitle("Post task")
                 .setOnCancelListener(new CancelAction())
                 .setPositiveButton(android.R.string.ok, new PostAction(field));
-            builder.create().show();
+            return builder.create();
         }
 
         private class CancelAction implements DialogInterface.OnCancelListener {
