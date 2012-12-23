@@ -76,6 +76,14 @@ public class TaskListFragment extends ListFragment
         new TaskCompleteTask((Task)e.get("task")).execute();
     }
 
+    private Authenticator getAuthenticator() {
+        return Authenticator.create(getActivity());
+    }
+
+    private void refresh() {
+        mAdapter.notifyDataSetChanged();
+    }
+
     public class TaskListAdapterBuilder {
         public TaskListAdapter build() {
             final List<Map<String, ?>> data = new LinkedList<Map<String, ?>>();
@@ -159,7 +167,29 @@ public class TaskListFragment extends ListFragment
         protected static final int FAILURE = 3;
 
         @Override
-        public void onPostExecute(Integer ret) {
+        protected Integer doInBackground(Void... params) {
+            try {
+                doTask();
+                return OK;
+            } catch (IOException e) {
+                mmError = e;
+                return FAILURE;
+            } catch (Authenticator.BogusException e) {
+                mmError = e;
+                return LOGIN_REQUIRED;
+            } catch (Authenticator.FailureException e) {
+                mmError = e;
+                return LOGIN_FAILED;
+            } catch (Authenticator.Exception e) {
+                mmError = e;
+                return FAILURE;
+            }
+        }
+
+        abstract protected void doTask() throws IOException, Authenticator.Exception;
+
+        @Override
+        protected void onPostExecute(Integer ret) {
             if (ret == LOGIN_REQUIRED) {
                 showLoginRequired();
             } else if (ret == LOGIN_FAILED) {
@@ -168,6 +198,20 @@ public class TaskListFragment extends ListFragment
                 Log.e("TLF", "fetch failure", mmError);
                 Toast.makeText(getActivity(), String.format("fetch failure: %s", mmError.getMessage()), Toast.LENGTH_LONG).show();
             }
+        }
+
+        private void showLoginRequired() {
+            getFragmentManager()
+                .beginTransaction()
+                .replace(R.id.frag, new LoginRequiredFragment())
+                .commit();
+        }
+
+        private void showLoginFailed() {
+            getFragmentManager()
+                .beginTransaction()
+                .replace(R.id.frag, new LoginFailedFragment())
+                .commit();
         }
     }
 
@@ -198,61 +242,46 @@ public class TaskListFragment extends ListFragment
         }
 
         @Override
-        public Integer doInBackground(Void... params) {
+        protected void doTask() throws IOException, Authenticator.Exception {
+            DB db = new DB(getActivity());
             try {
-                DB db = new DB(getActivity());
-                try {
-                    db.open();
-                    db.update(mClient);
+                db.open();
+                db.update(mClient);
 
-                    for (Task t : db.getHotTasks()) {
-                        if (t.completed != 0)
-                            continue;
+                for (Task t : db.getHotTasks()) {
+                    if (t.completed != 0)
+                        continue;
 
-                        Context c = t.resolved.context;
-                        Folder f = t.resolved.folder;
+                    Context c = t.resolved.context;
+                    Folder f = t.resolved.folder;
 
-                        Map<String, Object> map = new HashMap<String, Object>();
-                        map.put("task", t);
-                        map.put("title", t.title);
-                        map.put("priority", t.priority);
+                    Map<String, Object> map = new HashMap<String, Object>();
+                    map.put("task", t);
+                    map.put("title", t.title);
+                    map.put("priority", t.priority);
 
-                        if (f != null) {
-                            map.put("context_0", String.format("%s", f.name));
-                        }
-                        if (c != null) {
-                            map.put("context_1", String.format("@%s", c.name));
-                        }
-
-                        if (t.duedate > 0) {
-                            map.put("due", new Formatter().format("%1$tY-%1$tm-%1$td", new Date(t.duedate * 1000)).toString());
-                        }
-                        //map.put("timer_flag", "(on)");
-                        mmData.add(map);
+                    if (f != null) {
+                        map.put("context_0", String.format("%s", f.name));
                     }
-                    return OK;
-                } finally {
-                    if (db != null) {
-                        db.close();
+                    if (c != null) {
+                        map.put("context_1", String.format("@%s", c.name));
                     }
+
+                    if (t.duedate > 0) {
+                        map.put("due", new Formatter().format("%1$tY-%1$tm-%1$td", new Date(t.duedate * 1000)).toString());
+                    }
+                    //map.put("timer_flag", "(on)");
+                    mmData.add(map);
                 }
-            } catch (IOException e) {
-                mmError = e;
-                return FAILURE;
-            } catch (Authenticator.BogusException e) {
-                mmError = e;
-                return LOGIN_REQUIRED;
-            } catch (Authenticator.FailureException e) {
-                mmError = e;
-                return LOGIN_FAILED;
-            } catch (Authenticator.ErrorException e) {
-                mmError = e;
-                return FAILURE;
+            } finally {
+                if (db != null) {
+                    db.close();
+                }
             }
         }
 
         @Override
-        public void onPostExecute(Integer ret) {
+        protected void onPostExecute(Integer ret) {
             super.onPostExecute(ret);
             mmDialog.dismiss();
             if (ret == OK) {
@@ -274,44 +303,29 @@ public class TaskListFragment extends ListFragment
         }
 
         @Override
-        public void onPreExecute() {
+        protected void onPreExecute() {
             startStrikeout(mmTask);
             refresh();
         }
 
         @Override
-        public Integer doInBackground(Void... params) {
+        protected void doTask() throws IOException, Authenticator.Exception {
+            DB db = new DB(getActivity());
             try {
-                DB db = new DB(getActivity());
-                try {
-                    mmTask.markAsDone();
-                    mClient.updateDone(mmTask);
+                mmTask.markAsDone();
+                mClient.updateDone(mmTask);
 
-                    db.open();
-                    db.update(mClient);
-                } finally {
-                    if (db != null) {
-                        db.close();
-                    }
+                db.open();
+                db.update(mClient);
+            } finally {
+                if (db != null) {
+                    db.close();
                 }
-                return OK;
-            } catch (IOException e) {
-                mmError = e;
-                return FAILURE;
-            } catch (Authenticator.BogusException e) {
-                mmError = e;
-                return LOGIN_REQUIRED;
-            } catch (Authenticator.FailureException e) {
-                mmError = e;
-                return LOGIN_FAILED;
-            } catch (Authenticator.ErrorException e) {
-                mmError = e;
-                return FAILURE;
             }
         }
 
         @Override
-        public void onPostExecute(Integer ret) {
+        protected void onPostExecute(Integer ret) {
             super.onPostExecute(ret);
             if (ret == OK) {
                 completeStrikeout(mmTask);
@@ -345,7 +359,7 @@ public class TaskListFragment extends ListFragment
         }
 
         @Override
-        public void onPreExecute() {
+        protected void onPreExecute() {
             mmDialog = new ProgressDialog(getActivity());
             mmDialog.setTitle("Adding task");
             mmDialog.setMessage("Adding task...");
@@ -363,64 +377,26 @@ public class TaskListFragment extends ListFragment
         }
 
         @Override
-        public Integer doInBackground(Void... params) {
+        protected void doTask() throws IOException, Authenticator.Exception {
+            DB db = new DB(getActivity());
             try {
-                DB db = new DB(getActivity());
-                try {
-                    mClient.addTask(mmTask, null);
+                mClient.addTask(mmTask, null);
 
-                    db.open();
-                    db.update(mClient);
-                } finally {
-                    if (db != null) {
-                        db.close();
-                    }
+                db.open();
+                db.update(mClient);
+            } finally {
+                if (db != null) {
+                    db.close();
                 }
-                return OK;
-            } catch (IOException e) {
-                mmError = e;
-                return FAILURE;
-            } catch (Authenticator.BogusException e) {
-                mmError = e;
-                return LOGIN_REQUIRED;
-            } catch (Authenticator.FailureException e) {
-                mmError = e;
-                return LOGIN_FAILED;
-            } catch (Authenticator.ErrorException e) {
-                mmError = e;
-                return FAILURE;
             }
         }
 
         @Override
-        public void onPostExecute(Integer ret) {
+        protected void onPostExecute(Integer ret) {
             super.onPostExecute(ret);
             refresh();
             mmDialog.dismiss();
         }
-    }
-
-
-    private Authenticator getAuthenticator() {
-        return Authenticator.create(getActivity());
-    }
-
-    private void refresh() {
-        mAdapter.notifyDataSetChanged();
-    }
-
-    private void showLoginRequired() {
-        getFragmentManager()
-            .beginTransaction()
-            .replace(R.id.frag, new LoginRequiredFragment())
-            .commit();
-    }
-
-    private void showLoginFailed() {
-        getFragmentManager()
-            .beginTransaction()
-            .replace(R.id.frag, new LoginFailedFragment())
-            .commit();
     }
 
     private class PostTaskAction {

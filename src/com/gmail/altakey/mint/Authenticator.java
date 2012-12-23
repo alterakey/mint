@@ -245,6 +245,16 @@ public class Authenticator {
         return (mEmail == null || mPassword == null);
     }
 
+    public static class Exception extends java.lang.Exception {
+        public Exception() {
+            super();
+        }
+
+        public Exception(String desc) {
+            super(desc);
+        }
+    }
+
     public static class BogusException extends Exception {
     }
 
