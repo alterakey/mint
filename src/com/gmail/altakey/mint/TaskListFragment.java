@@ -410,7 +410,7 @@ public class TaskListFragment extends ListFragment
             final View layout = inflater.inflate(
                 R.layout.post_task,
                 null);
-            final TextView field = (TextView)layout.findViewById(R.id.detail);
+            final TextView field = (TextView)layout.findViewById(R.id.title);
 
             builder
                 .setView(layout)
@@ -428,6 +428,7 @@ public class TaskListFragment extends ListFragment
 
         private class PostAction implements DialogInterface.OnClickListener {
             private TextView mmmField;
+            private static final int DUE = 86400;
 
             public PostAction(TextView field) {
                 mmmField = field;
@@ -441,7 +442,7 @@ public class TaskListFragment extends ListFragment
             private Task build() {
                 final Task t = new Task();
                 t.title = mmmField.getText().toString();
-                t.duedate = (new Date().getTime() + 86400000) / 1000;
+                t.duedate = (new Date().getTime() + DUE * 1000) / 1000;
                 return t;
             }
         }
