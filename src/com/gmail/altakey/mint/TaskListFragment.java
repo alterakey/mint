@@ -336,6 +336,71 @@ public class TaskListFragment extends ListFragment
 
     }
 
+    private class TaskAddTask extends NetworkTask {
+        private Task mmTask;
+        private ProgressDialog mmDialog;
+
+        public TaskAddTask(Task task) {
+            mmTask = task;
+        }
+
+        @Override
+        public void onPreExecute() {
+            mmDialog = new ProgressDialog(getActivity());
+            mmDialog.setTitle("Adding task");
+            mmDialog.setMessage("Adding task...");
+            mmDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            mmDialog.setIndeterminate(true);
+            mmDialog.setCancelable(true);
+            mmDialog.setCanceledOnTouchOutside(true);
+            mmDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                @Override
+                public void onCancel(DialogInterface dialog) {
+                    cancel(true);
+                }
+            });
+            mmDialog.show();
+        }
+
+        @Override
+        public Integer doInBackground(Void... params) {
+            try {
+                DB db = new DB(getActivity());
+                try {
+                    mClient.addTask(mmTask, null);
+
+                    db.open();
+                    db.update(mClient);
+                } finally {
+                    if (db != null) {
+                        db.close();
+                    }
+                }
+                return OK;
+            } catch (IOException e) {
+                mmError = e;
+                return FAILURE;
+            } catch (Authenticator.BogusException e) {
+                mmError = e;
+                return LOGIN_REQUIRED;
+            } catch (Authenticator.FailureException e) {
+                mmError = e;
+                return LOGIN_FAILED;
+            } catch (Authenticator.ErrorException e) {
+                mmError = e;
+                return FAILURE;
+            }
+        }
+
+        @Override
+        public void onPostExecute(Integer ret) {
+            super.onPostExecute(ret);
+            refresh();
+            mmDialog.dismiss();
+        }
+    }
+
+
     private Authenticator getAuthenticator() {
         return Authenticator.create(getActivity());
     }
@@ -390,7 +455,14 @@ public class TaskListFragment extends ListFragment
 
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Log.d("TLF.PTA.PA.oC", String.format("would post task: %s", mmmField.getText().toString()));
+                new TaskAddTask(build()).execute();
+            }
+
+            private Task build() {
+                final Task t = new Task();
+                t.title = mmmField.getText().toString();
+                t.duedate = (new Date().getTime() + 86400000) / 1000;
+                return t;
             }
         }
     }

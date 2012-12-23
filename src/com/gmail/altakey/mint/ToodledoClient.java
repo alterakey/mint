@@ -124,6 +124,16 @@ public class ToodledoClient {
         }
     }
 
+    public void addTask(Task t, String[] additionalFields) throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
+        final String fields = additionalFields == null ? "" : String.format("&fields=%s", Joiner.on(",").join(additionalFields));
+
+        issueRequest(
+            new HttpPost(
+                getServiceUrl("tasks/add", String.format("tasks=%s%s", URLEncoder.encode(getGson().toJson(new Task[] {t})), fields))
+            )
+        );
+    }
+
     public Status getStatus() throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
         final ByteArrayOutputStream os = issueRequest(
             new HttpGet(
