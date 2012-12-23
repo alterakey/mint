@@ -27,6 +27,7 @@ import java.util.Formatter;
 import java.util.Queue;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.app.AlertDialog;
 
 public class TaskListFragment extends ListFragment
 {
@@ -55,6 +56,8 @@ public class TaskListFragment extends ListFragment
         case R.id.main_preferences:
             startActivity(new Intent(getActivity(), ConfigActivity.class));
             return false;
+        case R.id.main_post:
+            new PostTaskAction().start();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -353,5 +356,42 @@ public class TaskListFragment extends ListFragment
             .beginTransaction()
             .replace(R.id.frag, new LoginFailedFragment())
             .commit();
+    }
+
+    private class PostTaskAction {
+        public void start() {
+            final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            final LayoutInflater inflater = getActivity().getLayoutInflater();
+            final View layout = inflater.inflate(
+                R.layout.post_task,
+                null);
+            final TextView field = (TextView)layout.findViewById(R.id.detail);
+
+            builder
+                .setView(layout)
+                .setTitle("Post task")
+                .setOnCancelListener(new CancelAction())
+                .setPositiveButton(android.R.string.ok, new PostAction(field));
+            builder.create().show();
+        }
+
+        private class CancelAction implements DialogInterface.OnCancelListener {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+            }
+        }
+
+        private class PostAction implements DialogInterface.OnClickListener {
+            private TextView mmmField;
+
+            public PostAction(TextView field) {
+                mmmField = field;
+            }
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Log.d("TLF.PTA.PA.oC", String.format("would post task: %s", mmmField.getText().toString()));
+            }
+        }
     }
 }
