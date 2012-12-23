@@ -223,7 +223,7 @@ public class TaskListFragment extends ListFragment
     }
 
     private class TaskListLoadTask extends NetworkTask {
-        private ProgressDialog mmDialog;
+        private Progress mmProgress = new Progress();
         private List<Map<String, ?>> mmData;
 
         public TaskListLoadTask(List<Map<String, ?>> data) {
@@ -232,20 +232,7 @@ public class TaskListFragment extends ListFragment
 
         @Override
         protected void onPreExecute() {
-            mmDialog = new ProgressDialog(getActivity());
-            mmDialog.setTitle("Getting tasks");
-            mmDialog.setMessage("Querying remote tasks...");
-            mmDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            mmDialog.setIndeterminate(true);
-            mmDialog.setCancelable(true);
-            mmDialog.setCanceledOnTouchOutside(true);
-            mmDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-                @Override
-                public void onCancel(DialogInterface dialog) {
-                    cancel(true);
-                }
-            });
-            mmDialog.show();
+            mmProgress.show(getFragmentManager(), Progress.TAG);
         }
 
         @Override
@@ -290,7 +277,7 @@ public class TaskListFragment extends ListFragment
         @Override
         protected void onPostExecute(Integer ret) {
             super.onPostExecute(ret);
-            mmDialog.dismiss();
+            mmProgress.dismiss();
             if (ret == OK) {
                 refresh();
             }
@@ -299,6 +286,28 @@ public class TaskListFragment extends ListFragment
         @Override
         protected void onCancelled() {
             refresh();
+        }
+
+        private class Progress extends DialogFragment {
+            public static final String TAG = "progress_get_task";
+
+            @Override
+            public Dialog onCreateDialog(Bundle savedInstanceState) {
+                ProgressDialog dialog = new ProgressDialog(getActivity());
+                dialog.setTitle("Getting tasks");
+                dialog.setMessage("Querying remote tasks...");
+                dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                dialog.setIndeterminate(true);
+                dialog.setCancelable(true);
+                dialog.setCanceledOnTouchOutside(true);
+                dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                    @Override
+                    public void onCancel(DialogInterface dialog) {
+                        cancel(true);
+                    }
+                });
+                return dialog;
+            }
         }
     }
 
@@ -359,7 +368,7 @@ public class TaskListFragment extends ListFragment
 
     private class TaskAddTask extends NetworkTask {
         private Task mmTask;
-        private ProgressDialog mmDialog;
+        private Progress mmProgress = new Progress();
 
         public TaskAddTask(Task task) {
             mmTask = task;
@@ -367,20 +376,7 @@ public class TaskListFragment extends ListFragment
 
         @Override
         protected void onPreExecute() {
-            mmDialog = new ProgressDialog(getActivity());
-            mmDialog.setTitle("Adding task");
-            mmDialog.setMessage("Adding task...");
-            mmDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            mmDialog.setIndeterminate(true);
-            mmDialog.setCancelable(true);
-            mmDialog.setCanceledOnTouchOutside(true);
-            mmDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-                @Override
-                public void onCancel(DialogInterface dialog) {
-                    cancel(true);
-                }
-            });
-            mmDialog.show();
+            mmProgress.show(getFragmentManager(), Progress.TAG);
         }
 
         @Override
@@ -401,8 +397,30 @@ public class TaskListFragment extends ListFragment
         @Override
         protected void onPostExecute(Integer ret) {
             super.onPostExecute(ret);
-            mmDialog.dismiss();
+            mmProgress.dismiss();
             reload();
+        }
+
+        private class Progress extends DialogFragment {
+            public static final String TAG = "progress_add_task";
+
+            @Override
+            public Dialog onCreateDialog(Bundle savedInstanceState) {
+                ProgressDialog dialog = new ProgressDialog(getActivity());
+                dialog.setTitle("Adding task");
+                dialog.setMessage("Adding task...");
+                dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                dialog.setIndeterminate(true);
+                dialog.setCancelable(true);
+                dialog.setCanceledOnTouchOutside(true);
+                dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                    @Override
+                    public void onCancel(DialogInterface dialog) {
+                        cancel(true);
+                    }
+                });
+                return dialog;
+            }
         }
     }
 
