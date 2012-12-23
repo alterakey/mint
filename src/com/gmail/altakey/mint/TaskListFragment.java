@@ -25,6 +25,8 @@ import android.widget.SimpleAdapter;
 import java.util.Date;
 import java.util.Formatter;
 import java.util.Queue;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 
 public class TaskListFragment extends ListFragment
 {
@@ -167,10 +169,29 @@ public class TaskListFragment extends ListFragment
     }
 
     private class TaskListLoadTask extends NetworkTask {
+        private ProgressDialog mmDialog;
         private List<Map<String, ?>> mmData;
 
         public TaskListLoadTask(List<Map<String, ?>> data) {
             mmData = data;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            mmDialog = new ProgressDialog(getActivity());
+            mmDialog.setTitle("Getting tasks");
+            mmDialog.setMessage("Querying remote tasks...");
+            mmDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            mmDialog.setIndeterminate(true);
+            mmDialog.setCancelable(true);
+            mmDialog.setCanceledOnTouchOutside(true);
+            mmDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                @Override
+                public void onCancel(DialogInterface dialog) {
+                    cancel(true);
+                }
+            });
+            mmDialog.show();
         }
 
         @Override
@@ -230,9 +251,15 @@ public class TaskListFragment extends ListFragment
         @Override
         public void onPostExecute(Integer ret) {
             super.onPostExecute(ret);
+            mmDialog.dismiss();
             if (ret == OK) {
                 refresh();
             }
+        }
+
+        @Override
+        protected void onCancelled() {
+            refresh();
         }
     }
 
