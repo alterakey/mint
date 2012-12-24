@@ -59,7 +59,7 @@ public class TaskListFragment extends ListFragment
             startActivity(new Intent(getActivity(), ConfigActivity.class));
             return false;
         case R.id.main_post:
-            new PostTaskDialog().show(getFragmentManager(), "post_task");
+            new TaskPostFragment().show(getFragmentManager(), "post_task");
             return false;
         }
         return super.onOptionsItemSelected(item);
@@ -165,64 +165,31 @@ public class TaskListFragment extends ListFragment
         }
     }
 
-    private abstract class NetworkTask extends AsyncTask<Void, Void, Integer> {
-        protected Exception mmError;
-
-        protected static final int OK = 0;
-        protected static final int LOGIN_REQUIRED = 1;
-        protected static final int LOGIN_FAILED = 2;
-        protected static final int FAILURE = 3;
-
+    private abstract class ReportingNetworkTask extends NetworkTask {
         @Override
-        protected Integer doInBackground(Void... params) {
-            try {
-                doTask();
-                return OK;
-            } catch (IOException e) {
-                mmError = e;
-                return FAILURE;
-            } catch (Authenticator.BogusException e) {
-                mmError = e;
-                return LOGIN_REQUIRED;
-            } catch (Authenticator.FailureException e) {
-                mmError = e;
-                return LOGIN_FAILED;
-            } catch (Authenticator.Exception e) {
-                mmError = e;
-                return FAILURE;
-            }
-        }
-
-        abstract protected void doTask() throws IOException, Authenticator.Exception;
-
-        @Override
-        protected void onPostExecute(Integer ret) {
-            if (ret == LOGIN_REQUIRED) {
-                showLoginRequired();
-            } else if (ret == LOGIN_FAILED) {
-                showLoginFailed();
-            } else if (ret == FAILURE) {
-                Log.e("TLF", "fetch failure", mmError);
-                Toast.makeText(getActivity(), String.format("fetch failure: %s", mmError.getMessage()), Toast.LENGTH_LONG).show();
-            }
-        }
-
-        private void showLoginRequired() {
+        protected void onLoginRequired() {
             getFragmentManager()
                 .beginTransaction()
                 .replace(R.id.frag, new LoginRequiredFragment())
                 .commit();
         }
 
-        private void showLoginFailed() {
+        @Override
+        protected void onLoginFailed() {
             getFragmentManager()
                 .beginTransaction()
                 .replace(R.id.frag, new LoginFailedFragment())
                 .commit();
         }
+
+        @Override
+        protected void onLoginError() {
+            super.onLoginError();
+            Toast.makeText(getActivity(), String.format("fetch failure: %s", mError.getMessage()), Toast.LENGTH_LONG).show();
+        }
     }
 
-    private class TaskListLoadTask extends NetworkTask {
+    private class TaskListLoadTask extends ReportingNetworkTask {
         private Progress mmProgress = new Progress();
         private List<Map<String, ?>> mmData;
 
@@ -311,7 +278,7 @@ public class TaskListFragment extends ListFragment
         }
     }
 
-    private class TaskCompleteTask extends NetworkTask {
+    private class TaskCompleteTask extends ReportingNetworkTask {
         private Task mmTask;
 
         public TaskCompleteTask(Task task) {
@@ -362,111 +329,6 @@ public class TaskListFragment extends ListFragment
 
         private void stopStrikeout(Task t) {
             t.grayedout = false;
-        }
-
-    }
-
-    private class TaskAddTask extends NetworkTask {
-        private Task mmTask;
-        private Progress mmProgress = new Progress();
-
-        public TaskAddTask(Task task) {
-            mmTask = task;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            mmProgress.show(getFragmentManager(), Progress.TAG);
-        }
-
-        @Override
-        protected void doTask() throws IOException, Authenticator.Exception {
-            DB db = new DB(getActivity());
-            try {
-                mClient.addTask(mmTask, null);
-
-                db.open();
-                db.update(mClient);
-            } finally {
-                if (db != null) {
-                    db.close();
-                }
-            }
-        }
-
-        @Override
-        protected void onPostExecute(Integer ret) {
-            super.onPostExecute(ret);
-            mmProgress.dismiss();
-            reload();
-        }
-
-        private class Progress extends DialogFragment {
-            public static final String TAG = "progress_add_task";
-
-            @Override
-            public Dialog onCreateDialog(Bundle savedInstanceState) {
-                ProgressDialog dialog = new ProgressDialog(getActivity());
-                dialog.setTitle("Adding task");
-                dialog.setMessage("Adding task...");
-                dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                dialog.setIndeterminate(true);
-                dialog.setCancelable(true);
-                dialog.setCanceledOnTouchOutside(true);
-                dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-                    @Override
-                    public void onCancel(DialogInterface dialog) {
-                        cancel(true);
-                    }
-                });
-                return dialog;
-            }
-        }
-    }
-
-    private class PostTaskDialog extends DialogFragment {
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-            final LayoutInflater inflater = getActivity().getLayoutInflater();
-            final View layout = inflater.inflate(
-                R.layout.post_task,
-                null);
-            final TextView field = (TextView)layout.findViewById(R.id.title);
-
-            builder
-                .setView(layout)
-                .setTitle("Post task")
-                .setOnCancelListener(new CancelAction())
-                .setPositiveButton(android.R.string.ok, new PostAction(field));
-            return builder.create();
-        }
-
-        private class CancelAction implements DialogInterface.OnCancelListener {
-            @Override
-            public void onCancel(DialogInterface dialog) {
-            }
-        }
-
-        private class PostAction implements DialogInterface.OnClickListener {
-            private TextView mmmField;
-            private static final int DUE = 86400;
-
-            public PostAction(TextView field) {
-                mmmField = field;
-            }
-
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                new TaskAddTask(build()).execute();
-            }
-
-            private Task build() {
-                final Task t = new Task();
-                t.title = mmmField.getText().toString();
-                t.duedate = (new Date().getTime() + DUE * 1000) / 1000;
-                return t;
-            }
         }
     }
 }
