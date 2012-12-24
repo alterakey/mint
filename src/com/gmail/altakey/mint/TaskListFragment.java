@@ -171,7 +171,7 @@ public class TaskListFragment extends ListFragment
             getFragmentManager()
                 .beginTransaction()
                 .replace(R.id.frag, new LoginRequiredFragment())
-                .commit();
+                .commitAllowingStateLoss();
         }
 
         @Override
@@ -179,7 +179,7 @@ public class TaskListFragment extends ListFragment
             getFragmentManager()
                 .beginTransaction()
                 .replace(R.id.frag, new LoginFailedFragment())
-                .commit();
+                .commitAllowingStateLoss();
         }
 
         @Override
