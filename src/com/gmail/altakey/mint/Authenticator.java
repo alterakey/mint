@@ -45,11 +45,11 @@ public class Authenticator {
         mPassword = password;
     }
 
-    public static Authenticator create(Activity activity) {
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(activity);
+    public static Authenticator create(Context context) {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
         String userId = pref.getString(ConfigKey.USER_ID, null);
         String userPassword = pref.getString(ConfigKey.USER_PASSWORD, null);
-        return new Authenticator(activity, userId, userPassword);
+        return new Authenticator(context, userId, userPassword);
     }
 
     public static void purge(Activity activity) {
