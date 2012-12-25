@@ -68,7 +68,7 @@ public class TaskPostFragment extends DialogFragment {
 
     private class TaskAddTask extends NetworkTask {
         private Task mmTask;
-        private Progress mmProgress = new Progress();
+        private VolatileDialog mmProgress = new Progress();
 
         public TaskAddTask(Task task) {
             mmTask = task;
@@ -76,7 +76,7 @@ public class TaskPostFragment extends DialogFragment {
 
         @Override
         protected void onPreExecute() {
-            mmProgress.show(getFragmentManager(), Progress.TAG);
+            mmProgress.show();
         }
 
         @Override
@@ -100,12 +100,12 @@ public class TaskPostFragment extends DialogFragment {
             mmProgress.dismiss();
         }
 
-        private class Progress extends DialogFragment {
-            public static final String TAG = "progress_add_task";
+        private class Progress implements VolatileDialog {
+            private Dialog mmmDialog;
 
             @Override
-            public Dialog onCreateDialog(Bundle savedInstanceState) {
-                ProgressDialog dialog = new ProgressDialog(getActivity());
+            public void show() {
+                final ProgressDialog dialog = new ProgressDialog(getActivity());
                 dialog.setTitle("Adding task");
                 dialog.setMessage("Adding task...");
                 dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
@@ -118,7 +118,13 @@ public class TaskPostFragment extends DialogFragment {
                         cancel(true);
                     }
                 });
-                return dialog;
+                mmmDialog = dialog;
+                mmmDialog.show();
+            }
+
+            @Override
+            public void dismiss() {
+                mmmDialog.dismiss();
             }
         }
     }

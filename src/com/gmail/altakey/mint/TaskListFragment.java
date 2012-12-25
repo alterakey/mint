@@ -190,7 +190,7 @@ public class TaskListFragment extends ListFragment
     }
 
     private class TaskListLoadTask extends ReportingNetworkTask {
-        private Progress mmProgress = new Progress();
+        private VolatileDialog mmProgress = new Progress();
         private List<Map<String, ?>> mmData;
 
         public TaskListLoadTask(List<Map<String, ?>> data) {
@@ -199,7 +199,7 @@ public class TaskListFragment extends ListFragment
 
         @Override
         protected void onPreExecute() {
-            mmProgress.show(getFragmentManager(), Progress.TAG);
+            mmProgress.show();
         }
 
         @Override
@@ -255,12 +255,12 @@ public class TaskListFragment extends ListFragment
             refresh();
         }
 
-        private class Progress extends DialogFragment {
-            public static final String TAG = "progress_get_task";
+        private class Progress implements VolatileDialog {
+            private Dialog mmmDialog;
 
             @Override
-            public Dialog onCreateDialog(Bundle savedInstanceState) {
-                ProgressDialog dialog = new ProgressDialog(getActivity());
+            public void show() {
+                final ProgressDialog dialog = new ProgressDialog(getActivity());
                 dialog.setTitle("Getting tasks");
                 dialog.setMessage("Querying remote tasks...");
                 dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
@@ -273,7 +273,13 @@ public class TaskListFragment extends ListFragment
                         cancel(true);
                     }
                 });
-                return dialog;
+                mmmDialog = dialog;
+                mmmDialog.show();
+            }
+
+            @Override
+            public void dismiss() {
+                mmmDialog.dismiss();
             }
         }
     }
