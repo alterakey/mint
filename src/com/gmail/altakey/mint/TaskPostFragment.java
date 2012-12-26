@@ -34,7 +34,7 @@ public class TaskPostFragment extends DialogFragment {
 
         builder
             .setView(layout)
-            .setTitle("Post task")
+            .setTitle("Post task here")
             .setOnCancelListener(new CancelAction())
             .setPositiveButton(android.R.string.ok, new PostAction(field));
         return builder.create();
