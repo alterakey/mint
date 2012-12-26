@@ -30,9 +30,13 @@ import android.content.DialogInterface;
 import android.app.AlertDialog;
 import android.support.v4.app.DialogFragment;
 import android.app.Dialog;
+import android.app.ActionBar;
+import android.widget.SimpleAdapter;
 
 public class TaskListFragment extends ListFragment
 {
+    public static final String TAG = "task_list";
+
     private TaskListAdapter mAdapter;
     private ToodledoClient mClient;
 
@@ -43,7 +47,6 @@ public class TaskListFragment extends ListFragment
         mAdapter = new TaskListAdapterBuilder().build();
 
         setHasOptionsMenu(true);
-        getActivity().setTitle("Hotlist");
         setListAdapter(mAdapter);
     }
 
