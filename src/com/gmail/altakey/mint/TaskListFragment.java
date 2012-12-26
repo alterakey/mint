@@ -32,6 +32,7 @@ import android.support.v4.app.DialogFragment;
 import android.app.Dialog;
 import android.app.ActionBar;
 import android.widget.SimpleAdapter;
+import android.support.v4.app.FragmentActivity;
 
 public class TaskListFragment extends ListFragment
 {
@@ -338,6 +339,62 @@ public class TaskListFragment extends ListFragment
 
         private void stopStrikeout(Task t) {
             t.grayedout = false;
+        }
+    }
+
+    public static class Mode implements ActionBar.OnNavigationListener {
+        private FragmentActivity mmActivity;
+        private List<Map<String, Object>> mmData;
+
+        public Mode(FragmentActivity activity) {
+            mmActivity = activity;
+            mmData = new LinkedList<Map<String, Object>>();
+            Map<String, Object> entry = null;
+
+            entry = new HashMap<String, Object>();
+            entry.put("title", "Hotlist");
+            entry.put("filter", "hotlist");
+            mmData.add(entry);
+
+            entry = new HashMap<String, Object>();
+            entry.put("title", "Inbox");
+            entry.put("filter", "inbox");
+            mmData.add(entry);
+
+            entry = new HashMap<String, Object>();
+            entry.put("title", "Next Action");
+            entry.put("filter", "next_action");
+            mmData.add(entry);
+
+            entry = new HashMap<String, Object>();
+            entry.put("title", "Reference");
+            entry.put("filter", "reference");
+            mmData.add(entry);
+
+            entry = new HashMap<String, Object>();
+            entry.put("title", "Delegated");
+            entry.put("filter", "delegated");
+            mmData.add(entry);
+
+            entry = new HashMap<String, Object>();
+            entry.put("title", "Someday");
+            entry.put("filter", "someday");
+            mmData.add(entry);
+        }
+
+        public List<Map<String, Object>> getData() {
+            return mmData;
+        }
+
+        @Override
+        public boolean onNavigationItemSelected(int pos, long id) {
+            Map<String, Object> map = mmData.get(pos);
+            final String filter = (String)map.get("filter");
+            final TaskListFragment tlf = (TaskListFragment)mmActivity.getSupportFragmentManager().findFragmentByTag(TaskListFragment.TAG);
+            if (tlf != null) {
+                Log.d("MA", String.format("Would set filter to %s", filter));
+            }
+            return true;
         }
     }
 }
