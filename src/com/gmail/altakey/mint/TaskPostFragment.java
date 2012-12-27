@@ -1,16 +1,16 @@
 package com.gmail.altakey.mint;
 
 import android.app.DialogFragment;
-import android.os.Bundle;
-import android.content.DialogInterface;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.os.Bundle;
 import android.view.View;
 import android.view.LayoutInflater;
-import android.app.ProgressDialog;
 import android.widget.TextView;
+
 import java.util.Date;
-import android.util.Log;
 import java.io.IOException;
 
 public class TaskPostFragment extends DialogFragment {

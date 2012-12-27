@@ -5,22 +5,14 @@ import android.app.ActionBar;
 import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.*;
 import android.widget.*;
 
 import java.io.IOException;
-import java.util.Date;
-import java.util.Formatter;
-import java.util.List;
-import java.util.Map;
-import java.util.LinkedList;
-import java.util.HashMap;
 
 public class LoginTroubleActivity extends Activity
 {
