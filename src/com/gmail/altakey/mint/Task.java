@@ -19,6 +19,7 @@ public class Task {
     public long priority;
     public long star;
     public long duedate;
+    public String status;
     public Resolved resolved = new Resolved();
     public boolean grayedout;
 
@@ -42,6 +43,7 @@ public class Task {
         task.priority = c.getLong(6 + offset);
         task.star = c.getLong(7 + offset);
         task.duedate = c.getLong(8 + offset);
+        task.status = c.getString(9 + offset);
         return task.id != 0 ? task : null;
     }
 
@@ -71,6 +73,8 @@ public class Task {
                     task.star = Long.valueOf(value);
                 } else if ("duedate".equals(name)) {
                     task.duedate = Long.valueOf(value);
+                } else if ("status".equals(name)) {
+                    task.status = value;
                 }
             }
             reader.endObject();
@@ -91,6 +95,7 @@ public class Task {
                 .name("priority").value(task.priority)
                 .name("star").value(task.star)
                 .name("duedate").value(task.duedate)
+                .name("status").value(task.duedate)
                 .endObject();
         }
     }

@@ -27,7 +27,7 @@ public class DB {
             this.conn = new SQLiteOpenHelper(mContext, "toodledo", null, 1) {
                 @Override
                 public void onCreate(SQLiteDatabase db) {
-                    db.execSQL("CREATE TABLE IF NOT EXISTS tasks (task BIGINT PRIMARY KEY, title TEXT, modified BIGINT, completed TEXT, folder BIGINT, context BIGINT, priority INTEGER, star INTEGER, duedate BIGINT)");
+                    db.execSQL("CREATE TABLE IF NOT EXISTS tasks (task BIGINT PRIMARY KEY, title TEXT, modified BIGINT, completed TEXT, folder BIGINT, context BIGINT, priority INTEGER, star INTEGER, duedate BIGINT, status BIGINT)");
                     db.execSQL("CREATE TABLE IF NOT EXISTS folders (folder BIGINT PRIMARY KEY, name TEXT, private TEXT, archived TEXT, ord TEXT)");
                     db.execSQL("CREATE TABLE IF NOT EXISTS contexts (context BIGINT PRIMARY KEY, name TEXT)");
                     db.execSQL("CREATE TABLE IF NOT EXISTS status (status TEXT PRIMARY KEY, lastedit_folder BIGINT, lastedit_context BIGINT, lastedit_goal BIGINT, lastedit_location BIGINT, lastedit_task BIGINT, lastdelete_task BIGINT, lastedit_notebook BIGINT, lastdelete_notebook BIGINT)");
@@ -142,7 +142,7 @@ public class DB {
             if (flags.containsKey("task")) {
                 for (Task t : client.getTasksAfter(flags.get("task"))) {
                     conn.execSQL(
-                        "INSERT OR REPLACE INTO tasks (task, title, modified, completed, folder, context, priority, star, duedate) VALUES (?,?,?,?,?,?,?,?,?)",
+                        "INSERT OR REPLACE INTO tasks (task, title, modified, completed, folder, context, priority, star, duedate, status) VALUES (?,?,?,?,?,?,?,?,?,?)",
                         new String[] {
                             String.valueOf(t.id),
                             t.title,
@@ -152,7 +152,8 @@ public class DB {
                             String.valueOf(t.context),
                             String.valueOf(t.priority),
                             String.valueOf(t.star),
-                            String.valueOf(t.duedate)
+                            String.valueOf(t.duedate),
+                            String.valueOf(t.status)
                         });
                 }
             }
@@ -193,21 +194,21 @@ public class DB {
         }
     }
 
-    private final String TASK_QUERY = "SELECT task,title,modified,completed,folder,context,priority,star,duedate,folder as folder_id,folders.name as folder_name,folders.private as folder_private,folders.archived as folder_archived,folders.ord as folder_ord,context as context_id,contexts.name as context_name FROM tasks left join folders using (folder) left join contexts using (context) where %s order by %s";
-    private final String DEFAULT_ORDER = "duedate,priority desc";
-    private final String HOT_FILTER = "(priority=3 or (priority>=0 and duedate>0 and duedate<?)) and completed=0";
-    private final String ALL_FILTER = "1=1";
+    private final String TASK_QUERY = "SELECT task,title,modified,completed,folder,context,priority,star,duedate,status,folder as folder_id,folders.name as folder_name,folders.private as folder_private,folders.archived as folder_archived,folders.ord as folder_ord,context as context_id,contexts.name as context_name FROM tasks left join folders using (folder) left join contexts using (context) where %s order by %s";
+    public static final String DEFAULT_ORDER = "duedate,priority desc";
+    public static final String HOT_FILTER = "(priority=3 or (priority>=0 and duedate>0 and duedate<?)) and completed=0";
+    public static final String ALL_FILTER = "1=1";
 
     public List<Task> getTasks(String filter, String order) {
         List<Task> ret = new LinkedList<Task>();
         Cursor c = conn.rawQuery(
-            String.format(TASK_QUERY, ALL_FILTER, DEFAULT_ORDER), null);
+            String.format(TASK_QUERY, filter, DEFAULT_ORDER), null);
         try {
             c.moveToFirst();
             while (!c.isAfterLast()) {
                 Task task = Task.fromCursor(c, 0);
-                task.resolved.folder = Folder.fromCursor(c, 9);
-                task.resolved.context = Context.fromCursor(c, 14);
+                task.resolved.folder = Folder.fromCursor(c, 10);
+                task.resolved.context = Context.fromCursor(c, 15);
                 ret.add(task);
                 c.moveToNext();
             }
@@ -226,8 +227,8 @@ public class DB {
             c.moveToFirst();
             while (!c.isAfterLast()) {
                 Task task = Task.fromCursor(c, 0);
-                task.resolved.folder = Folder.fromCursor(c, 9);
-                task.resolved.context = Context.fromCursor(c, 14);
+                task.resolved.folder = Folder.fromCursor(c, 10);
+                task.resolved.context = Context.fromCursor(c, 15);
                 ret.add(task);
                 c.moveToNext();
             }
