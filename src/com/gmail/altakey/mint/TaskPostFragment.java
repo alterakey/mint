@@ -1,6 +1,6 @@
 package com.gmail.altakey.mint;
 
-import android.support.v4.app.DialogFragment;
+import android.app.DialogFragment;
 import android.os.Bundle;
 import android.content.DialogInterface;
 import android.app.AlertDialog;
@@ -35,15 +35,8 @@ public class TaskPostFragment extends DialogFragment {
         builder
             .setView(layout)
             .setTitle("Post task here")
-            .setOnCancelListener(new CancelAction())
             .setPositiveButton(android.R.string.ok, new PostAction(field));
         return builder.create();
-    }
-
-    private class CancelAction implements DialogInterface.OnCancelListener {
-        @Override
-        public void onCancel(DialogInterface dialog) {
-        }
     }
 
     private class PostAction implements DialogInterface.OnClickListener {

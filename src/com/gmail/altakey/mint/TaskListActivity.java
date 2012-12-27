@@ -4,6 +4,7 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ListFragment;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -11,8 +12,6 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.ListFragment;
 import android.util.Log;
 import android.view.*;
 import android.widget.*;
@@ -25,7 +24,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 
-public class TaskListActivity extends FragmentActivity
+public class TaskListActivity extends Activity
 {
     /** Called when the activity is first created. */
     @Override
@@ -35,7 +34,7 @@ public class TaskListActivity extends FragmentActivity
         setContentView(R.layout.plate);
         setupActionBar();
 
-        getSupportFragmentManager()
+        getFragmentManager()
             .beginTransaction()
             .add(R.id.frag, new TaskListFragment(), TaskListFragment.TAG)
             .commit();
@@ -398,10 +397,10 @@ public class TaskListActivity extends FragmentActivity
         }
 
         public static class Mode implements ActionBar.OnNavigationListener {
-            private FragmentActivity mmActivity;
+            private Activity mmActivity;
             private List<Map<String, Object>> mmData;
 
-            public Mode(FragmentActivity activity) {
+            public Mode(Activity activity) {
                 mmActivity = activity;
                 mmData = new LinkedList<Map<String, Object>>();
                 Map<String, Object> entry = null;
@@ -445,7 +444,7 @@ public class TaskListActivity extends FragmentActivity
             public boolean onNavigationItemSelected(int pos, long id) {
                 Map<String, Object> map = mmData.get(pos);
                 final String filter = (String)map.get("filter");
-                final TaskListFragment tlf = (TaskListFragment)mmActivity.getSupportFragmentManager().findFragmentByTag(TaskListFragment.TAG);
+                final TaskListFragment tlf = (TaskListFragment)mmActivity.getFragmentManager().findFragmentByTag(TaskListFragment.TAG);
                 if (tlf != null && !filter.equals(tlf.mFilterType)) {
                     tlf.mFilterType = filter;
                     tlf.reload();

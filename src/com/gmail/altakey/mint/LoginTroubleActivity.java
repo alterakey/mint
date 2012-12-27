@@ -2,6 +2,7 @@ package com.gmail.altakey.mint;
 
 import android.app.Activity;
 import android.app.ActionBar;
+import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -9,8 +10,6 @@ import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.*;
 import android.widget.*;
@@ -23,7 +22,7 @@ import java.util.Map;
 import java.util.LinkedList;
 import java.util.HashMap;
 
-public class LoginTroubleActivity extends FragmentActivity
+public class LoginTroubleActivity extends Activity
 {
     public static final String KEY_TYPE = "type";
     public static final String TYPE_REQUIRED = "required";
@@ -40,12 +39,12 @@ public class LoginTroubleActivity extends FragmentActivity
         String type = intent.getStringExtra(KEY_TYPE);
 
         if (TYPE_REQUIRED.equals(type)) {
-            getSupportFragmentManager()
+            getFragmentManager()
                 .beginTransaction()
                 .add(R.id.frag, new LoginRequiredFragment())
                 .commit();
         } else if (TYPE_FAILED.equals(type)) {
-            getSupportFragmentManager()
+            getFragmentManager()
                 .beginTransaction()
                 .add(R.id.frag, new LoginFailedFragment())
                 .commit();
