@@ -34,8 +34,12 @@ public class ToodledoClient {
     private android.content.Context mContext;
 
     public ToodledoClient(Authenticator auth, android.content.Context context) {
-        mAuth = auth;
         mContext = context;
+        setAuthenticator(auth);
+    }
+
+    public void setAuthenticator(Authenticator auth) {
+        mAuth = auth;
     }
 
     public List<Folder> getFolders() throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
