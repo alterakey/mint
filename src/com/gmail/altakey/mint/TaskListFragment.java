@@ -40,12 +40,14 @@ public class TaskListFragment extends ListFragment
 
     private TaskListAdapter mAdapter;
     private ToodledoClient mClient;
+    private String mFilterType;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mClient = new ToodledoClient(getAuthenticator(), getActivity());
         mAdapter = new TaskListAdapterBuilder().build();
+        mFilterType = "hotlist";
 
         setHasOptionsMenu(true);
         setListAdapter(mAdapter);
@@ -213,7 +215,7 @@ public class TaskListFragment extends ListFragment
                 db.open();
                 db.update(mClient);
 
-                for (Task t : db.getHotTasks()) {
+                for (Task t : getTasks(db)) {
                     if (t.completed != 0)
                         continue;
 
@@ -242,6 +244,25 @@ public class TaskListFragment extends ListFragment
                 if (db != null) {
                     db.close();
                 }
+            }
+        }
+
+        private List<Task> getTasks(DB db) {
+            Log.d("TLT", String.format("loading %s", mFilterType));
+            if ("hotlist".equals(mFilterType)) {
+                return db.getHotTasks();
+            } else if ("inbox".equals(mFilterType)) {
+                return db.getTasks("status=\"0\" and completed=0", DB.DEFAULT_ORDER);
+            } else if ("next_action".equals(mFilterType)) {
+                return db.getTasks("status=\"1\" and completed=0", DB.DEFAULT_ORDER);
+            } else if ("reference".equals(mFilterType)) {
+                return db.getTasks("status=\"10\" and completed=0", DB.DEFAULT_ORDER);
+            } else if ("waiting".equals(mFilterType)) {
+                return db.getTasks("status=\"5\" and completed=0", DB.DEFAULT_ORDER);
+            } else if ("someday".equals(mFilterType)) {
+                return db.getTasks("status=\"8\" and completed=0", DB.DEFAULT_ORDER);
+            } else {
+                return new LinkedList<Task>();
             }
         }
 
@@ -372,8 +393,8 @@ public class TaskListFragment extends ListFragment
             mmData.add(entry);
 
             entry = new HashMap<String, Object>();
-            entry.put("title", "Delegated");
-            entry.put("filter", "delegated");
+            entry.put("title", "Waiting");
+            entry.put("filter", "waiting");
             mmData.add(entry);
 
             entry = new HashMap<String, Object>();
@@ -391,8 +412,9 @@ public class TaskListFragment extends ListFragment
             Map<String, Object> map = mmData.get(pos);
             final String filter = (String)map.get("filter");
             final TaskListFragment tlf = (TaskListFragment)mmActivity.getSupportFragmentManager().findFragmentByTag(TaskListFragment.TAG);
-            if (tlf != null) {
-                Log.d("MA", String.format("Would set filter to %s", filter));
+            if (tlf != null && !filter.equals(tlf.mFilterType)) {
+                tlf.mFilterType = filter;
+                tlf.reload();
             }
             return true;
         }

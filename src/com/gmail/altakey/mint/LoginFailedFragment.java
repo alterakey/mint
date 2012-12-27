@@ -87,7 +87,7 @@ public class LoginFailedFragment extends Fragment {
             if (mmShouldResume) {
                 getFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.frag, new TaskListFragment())
+                    .replace(R.id.frag, new TaskListFragment(), TaskListFragment.TAG)
                     .commitAllowingStateLoss();
             }
         }

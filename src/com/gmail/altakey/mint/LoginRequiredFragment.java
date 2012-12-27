@@ -41,7 +41,7 @@ public class LoginRequiredFragment extends Fragment {
         if (requestCode == REQ_SET_LOGIN) {
             getFragmentManager()
                 .beginTransaction()
-                .replace(R.id.frag, new TaskListFragment())
+                .replace(R.id.frag, new TaskListFragment(), TaskListFragment.TAG)
                 .commitAllowingStateLoss();
         }
     }
