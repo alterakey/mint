@@ -34,6 +34,7 @@ public class MainActivity extends Activity {
         public void onListItemClick(ListView lv, View v, int pos, long id) {
             final String target = (String)getListAdapter().getItem(pos);
             Intent intent = new Intent(getActivity(), TaskListActivity.class);
+            intent.putExtra(TaskListActivity.KEY_LIST_FILTER, AdapterBuilder.FILTERS[pos]);
             startActivity(intent);
         }
 

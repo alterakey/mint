@@ -21,41 +21,30 @@ import java.util.List;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Arrays;
 
 public class TaskListActivity extends Activity
 {
+    public static final String KEY_LIST_FILTER = "filter";
+
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.plate);
-        setupActionBar();
+
+        Intent intent = getIntent();
+        String filter = intent.getStringExtra(KEY_LIST_FILTER);
+        if (filter == null) {
+            filter = "hotlist";
+        }
+        setTitle(TaskListFragment.Mode.getTitle(filter));
 
         getFragmentManager()
             .beginTransaction()
-            .add(R.id.frag, new TaskListFragment(), TaskListFragment.TAG)
+            .add(R.id.frag, TaskListFragment.newInstance(filter), TaskListFragment.TAG)
             .commit();
-    }
-
-    public void setupActionBar() {
-        final ActionBar bar = getActionBar();
-        final TaskListFragment.Mode mode = new TaskListFragment.Mode(this);
-        bar.setTitle("");
-        bar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-
-        SpinnerAdapter adapter = new SimpleAdapter(
-            this, mode.getData(),
-            android.R.layout.simple_spinner_dropdown_item,
-            new String[] {
-                "title"
-            },
-            new int[] {
-                android.R.id.text1
-            }
-        );
-
-        bar.setListNavigationCallbacks(adapter, mode);
     }
 
     private static class TaskListFragment extends ListFragment
@@ -68,12 +57,22 @@ public class TaskListActivity extends Activity
         private ToodledoClient mClient;
         private String mFilterType;
 
+        public static TaskListFragment newInstance(String filter) {
+            TaskListFragment f = new TaskListFragment();
+            Bundle args = new Bundle();
+            args.putString(KEY_LIST_FILTER, filter);
+            f.setArguments(args);
+            return f;
+        }
+
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
+            Bundle args = getArguments();
+
             mAdapter = new TaskListAdapterBuilder().build();
             mClient = new ToodledoClient(null, getActivity());
-            mFilterType = "hotlist";
+            mFilterType = args.getString(KEY_LIST_FILTER, "hotlist");
 
             setHasOptionsMenu(true);
             setListAdapter(mAdapter);
@@ -395,6 +394,9 @@ public class TaskListActivity extends Activity
         }
 
         public static class Mode implements ActionBar.OnNavigationListener {
+            public static final String[] TITLES = { "Hotlist", "Inbox", "Next Action", "Reference", "Waiting", "Someday" };
+            public static final String[] FILTERS = { "hotlist", "inbox", "next_action", "reference", "waiting", "someday" };
+
             private Activity mmActivity;
             private List<Map<String, Object>> mmData;
 
@@ -403,39 +405,24 @@ public class TaskListActivity extends Activity
                 mmData = new LinkedList<Map<String, Object>>();
                 Map<String, Object> entry = null;
 
-                entry = new HashMap<String, Object>();
-                entry.put("title", "Hotlist");
-                entry.put("filter", "hotlist");
-                mmData.add(entry);
-
-                entry = new HashMap<String, Object>();
-                entry.put("title", "Inbox");
-                entry.put("filter", "inbox");
-                mmData.add(entry);
-
-                entry = new HashMap<String, Object>();
-                entry.put("title", "Next Action");
-                entry.put("filter", "next_action");
-                mmData.add(entry);
-
-                entry = new HashMap<String, Object>();
-                entry.put("title", "Reference");
-                entry.put("filter", "reference");
-                mmData.add(entry);
-
-                entry = new HashMap<String, Object>();
-                entry.put("title", "Waiting");
-                entry.put("filter", "waiting");
-                mmData.add(entry);
-
-                entry = new HashMap<String, Object>();
-                entry.put("title", "Someday");
-                entry.put("filter", "someday");
-                mmData.add(entry);
+                for (int i=0; i<TITLES.length; ++i) {
+                    entry = new HashMap<String, Object>();
+                    entry.put("title", TITLES[i]);
+                    entry.put("filter", FILTERS[i]);
+                    mmData.add(entry);
+                }
             }
 
             public List<Map<String, Object>> getData() {
                 return mmData;
+            }
+
+            public static String getTitle(String filter) {
+                try {
+                    return TITLES[Arrays.asList(FILTERS).indexOf(filter)];
+                } catch (IndexOutOfBoundsException e) {
+                    return "?";
+                }
             }
 
             @Override
