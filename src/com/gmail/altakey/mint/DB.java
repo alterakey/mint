@@ -261,4 +261,21 @@ public class DB {
             c.close();
         }
     }
+
+    public Task getTask(long taskId) {
+        Cursor c = conn.rawQuery(
+            String.format(TASK_QUERY, String.format("task=%d", taskId), DEFAULT_ORDER), null);
+        try {
+            c.moveToFirst();
+            while (!c.isAfterLast()) {
+                Task task = Task.fromCursor(c, 0);
+                task.resolved.folder = TaskFolder.fromCursor(c, 10);
+                task.resolved.context = TaskContext.fromCursor(c, 15);
+                return task;
+            }
+            return null;
+        } finally {
+            c.close();
+        }
+    }
 }

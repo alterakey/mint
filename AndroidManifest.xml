@@ -13,6 +13,7 @@
       </intent-filter>
     </activity>
     <activity android:name="TaskListActivity" />
+    <activity android:name="TaskEditActivity" />
     <activity android:name="LoginTroubleActivity" />
     <activity android:name="ConfigActivity" />
   </application>

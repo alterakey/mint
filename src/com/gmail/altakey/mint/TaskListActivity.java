@@ -152,7 +152,11 @@ public class TaskListActivity extends Activity
         @Override
         public void onListItemClick(ListView lv, View v, int position, long id) {
             super.onListItemClick(lv, v, position, id);
-            Log.d("TLA.TLF", String.format("would start edit at %d");
+            final Map<String, ?> map = (Map<String, ?>)mAdapter.getItem(position);
+            final Task task = (Task)map.get("task");
+            final Intent intent = new Intent(getActivity(), TaskEditActivity.class);
+            intent.putExtra(TaskEditActivity.KEY_TASK_ID, task.id);
+            startActivity(intent);
         }
 
         private Authenticator getAuthenticator() {
