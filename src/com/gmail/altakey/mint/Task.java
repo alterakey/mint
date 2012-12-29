@@ -95,7 +95,7 @@ public class Task {
                 .name("priority").value(task.priority)
                 .name("star").value(task.star)
                 .name("duedate").value(task.duedate)
-                .name("status").value(task.duedate)
+                .name("status").value(task.status)
                 .endObject();
         }
     }

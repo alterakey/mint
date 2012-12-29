@@ -47,7 +47,7 @@ public class TaskListActivity extends Activity
             .commit();
     }
 
-    private static class TaskListFragment extends ListFragment
+    public static class TaskListFragment extends ListFragment
     {
         public static final String TAG = "task_list";
 
@@ -76,6 +76,10 @@ public class TaskListActivity extends Activity
                     return "?";
                 }
             }
+        }
+
+        public String getFilter() {
+            return mFilterType;
         }
 
         public static TaskListFragment newInstance(String filter) {

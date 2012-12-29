@@ -53,9 +53,23 @@ public class TaskPostFragment extends DialogFragment {
 
         private Task build() {
             final Task t = new Task();
+            final int status = new DB.Filter(getActiveFilter()).getStatus();
             t.title = mmField.getText().toString();
-            t.duedate = (new Date().getTime() + DUE * 1000) / 1000;
+            if (status == DB.Filter.UNKNOWN) {
+                t.duedate = (new Date().getTime() + DUE * 1000) / 1000;
+            } else {
+                t.status = String.valueOf(status);
+            }
             return t;
+        }
+
+        private String getActiveFilter() {
+            TaskListActivity.TaskListFragment f = (TaskListActivity.TaskListFragment)getFragmentManager().findFragmentByTag(TaskListActivity.TaskListFragment.TAG);
+            if (f == null) {
+                return null;
+            } else {
+                return f.getFilter();
+            }
         }
     }
 
