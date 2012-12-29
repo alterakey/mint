@@ -39,7 +39,7 @@ public class TaskListActivity extends Activity
         if (filter == null) {
             filter = "hotlist";
         }
-        setTitle(TaskListFragment.getTitle(filter));
+        setTitle(new TaskListFragment.Filter(filter).getTitle());
 
         getFragmentManager()
             .beginTransaction()
@@ -50,12 +50,33 @@ public class TaskListActivity extends Activity
     private static class TaskListFragment extends ListFragment
     {
         public static final String TAG = "task_list";
-        public static final String[] TITLES = { "Hotlist", "Inbox", "Next Action", "Reference", "Waiting", "Someday" };
-        public static final String[] FILTERS = { "hotlist", "inbox", "next_action", "reference", "waiting", "someday" };
 
         private TaskListAdapter mAdapter;
         private ToodledoClient mClient;
         private String mFilterType;
+
+        public static class Filter {
+            private static final String[] ALL = { "hotlist", "inbox", "next_action", "reference", "waiting", "someday" };
+            private static final String[] TITLES = { "Hotlist", "Inbox", "Next Action", "Reference", "Waiting", "Someday" };
+
+            private String mmFilter;
+
+            public Filter(String filter) {
+                mmFilter = filter;
+            }
+
+            public List<String> getTitles() {
+                return Arrays.asList(TITLES);
+            }
+
+            public String getTitle() {
+                try {
+                    return TITLES[Arrays.asList(ALL).indexOf(mmFilter)];
+                } catch (IndexOutOfBoundsException e) {
+                    return "?";
+                }
+            }
+        }
 
         public static TaskListFragment newInstance(String filter) {
             TaskListFragment f = new TaskListFragment();
@@ -63,14 +84,6 @@ public class TaskListActivity extends Activity
             args.putString(KEY_LIST_FILTER, filter);
             f.setArguments(args);
             return f;
-        }
-
-        public static String getTitle(String filter) {
-            try {
-                return TITLES[Arrays.asList(FILTERS).indexOf(filter)];
-            } catch (IndexOutOfBoundsException e) {
-                return "?";
-            }
         }
 
         @Override
@@ -296,18 +309,14 @@ public class TaskListActivity extends Activity
                 Log.d("TLT", String.format("loading %s", mFilterType));
                 if ("hotlist".equals(mFilterType)) {
                     return db.getHotTasks();
-                } else if ("inbox".equals(mFilterType)) {
-                    return db.getTasks("status=\"0\" and completed=0", DB.DEFAULT_ORDER);
-                } else if ("next_action".equals(mFilterType)) {
-                    return db.getTasks("status=\"1\" and completed=0", DB.DEFAULT_ORDER);
-                } else if ("reference".equals(mFilterType)) {
-                    return db.getTasks("status=\"10\" and completed=0", DB.DEFAULT_ORDER);
-                } else if ("waiting".equals(mFilterType)) {
-                    return db.getTasks("status=\"5\" and completed=0", DB.DEFAULT_ORDER);
-                } else if ("someday".equals(mFilterType)) {
-                    return db.getTasks("status=\"8\" and completed=0", DB.DEFAULT_ORDER);
                 } else {
-                    return new LinkedList<Task>();
+                    final int status = new DB.Filter(mFilterType).getStatus();
+
+                    if (status == DB.Filter.UNKNOWN) {
+                        return new LinkedList<Task>();
+                    } else {
+                        return db.getTasks(String.format("status=\"%d\" and completed=0", status), DB.DEFAULT_ORDER);
+                    }
                 }
             }
 

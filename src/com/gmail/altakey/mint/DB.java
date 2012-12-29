@@ -18,6 +18,29 @@ public class DB {
     private static int ssRefs = 0;
     private android.content.Context mContext;
 
+    public static class Filter {
+        public static final int UNKNOWN = -1;
+
+        private static final Map<String, Integer> FOLDER_MAP = new HashMap<String, Integer>();
+        private String mmFilter;
+
+        public Filter(String filter) {
+            mmFilter = filter;
+            if (FOLDER_MAP.isEmpty()) {
+                FOLDER_MAP.put("inbox", 0);
+                FOLDER_MAP.put("next_action", 1);
+                FOLDER_MAP.put("reference", 10);
+                FOLDER_MAP.put("waiting", 5);
+                FOLDER_MAP.put("someday", 8);
+            }
+        }
+
+        public int getStatus() {
+            Integer ret = FOLDER_MAP.get(mmFilter);
+            return ret == null ? UNKNOWN : ret.intValue();
+        }
+    }
+
     public DB(android.content.Context c) {
         mContext = c;
     }
