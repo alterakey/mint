@@ -217,7 +217,10 @@ public class TaskListActivity extends Activity
             }
 
             protected void abort() {
-                getActivity().finish();
+                final Activity activity = getActivity();
+                if (activity != null) {
+                    activity.finish();
+                }
             }
 
             protected void abortWithErrorType(String type) {
