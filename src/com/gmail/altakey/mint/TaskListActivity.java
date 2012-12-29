@@ -1,5 +1,7 @@
 package com.gmail.altakey.mint;
 
+import com.example.android.swipedismiss.*;
+
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Dialog;
@@ -92,13 +94,31 @@ public class TaskListActivity extends Activity
         }
 
         @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
+        public void onActivityCreated(Bundle savedInstanceState) {
+            super.onActivityCreated(savedInstanceState);
             Bundle args = getArguments();
 
             mAdapter = new TaskListAdapterBuilder().build();
             mClient = new ToodledoClient(null, getActivity());
             mFilterType = args.getString(KEY_LIST_FILTER, "hotlist");
+
+            ListView listView = getListView();
+            SwipeDismissListViewTouchListener touchListener =
+                new SwipeDismissListViewTouchListener(
+                    listView,
+                    new SwipeDismissListViewTouchListener.OnDismissCallback() {
+                        @Override
+                        public void onDismiss(ListView listView, int[] reverseSortedPositions) {
+                            for (int position : reverseSortedPositions) {
+                                final Map<String, ?> e = (Map<String, ?>)mAdapter.getItem(position);
+                                new TaskCompleteTask((Task)e.get("task")).execute();
+                                mAdapter.remove(position);
+                            }
+                            mAdapter.notifyDataSetChanged();
+                        }
+                    });
+            listView.setOnTouchListener(touchListener);
+            listView.setOnScrollListener(touchListener.makeScrollListener());
 
             setHasOptionsMenu(true);
             setListAdapter(mAdapter);
@@ -132,9 +152,7 @@ public class TaskListActivity extends Activity
         @Override
         public void onListItemClick(ListView lv, View v, int position, long id) {
             super.onListItemClick(lv, v, position, id);
-            final TaskListAdapter adapter = (TaskListAdapter)getListAdapter();
-            final Map<String, ?> e = (Map<String, ?>)adapter.getItem(position);
-            new TaskCompleteTask((Task)e.get("task")).execute();
+            Log.d("TLA.TLF", String.format("would start edit at %d");
         }
 
         private Authenticator getAuthenticator() {
@@ -182,6 +200,10 @@ public class TaskListActivity extends Activity
                 for (Map<String, ?> e: toBeRemoved) {
                     mmmData.remove(e);
                 }
+            }
+
+            public void remove(int pos) {
+                mmmData.remove(pos);
             }
 
             public void reload() {
@@ -376,12 +398,6 @@ public class TaskListActivity extends Activity
             }
 
             @Override
-            protected void onPreExecute() {
-                startStrikeout(mmTask);
-                refresh();
-            }
-
-            @Override
             protected void doTask() throws IOException, Authenticator.Exception {
                 DB db = new DB(getActivity());
                 try {
@@ -395,30 +411,6 @@ public class TaskListActivity extends Activity
                         db.close();
                     }
                 }
-            }
-
-            @Override
-            protected void onPostExecute(Integer ret) {
-                super.onPostExecute(ret);
-                if (ret == OK) {
-                    completeStrikeout(mmTask);
-                    refresh();
-                } else if (ret == FAILURE) {
-                    stopStrikeout(mmTask);
-                    refresh();
-                }
-            }
-
-            private void completeStrikeout(Task t) {
-                mAdapter.removeTask(t);
-            }
-
-            private void startStrikeout(Task t) {
-                t.grayedout = true;
-            }
-
-            private void stopStrikeout(Task t) {
-                t.grayedout = false;
             }
         }
     }
