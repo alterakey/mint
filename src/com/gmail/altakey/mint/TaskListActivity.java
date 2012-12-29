@@ -39,7 +39,7 @@ public class TaskListActivity extends Activity
         if (filter == null) {
             filter = "hotlist";
         }
-        setTitle(TaskListFragment.Mode.getTitle(filter));
+        setTitle(TaskListFragment.getTitle(filter));
 
         getFragmentManager()
             .beginTransaction()
@@ -50,8 +50,8 @@ public class TaskListActivity extends Activity
     private static class TaskListFragment extends ListFragment
     {
         public static final String TAG = "task_list";
-
-        private static final int REQ_LOGIN_TROUBLE = 1;
+        public static final String[] TITLES = { "Hotlist", "Inbox", "Next Action", "Reference", "Waiting", "Someday" };
+        public static final String[] FILTERS = { "hotlist", "inbox", "next_action", "reference", "waiting", "someday" };
 
         private TaskListAdapter mAdapter;
         private ToodledoClient mClient;
@@ -63,6 +63,14 @@ public class TaskListActivity extends Activity
             args.putString(KEY_LIST_FILTER, filter);
             f.setArguments(args);
             return f;
+        }
+
+        public static String getTitle(String filter) {
+            try {
+                return TITLES[Arrays.asList(FILTERS).indexOf(filter)];
+            } catch (IndexOutOfBoundsException e) {
+                return "?";
+            }
         }
 
         @Override
@@ -394,51 +402,6 @@ public class TaskListActivity extends Activity
 
             private void stopStrikeout(Task t) {
                 t.grayedout = false;
-            }
-        }
-
-        public static class Mode implements ActionBar.OnNavigationListener {
-            public static final String[] TITLES = { "Hotlist", "Inbox", "Next Action", "Reference", "Waiting", "Someday" };
-            public static final String[] FILTERS = { "hotlist", "inbox", "next_action", "reference", "waiting", "someday" };
-
-            private Activity mmActivity;
-            private List<Map<String, Object>> mmData;
-
-            public Mode(Activity activity) {
-                mmActivity = activity;
-                mmData = new LinkedList<Map<String, Object>>();
-                Map<String, Object> entry = null;
-
-                for (int i=0; i<TITLES.length; ++i) {
-                    entry = new HashMap<String, Object>();
-                    entry.put("title", TITLES[i]);
-                    entry.put("filter", FILTERS[i]);
-                    mmData.add(entry);
-                }
-            }
-
-            public List<Map<String, Object>> getData() {
-                return mmData;
-            }
-
-            public static String getTitle(String filter) {
-                try {
-                    return TITLES[Arrays.asList(FILTERS).indexOf(filter)];
-                } catch (IndexOutOfBoundsException e) {
-                    return "?";
-                }
-            }
-
-            @Override
-            public boolean onNavigationItemSelected(int pos, long id) {
-                Map<String, Object> map = mmData.get(pos);
-                final String filter = (String)map.get("filter");
-                final TaskListFragment tlf = (TaskListFragment)mmActivity.getFragmentManager().findFragmentByTag(TaskListFragment.TAG);
-                if (tlf != null && !filter.equals(tlf.mFilterType)) {
-                    tlf.mFilterType = filter;
-                    tlf.reload();
-                }
-                return true;
             }
         }
     }
