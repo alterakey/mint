@@ -1,5 +1,6 @@
 package com.gmail.altakey.mint;
 
+import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
@@ -16,7 +17,7 @@ import java.util.Date;
 public class DB {
     public static SQLiteDatabase conn = null;
     private static int ssRefs = 0;
-    private android.content.Context mContext;
+    private Context mContext;
 
     public static class Filter {
         public static final int UNKNOWN = -1;
@@ -41,7 +42,7 @@ public class DB {
         }
     }
 
-    public DB(android.content.Context c) {
+    public DB(Context c) {
         mContext = c;
     }
 
@@ -75,7 +76,7 @@ public class DB {
         }
     }
 
-    public Map<String, Long> updatedSince(Status s) {
+    public Map<String, Long> updatedSince(TaskStatus s) {
         Map<String, Long> out = new HashMap<String, Long>();
         Cursor c = conn.rawQuery("select lastedit_folder, lastedit_context, lastedit_task, lastdelete_task from status limit 1", null);
         if (c.getCount() > 0) {
@@ -101,7 +102,7 @@ public class DB {
         try {
             conn.beginTransaction();
 
-            Status st = client.getStatus();
+            TaskStatus st = client.getStatus();
             Map<String, Long> flags = updatedSince(st);
 
             conn.execSQL("INSERT OR REPLACE INTO status (status, lastedit_folder, lastedit_context, lastedit_goal, lastedit_location, lastedit_task, lastdelete_task, lastedit_notebook, lastdelete_notebook) VALUES (?,?,?,?,?,?,?,?,?)",
@@ -118,7 +119,7 @@ public class DB {
                          });
 
             if (flags.containsKey("folder_delete")) {
-                for (Folder t : client.getFoldersDeletedAfter(flags.get("folder_delete"))) {
+                for (TaskFolder t : client.getFoldersDeletedAfter(flags.get("folder_delete"))) {
                     conn.execSQL(
                         "DELETE FROM folders WHERE folder=?",
                         new String[] {
@@ -138,7 +139,7 @@ public class DB {
             }
 
             if (flags.containsKey("folder")) {
-                for (Folder t : client.getFoldersAfter(flags.get("folder"))) {
+                for (TaskFolder t : client.getFoldersAfter(flags.get("folder"))) {
                     conn.execSQL(
                         "INSERT OR REPLACE INTO folders (folder, name, private, archived, ord) VALUES (?,?,?,?,?)",
                         new String[] {
@@ -152,7 +153,7 @@ public class DB {
             }
 
             if (flags.containsKey("context")) {
-                for (Context t : client.getContextsAfter(flags.get("context"))) {
+                for (TaskContext t : client.getContextsAfter(flags.get("context"))) {
                     conn.execSQL(
                         "INSERT OR REPLACE INTO contexts (context, name) VALUES (?,?)",
                         new String[] {
@@ -187,13 +188,13 @@ public class DB {
         }
     }
 
-    public List<Folder> getFolders() {
-        List<Folder> ret = new LinkedList<Folder>();
+    public List<TaskFolder> getFolders() {
+        List<TaskFolder> ret = new LinkedList<TaskFolder>();
         Cursor c = conn.rawQuery("SELECT folder,name,private,archived,ord FROM folders", null);
         try {
             c.moveToFirst();
             while (!c.isAfterLast()) {
-                ret.add(Folder.fromCursor(c, 0));
+                ret.add(TaskFolder.fromCursor(c, 0));
                 c.moveToNext();
             }
             return ret;
@@ -202,13 +203,13 @@ public class DB {
         }
     }
 
-    public List<Context> getContext() {
-        List<Context> ret = new LinkedList<Context>();
+    public List<TaskContext> getContext() {
+        List<TaskContext> ret = new LinkedList<TaskContext>();
         Cursor c = conn.rawQuery("SELECT context,name FROM contexts", null);
         try {
             c.moveToFirst();
             while (!c.isAfterLast()) {
-                ret.add(Context.fromCursor(c, 0));
+                ret.add(TaskContext.fromCursor(c, 0));
                 c.moveToNext();
             }
             return ret;
@@ -230,8 +231,8 @@ public class DB {
             c.moveToFirst();
             while (!c.isAfterLast()) {
                 Task task = Task.fromCursor(c, 0);
-                task.resolved.folder = Folder.fromCursor(c, 10);
-                task.resolved.context = Context.fromCursor(c, 15);
+                task.resolved.folder = TaskFolder.fromCursor(c, 10);
+                task.resolved.context = TaskContext.fromCursor(c, 15);
                 ret.add(task);
                 c.moveToNext();
             }
@@ -250,8 +251,8 @@ public class DB {
             c.moveToFirst();
             while (!c.isAfterLast()) {
                 Task task = Task.fromCursor(c, 0);
-                task.resolved.folder = Folder.fromCursor(c, 10);
-                task.resolved.context = Context.fromCursor(c, 15);
+                task.resolved.folder = TaskFolder.fromCursor(c, 10);
+                task.resolved.context = TaskContext.fromCursor(c, 15);
                 ret.add(task);
                 c.moveToNext();
             }

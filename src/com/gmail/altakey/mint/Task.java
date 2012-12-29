@@ -24,8 +24,8 @@ public class Task {
     public boolean grayedout;
 
     public class Resolved {
-        Folder folder;
-        Context context;
+        TaskFolder folder;
+        TaskContext context;
     };
 
     public void markAsDone() {

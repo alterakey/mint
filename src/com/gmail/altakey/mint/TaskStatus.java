@@ -6,7 +6,7 @@ import com.google.gson.stream.JsonWriter;
 
 import java.io.IOException;
 
-public class Status {
+public class TaskStatus {
     public String id;
     public long lastedit_folder;
     public long lastedit_context;
@@ -17,10 +17,10 @@ public class Status {
     public long lastedit_notebook;
     public long lastdelete_notebook;
 
-    public static class JsonAdapter extends TypeAdapter<Status> {
+    public static class JsonAdapter extends TypeAdapter<TaskStatus> {
         @Override
-        public Status read(JsonReader reader) throws IOException {
-            final Status status = new Status();
+        public TaskStatus read(JsonReader reader) throws IOException {
+            final TaskStatus status = new TaskStatus();
             reader.beginObject();
             while (reader.hasNext()) {
                 final String name = reader.nextName();
@@ -48,8 +48,8 @@ public class Status {
         }
 
         @Override
-        public void write(JsonWriter writer, Status value) throws IOException {
-            final Status status = value;
+        public void write(JsonWriter writer, TaskStatus value) throws IOException {
+            final TaskStatus status = value;
             writer
                 .beginObject()
                 .name("userid").value(status.id)

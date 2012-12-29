@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.app.ListFragment;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -162,7 +163,7 @@ public class TaskListActivity extends Activity
         private class TaskListAdapter extends SimpleAdapter {
             private List<Map<String, ?>> mmmData;
 
-            public TaskListAdapter(android.content.Context ctx, List<Map<String, ?>> data) {
+            public TaskListAdapter(Context ctx, List<Map<String, ?>> data) {
                 super(ctx,
                       data,
                       R.layout.list_item,
@@ -281,8 +282,8 @@ public class TaskListActivity extends Activity
                         if (t.completed != 0)
                             continue;
 
-                        Context c = t.resolved.context;
-                        Folder f = t.resolved.folder;
+                        TaskContext c = t.resolved.context;
+                        TaskFolder f = t.resolved.folder;
 
                         Map<String, Object> map = new HashMap<String, Object>();
                         map.put("task", t);

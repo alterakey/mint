@@ -8,21 +8,21 @@ import com.google.gson.stream.JsonWriter;
 
 import java.io.IOException;
 
-public class Context {
+public class TaskContext {
     public long id;
     public String name;
 
-    public static Context fromCursor(Cursor c, int offset) {
-        Context context = new Context();
+    public static TaskContext fromCursor(Cursor c, int offset) {
+        TaskContext context = new TaskContext();
         context.id = c.getLong(0 + offset);
         context.name = c.getString(1 + offset);
         return context.id != 0 ? context : null;
     }
 
-    public static class JsonAdapter extends TypeAdapter<Context> {
+    public static class JsonAdapter extends TypeAdapter<TaskContext> {
         @Override
-        public Context read(JsonReader reader) throws IOException {
-            final Context context = new Context();
+        public TaskContext read(JsonReader reader) throws IOException {
+            final TaskContext context = new TaskContext();
             reader.beginObject();
             while (reader.hasNext()) {
                 final String name = reader.nextName();
@@ -38,8 +38,8 @@ public class Context {
         }
 
         @Override
-        public void write(JsonWriter writer, Context value) throws IOException {
-            final Context context = value;
+        public void write(JsonWriter writer, TaskContext value) throws IOException {
+            final TaskContext context = value;
             writer
                 .beginObject()
                 .name("id").value(String.valueOf(context.id))

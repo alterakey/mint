@@ -42,9 +42,9 @@ public class MainActivity extends Activity {
             public static final String[] TITLES = { "INBOX", "Hotlist", "Next Action", "Reference", "Waiting", "Someday" };
             public static final String[] FILTERS = { "inbox", "hotlist", "next_action", "reference", "waiting", "someday" };
 
-            private android.content.Context mmmContext;
+            private Context mmmContext;
 
-            public AdapterBuilder(android.content.Context ctx) {
+            public AdapterBuilder(Context ctx) {
                 mmmContext = ctx;
             }
 

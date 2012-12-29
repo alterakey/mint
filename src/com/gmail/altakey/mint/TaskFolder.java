@@ -8,15 +8,15 @@ import com.google.gson.stream.JsonWriter;
 
 import java.io.IOException;
 
-public class Folder {
+public class TaskFolder {
     public long id;
     public String name;
     public long private_;
     public long archived;
     public long ord;
 
-    public static Folder fromCursor(Cursor c, int offset) {
-        Folder folder = new Folder();
+    public static TaskFolder fromCursor(Cursor c, int offset) {
+        TaskFolder folder = new TaskFolder();
         folder.id = c.getLong(0 + offset);
         folder.name = c.getString(1 + offset);
         folder.private_ = c.getLong(2 + offset);
@@ -25,10 +25,10 @@ public class Folder {
         return folder.id != 0 ? folder : null;
     }
 
-    public static class JsonAdapter extends TypeAdapter<Folder> {
+    public static class JsonAdapter extends TypeAdapter<TaskFolder> {
         @Override
-        public Folder read(JsonReader reader) throws IOException {
-            final Folder folder = new Folder();
+        public TaskFolder read(JsonReader reader) throws IOException {
+            final TaskFolder folder = new TaskFolder();
             reader.beginObject();
             while (reader.hasNext()) {
                 final String name = reader.nextName();
@@ -50,8 +50,8 @@ public class Folder {
         }
 
         @Override
-        public void write(JsonWriter writer, Folder value) throws IOException {
-            final Folder folder = value;
+        public void write(JsonWriter writer, TaskFolder value) throws IOException {
+            final TaskFolder folder = value;
             writer
                 .beginObject()
                 .name("id").value(String.valueOf(folder.id))

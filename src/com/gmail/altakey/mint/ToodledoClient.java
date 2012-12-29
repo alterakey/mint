@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.io.UnsupportedEncodingException;
 
+import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
@@ -31,9 +32,9 @@ import java.net.URLEncoder;
 
 public class ToodledoClient {
     private Authenticator mAuth;
-    private android.content.Context mContext;
+    private Context mContext;
 
-    public ToodledoClient(Authenticator auth, android.content.Context context) {
+    public ToodledoClient(Authenticator auth, Context context) {
         mContext = context;
         setAuthenticator(auth);
     }
@@ -42,11 +43,11 @@ public class ToodledoClient {
         mAuth = auth;
     }
 
-    public List<Folder> getFolders() throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
+    public List<TaskFolder> getFolders() throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
         return getFoldersAfter(0);
     }
 
-    public List<Folder> getFoldersAfter(long time) throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
+    public List<TaskFolder> getFoldersAfter(long time) throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
         final ByteArrayOutputStream os = issueRequest(
             new HttpGet(
                 getServiceUrl("folders/get", null)
@@ -54,13 +55,13 @@ public class ToodledoClient {
         );
 
         try {
-            return getGson().fromJson(os.toString("UTF-8"), new TypeToken<LinkedList<Folder>>(){}.getType());
+            return getGson().fromJson(os.toString("UTF-8"), new TypeToken<LinkedList<TaskFolder>>(){}.getType());
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public List<Folder> getFoldersDeletedAfter(long time) throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
+    public List<TaskFolder> getFoldersDeletedAfter(long time) throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
         final ByteArrayOutputStream os = issueRequest(
             new HttpGet(
                 getServiceUrl("folders/deleted", null)
@@ -68,17 +69,17 @@ public class ToodledoClient {
         );
 
         try {
-            return getGson().fromJson(os.toString("UTF-8"), new TypeToken<LinkedList<Folder>>(){}.getType());
+            return getGson().fromJson(os.toString("UTF-8"), new TypeToken<LinkedList<TaskFolder>>(){}.getType());
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public List<Context> getContexts() throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
+    public List<TaskContext> getContexts() throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
         return getContextsAfter(0);
     }
 
-    public List<Context> getContextsAfter(long time) throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
+    public List<TaskContext> getContextsAfter(long time) throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
         final ByteArrayOutputStream os = issueRequest(
             new HttpGet(
                 getServiceUrl("contexts/get", null)
@@ -86,7 +87,7 @@ public class ToodledoClient {
         );
 
         try {
-            return getGson().fromJson(os.toString("UTF-8"), new TypeToken<LinkedList<Context>>(){}.getType());
+            return getGson().fromJson(os.toString("UTF-8"), new TypeToken<LinkedList<TaskContext>>(){}.getType());
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
@@ -138,7 +139,7 @@ public class ToodledoClient {
         );
     }
 
-    public Status getStatus() throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
+    public TaskStatus getStatus() throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
         final ByteArrayOutputStream os = issueRequest(
             new HttpGet(
                 getServiceUrl("account/get", null)
@@ -146,7 +147,7 @@ public class ToodledoClient {
         );
 
         try {
-            return getGson().fromJson(os.toString("UTF-8"), Status.class);
+            return getGson().fromJson(os.toString("UTF-8"), TaskStatus.class);
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
@@ -154,10 +155,10 @@ public class ToodledoClient {
 
     private static Gson getGson() {
         GsonBuilder builder = new GsonBuilder();
-        builder.registerTypeAdapter(Status.class, new Status.JsonAdapter());
-        builder.registerTypeAdapter(Folder.class, new Folder.JsonAdapter());
+        builder.registerTypeAdapter(TaskStatus.class, new TaskStatus.JsonAdapter());
+        builder.registerTypeAdapter(TaskFolder.class, new TaskFolder.JsonAdapter());
         builder.registerTypeAdapter(Task.class, new Task.JsonAdapter());
-        builder.registerTypeAdapter(Context.class, new Context.JsonAdapter());
+        builder.registerTypeAdapter(TaskContext.class, new TaskContext.JsonAdapter());
         return builder.create();
     }
 
