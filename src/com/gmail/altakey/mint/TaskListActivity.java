@@ -208,7 +208,11 @@ public class TaskListActivity extends Activity
                 abortWithErrorType(LoginTroubleActivity.TYPE_FAILED);
             }
 
-            private void abortWithErrorType(String type) {
+            protected void abort() {
+                getActivity().finish();
+            }
+
+            protected void abortWithErrorType(String type) {
                 Intent intent = new Intent(getActivity(), LoginTroubleActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 intent.putExtra(LoginTroubleActivity.KEY_TYPE, type);
@@ -307,7 +311,7 @@ public class TaskListActivity extends Activity
 
             @Override
             protected void onCancelled() {
-                refresh();
+                abort();
             }
 
             private class Progress implements VolatileDialog {
