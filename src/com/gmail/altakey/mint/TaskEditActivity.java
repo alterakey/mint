@@ -38,7 +38,7 @@ public class TaskEditActivity extends Activity
         setContentView(R.layout.plate);
 
         Intent intent = getIntent();
-        int task = intent.getLongExtra(KEY_TASK_ID, -1);
+        long task = intent.getLongExtra(KEY_TASK_ID, -1);
 
         getFragmentManager()
             .beginTransaction()
@@ -53,10 +53,10 @@ public class TaskEditActivity extends Activity
         private ToodledoClient mClient;
         private Task mTask;
 
-        public static TaskEditFragment newInstance(int task) {
+        public static TaskEditFragment newInstance(long task) {
             TaskEditFragment f = new TaskEditFragment();
             Bundle args = new Bundle();
-            args.putInt(KEY_TASK_ID, task);
+            args.putLong(KEY_TASK_ID, task);
             f.setArguments(args);
             return f;
         }
