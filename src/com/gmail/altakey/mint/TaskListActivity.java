@@ -96,6 +96,7 @@ public class TaskListActivity extends Activity
         @Override
         public void onActivityCreated(Bundle savedInstanceState) {
             super.onActivityCreated(savedInstanceState);
+            final Context context = getActivity();
             Bundle args = getArguments();
 
             mAdapter = new TaskListAdapterBuilder().build();
@@ -111,7 +112,10 @@ public class TaskListActivity extends Activity
                         public void onDismiss(ListView listView, int[] reverseSortedPositions) {
                             for (int position : reverseSortedPositions) {
                                 final Map<String, ?> e = (Map<String, ?>)mAdapter.getItem(position);
-                                new TaskCompleteTask((Task)e.get("task")).execute();
+                                final Task task = (Task)e.get("task");
+                                final Intent intent = new Intent(ToodledoClientService.ACTION_COMPLETE);
+                                intent.putExtra(ToodledoClientService.EXTRA_TASKS, ToodledoClientService.asListOfTasks((Task)e.get("task")));
+                                context.startService(intent);
                                 mAdapter.remove(position);
                             }
                             mAdapter.notifyDataSetChanged();
@@ -284,7 +288,7 @@ public class TaskListActivity extends Activity
             }
         }
 
-        private class TaskListLoadTask extends ReportingNetworkTask {
+        private class TaskListLoadTask extends AsyncTask<Void, Void, Void> {
             private VolatileDialog mmProgress = new Progress();
             private List<Map<String, ?>> mmData;
 
@@ -298,11 +302,10 @@ public class TaskListActivity extends Activity
             }
 
             @Override
-            protected void doTask() throws IOException, Authenticator.Exception {
+            protected Void doInBackground(Void... args) {
                 DB db = new DB(getActivity());
                 try {
                     db.open();
-                    db.update(mClient);
 
                     for (Task t : getTasks(db)) {
                         if (t.completed != 0)
@@ -329,6 +332,7 @@ public class TaskListActivity extends Activity
                         //map.put("timer_flag", "(on)");
                         mmData.add(map);
                     }
+                    return null;
                 } finally {
                     if (db != null) {
                         db.close();
@@ -352,17 +356,9 @@ public class TaskListActivity extends Activity
             }
 
             @Override
-            protected void onPostExecute(Integer ret) {
-                super.onPostExecute(ret);
+            protected void onPostExecute(Void ret) {
                 mmProgress.dismiss();
-                if (ret == OK) {
-                    refresh();
-                }
-            }
-
-            @Override
-            protected void onCancelled() {
-                abort();
+                refresh();
             }
 
             private class Progress implements VolatileDialog {
@@ -372,7 +368,7 @@ public class TaskListActivity extends Activity
                 public void show() {
                     final ProgressDialog dialog = new ProgressDialog(getActivity());
                     dialog.setTitle("Getting tasks");
-                    dialog.setMessage("Querying remote tasks...");
+                    dialog.setMessage("Querying tasks...");
                     dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
                     dialog.setIndeterminate(true);
                     dialog.setCancelable(true);
@@ -390,30 +386,6 @@ public class TaskListActivity extends Activity
                 @Override
                 public void dismiss() {
                     mmmDialog.dismiss();
-                }
-            }
-        }
-
-        private class TaskCompleteTask extends ReportingNetworkTask {
-            private Task mmTask;
-
-            public TaskCompleteTask(Task task) {
-                mmTask = task;
-            }
-
-            @Override
-            protected void doTask() throws IOException, Authenticator.Exception {
-                DB db = new DB(getActivity());
-                try {
-                    mmTask.markAsDone();
-                    mClient.updateDone(mmTask);
-
-                    db.open();
-                    db.update(mClient);
-                } finally {
-                    if (db != null) {
-                        db.close();
-                    }
                 }
             }
         }
