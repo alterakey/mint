@@ -163,7 +163,7 @@ public class TaskListActivity extends Activity
             return Authenticator.create(getActivity());
         }
 
-        private void reload() {
+        public void reload() {
             mAdapter.reload();
         }
 

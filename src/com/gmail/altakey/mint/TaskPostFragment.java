@@ -5,6 +5,9 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.view.LayoutInflater;
@@ -14,13 +17,11 @@ import java.util.Date;
 import java.io.IOException;
 
 public class TaskPostFragment extends DialogFragment {
-    private ToodledoClient mClient;
     private static final int DUE = 86400;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mClient = new ToodledoClient(Authenticator.create(getActivity()), getActivity());
     }
 
     @Override
@@ -48,7 +49,7 @@ public class TaskPostFragment extends DialogFragment {
 
         @Override
         public void onClick(DialogInterface dialog, int which) {
-            new TaskAddTask(build()).execute();
+            new TaskAddTask(getActivity(), build()).execute();
         }
 
         private Task build() {
@@ -71,68 +72,46 @@ public class TaskPostFragment extends DialogFragment {
                 return f.getFilter();
             }
         }
-    }
 
-    private class TaskAddTask extends NetworkTask {
-        private Task mmTask;
-        private VolatileDialog mmProgress = new Progress();
+        private class TaskAddTask extends AsyncTask<Void, Void, Void> {
+            private Task mmmTask;
+            private Context mmmContext;
 
-        public TaskAddTask(Task task) {
-            mmTask = task;
-        }
+            public TaskAddTask(Context ctx, Task task) {
+                mmmTask = task;
+                mmmContext = ctx;
+            }
 
-        @Override
-        protected void onPreExecute() {
-            mmProgress.show();
-        }
-
-        @Override
-        protected void doTask() throws IOException, Authenticator.Exception {
-            DB db = new DB(getActivity());
-            try {
-                mClient.addTask(mmTask, null);
-
-                db.open();
-                db.update(mClient);
-            } finally {
-                if (db != null) {
-                    db.close();
+            @Override
+            protected Void doInBackground(Void... params) {
+                DB db = new DB(getActivity());
+                try {
+                    db.open();
+                    db.addTask(mmmTask);
+                    return null;
+                } finally {
+                    if (db != null) {
+                        db.close();
+                    }
                 }
             }
-        }
-
-        @Override
-        protected void onPostExecute(Integer ret) {
-            super.onPostExecute(ret);
-            mmProgress.dismiss();
-        }
-
-        private class Progress implements VolatileDialog {
-            private Dialog mmmDialog;
 
             @Override
-            public void show() {
-                final ProgressDialog dialog = new ProgressDialog(getActivity());
-                dialog.setTitle("Adding task");
-                dialog.setMessage("Adding task...");
-                dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                dialog.setIndeterminate(true);
-                dialog.setCancelable(true);
-                dialog.setCanceledOnTouchOutside(true);
-                dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-                    @Override
-                    public void onCancel(DialogInterface dialog) {
-                        cancel(true);
-                    }
-                });
-                mmmDialog = dialog;
-                mmmDialog.show();
+            protected void onPostExecute(Void ret) {
+                Intent intent = new Intent(ToodledoClientService.ACTION_ADD);
+                intent.putExtra(ToodledoClientService.EXTRA_TASKS, ToodledoClientService.asListOfTasks(mmmTask));
+                mmmContext.startService(intent);
+
+                poke();
             }
 
-            @Override
-            public void dismiss() {
-                mmmDialog.dismiss();
+            private void poke() {
+                TaskListActivity.TaskListFragment f = (TaskListActivity.TaskListFragment)getFragmentManager().findFragmentByTag(TaskListActivity.TaskListFragment.TAG);
+                if (f != null) {
+                    f.reload();
+                }
             }
+
         }
     }
 }

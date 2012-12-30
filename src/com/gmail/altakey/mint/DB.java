@@ -278,4 +278,20 @@ public class DB {
             c.close();
         }
     }
+
+    public void addTask(Task task) {
+        try {
+            conn.beginTransaction();
+            conn.execSQL(
+                "INSERT INTO tasks (title,modified,completed,folder,context,priority,star,duedate,status) VALUES (?,?,?,?,?,?,?,?,?)",
+                new String[] {
+                    task.title, String.valueOf(task.modified), String.valueOf(task.completed), String.valueOf(task.folder),
+                    String.valueOf(task.context), String.valueOf(task.priority), String.valueOf(task.star), String.valueOf(task.duedate), task.status
+                }
+            );
+            conn.setTransactionSuccessful();
+        } finally {
+            conn.endTransaction();
+        }
+    }
 }
