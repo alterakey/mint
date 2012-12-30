@@ -48,8 +48,8 @@ public class ToodledoClientService extends IntentService {
         mDB.close();
     }
 
-    public static String asListOfTasks(List<Task> tasks) {
-        return getGson().toJson(tasks, new TypeToken<LinkedList<Task>>(){}.getType());
+    public static String asListOfTasks(Task... tasks) {
+        return getGson().toJson(tasks, Task[].class);
     }
 
     @Override
