@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Binder;
 import android.os.IBinder;
+import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -23,9 +25,12 @@ public class ToodledoClientService extends IntentService {
     public static final String ACTION_COMPLETE = "com.gmail.altakey.mint.COMPLETE";
     public static final String ACTION_UPDATE = "com.gmail.altakey.mint.UPDATE";
     public static final String ACTION_ADD = "com.gmail.altakey.mint.ADD";
+    public static final String ACTION_LOGIN_TROUBLE = "com.gmail.altakey.mint.LOGIN_TROUBLE";
 
     public static final String EXTRA_TASKS = "tasks";
     public static final String EXTRA_TASK_FIELDS = "task_fields";
+    public static final String EXTRA_TROUBLE_TYPE = "trouble_type";
+    public static final String EXTRA_TROUBLE_MESSAGE = "trouble_message";
 
     private NetworkTask mNetworkTask;
     private DB mDB;
@@ -80,11 +85,38 @@ public class ToodledoClientService extends IntentService {
                     }
                 }
             } catch (IOException e) {
+                abort(e.getMessage());
+            } catch (Authenticator.FailureException e) {
+                fail();
+            } catch (Authenticator.BogusException e) {
+                require();
             } catch (Authenticator.Exception e) {
+                abort(e.getMessage());
             }
         } finally {
             mDB.close();
         }
+    }
+
+    private void abort(String message) {
+        Log.d("TCS.abort", "mark");
+        final Intent intent = new Intent(ACTION_LOGIN_TROUBLE);
+        intent.putExtra(EXTRA_TROUBLE_MESSAGE, message);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+    }
+
+    private void fail() {
+        Log.d("TCS.fail", "mark");
+        final Intent intent = new Intent(ACTION_LOGIN_TROUBLE);
+        intent.putExtra(EXTRA_TROUBLE_TYPE, LoginTroubleActivity.TYPE_FAILED);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+    }
+
+    private void require() {
+        Log.d("TCS.require", "mark");
+        final Intent intent = new Intent(ACTION_LOGIN_TROUBLE);
+        intent.putExtra(EXTRA_TROUBLE_TYPE, LoginTroubleActivity.TYPE_REQUIRED);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
     private static Gson getGson() {

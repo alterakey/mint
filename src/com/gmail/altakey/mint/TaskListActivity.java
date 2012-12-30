@@ -7,14 +7,17 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.app.ListFragment;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.*;
 import android.widget.*;
+import android.support.v4.content.LocalBroadcastManager;
 
 import java.io.IOException;
 import java.util.Date;
@@ -29,6 +32,8 @@ import java.util.Arrays;
 public class TaskListActivity extends Activity
 {
     public static final String KEY_LIST_FILTER = "filter";
+
+    private LoginTroubleReceiver mLoginTroubleReceiver = new LoginTroubleReceiver();
 
     /** Called when the activity is first created. */
     @Override
@@ -48,6 +53,18 @@ public class TaskListActivity extends Activity
             .beginTransaction()
             .add(R.id.frag, TaskListFragment.newInstance(filter), TaskListFragment.TAG)
             .commit();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mLoginTroubleReceiver.register();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mLoginTroubleReceiver.unregister();
     }
 
     public static class TaskListFragment extends ListFragment
@@ -254,41 +271,6 @@ public class TaskListActivity extends Activity
             }
         }
 
-        private abstract class ReportingNetworkTask extends NetworkTask {
-            @Override
-            protected void onLoginRequired() {
-                abortWithErrorType(LoginTroubleActivity.TYPE_REQUIRED);
-            }
-
-            @Override
-            protected void onLoginFailed() {
-                abortWithErrorType(LoginTroubleActivity.TYPE_FAILED);
-            }
-
-            protected void abort() {
-                final Activity activity = getActivity();
-                if (activity != null) {
-                    activity.finish();
-                }
-            }
-
-            protected void abortWithErrorType(String type) {
-                Intent intent = new Intent(getActivity(), LoginTroubleActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                intent.putExtra(LoginTroubleActivity.KEY_TYPE, type);
-                startActivity(intent);
-                getActivity().overridePendingTransition(0, 0);
-                getActivity().finish();
-                getActivity().overridePendingTransition(0, 0);
-            }
-
-            @Override
-            protected void onLoginError() {
-                super.onLoginError();
-                Toast.makeText(getActivity(), String.format("fetch failure: %s", mError.getMessage()), Toast.LENGTH_LONG).show();
-            }
-        }
-
         private class TaskListLoadTask extends AsyncTask<Void, Void, Void> {
             private VolatileDialog mmProgress = new Progress();
             private List<Map<String, ?>> mmData;
@@ -389,6 +371,45 @@ public class TaskListActivity extends Activity
                     mmmDialog.dismiss();
                 }
             }
+        }
+    }
+
+
+    private class LoginTroubleReceiver extends BroadcastReceiver {
+        private final Activity mmActivity = TaskListActivity.this;
+
+        public void register() {
+            final IntentFilter filter = new IntentFilter(ToodledoClientService.ACTION_LOGIN_TROUBLE);
+            Log.d("TLA.LTR", "registered");
+            LocalBroadcastManager.getInstance(mmActivity).registerReceiver(this, filter);
+        }
+
+        public void unregister() {
+            Log.d("TLA.LTR", "unregistered");
+            LocalBroadcastManager.getInstance(mmActivity).unregisterReceiver(this);
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String type = intent.getStringExtra(ToodledoClientService.EXTRA_TROUBLE_TYPE);
+            Log.d("TLA.LTR", "received");
+            if (LoginTroubleActivity.TYPE_REQUIRED.equals(type)
+                || LoginTroubleActivity.TYPE_FAILED.equals(type)) {
+                abortWithErrorType(type);
+            } else {
+                final String error = intent.getStringExtra(ToodledoClientService.EXTRA_TROUBLE_MESSAGE);
+                Toast.makeText(mmActivity, String.format("fetch failure: %s", error), Toast.LENGTH_LONG).show();
+            }
+        }
+
+        protected void abortWithErrorType(String type) {
+            final Intent intent = new Intent(mmActivity, LoginTroubleActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            intent.putExtra(LoginTroubleActivity.KEY_TYPE, type);
+            startActivity(intent);
+            overridePendingTransition(0, 0);
+            finish();
+            overridePendingTransition(0, 0);
         }
     }
 }
