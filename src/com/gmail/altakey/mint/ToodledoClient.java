@@ -139,7 +139,7 @@ public class ToodledoClient {
 
         issueRequest(
             new HttpPost(
-                getServiceUrl("tasks/add", String.format("tasks=%s%s", URLEncoder.encode(getGson().toJson(tasks.toArray(new Task[0])), fields)))
+                getServiceUrl("tasks/add", String.format("tasks=%s%s", URLEncoder.encode(getGson().toJson(tasks.toArray(new Task[0])), "UTF-8"), fields))
             )
         );
     }
@@ -153,7 +153,7 @@ public class ToodledoClient {
 
         issueRequest(
             new HttpPost(
-                getServiceUrl("tasks/edit", String.format("tasks=%s%s", URLEncoder.encode(getGson().toJson(tasks.toArray(new Task[0])), fields)))
+                getServiceUrl("tasks/edit", String.format("tasks=%s%s", URLEncoder.encode(getGson().toJson(tasks.toArray(new Task[0])), "UTF-8"), fields))
             )
         );
     }
@@ -184,7 +184,7 @@ public class ToodledoClient {
     public void updateDone(Task t) throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
         issueRequest(
             new HttpPost(
-                getServiceUrl("tasks/edit", String.format("tasks=%s", URLEncoder.encode(getGson().toJson(new Task[] {t}))))
+                getServiceUrl("tasks/edit", String.format("tasks=%s", URLEncoder.encode(getGson().toJson(new Task[] {t}), "UTF-8")))
             )
         );
     }
