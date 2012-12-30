@@ -72,7 +72,6 @@ public class TaskListActivity extends Activity
         public static final String TAG = "task_list";
 
         private TaskListAdapter mAdapter;
-        private ToodledoClient mClient;
         private String mFilterType;
 
         public static class Filter {
@@ -117,7 +116,6 @@ public class TaskListActivity extends Activity
             Bundle args = getArguments();
 
             mAdapter = new TaskListAdapterBuilder().build();
-            mClient = new ToodledoClient(null, getActivity());
             mFilterType = args.getString(KEY_LIST_FILTER, "hotlist");
 
             ListView listView = getListView();
@@ -167,7 +165,6 @@ public class TaskListActivity extends Activity
         @Override
         public void onResume() {
             super.onResume();
-            mClient.setAuthenticator(getAuthenticator());
             reload();
         }
 
