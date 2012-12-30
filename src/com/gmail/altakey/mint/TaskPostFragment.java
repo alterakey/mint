@@ -98,7 +98,8 @@ public class TaskPostFragment extends DialogFragment {
 
             @Override
             protected void onPostExecute(Void ret) {
-                Intent intent = new Intent(ToodledoClientService.ACTION_ADD);
+                Intent intent = new Intent(mmmContext, ToodledoClientService.class);
+                intent.setAction(ToodledoClientService.ACTION_ADD);
                 intent.putExtra(ToodledoClientService.EXTRA_TASKS, ToodledoClientService.asListOfTasks(mmmTask));
                 mmmContext.startService(intent);
 

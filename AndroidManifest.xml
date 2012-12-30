@@ -16,6 +16,7 @@
     <activity android:name="TaskEditActivity" />
     <activity android:name="LoginTroubleActivity" />
     <activity android:name="ConfigActivity" />
+    <service android:name="ToodledoClientService" />
   </application>
   <uses-permission android:name="android.permission.INTERNET" />
 </manifest>
