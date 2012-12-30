@@ -165,6 +165,7 @@ public class TaskListActivity extends Activity
         @Override
         public void onResume() {
             super.onResume();
+            update();
             reload();
         }
 
@@ -188,6 +189,13 @@ public class TaskListActivity extends Activity
 
         private void refresh() {
             mAdapter.notifyDataSetChanged();
+        }
+
+        private void update() {
+            final Context context = getActivity();
+            final Intent intent = new Intent(context, ToodledoClientService.class);
+            intent.setAction(ToodledoClientService.ACTION_UPDATE);
+            context.startService(intent);
         }
 
         public class TaskListAdapterBuilder {
@@ -370,7 +378,6 @@ public class TaskListActivity extends Activity
             }
         }
     }
-
 
     private class LoginTroubleReceiver extends BroadcastReceiver {
         private final Activity mmActivity = TaskListActivity.this;
