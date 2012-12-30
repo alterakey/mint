@@ -22,7 +22,7 @@ public class TaskFolder {
         folder.private_ = c.getLong(2 + offset);
         folder.archived = c.getLong(3 + offset);
         folder.ord = c.getLong(4 + offset);
-        return folder.id != 0 ? folder : null;
+        return folder;
     }
 
     public static class JsonAdapter extends TypeAdapter<TaskFolder> {

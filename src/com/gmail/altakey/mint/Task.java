@@ -44,7 +44,7 @@ public class Task {
         task.star = c.getLong(7 + offset);
         task.duedate = c.getLong(8 + offset);
         task.status = c.getString(9 + offset);
-        return task.id != 0 ? task : null;
+        return task;
     }
 
     public static class JsonAdapter extends TypeAdapter<Task> {

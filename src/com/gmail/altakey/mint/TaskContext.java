@@ -16,7 +16,7 @@ public class TaskContext {
         TaskContext context = new TaskContext();
         context.id = c.getLong(0 + offset);
         context.name = c.getString(1 + offset);
-        return context.id != 0 ? context : null;
+        return context;
     }
 
     public static class JsonAdapter extends TypeAdapter<TaskContext> {
