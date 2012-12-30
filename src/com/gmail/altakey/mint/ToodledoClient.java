@@ -17,6 +17,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.reflect.TypeToken;
+import java.util.Arrays;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Map;
@@ -130,11 +131,29 @@ public class ToodledoClient {
     }
 
     public void addTask(Task t, String[] additionalFields) throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
+        addTasks(Arrays.asList(t), additionalFields);
+    }
+
+    public void addTasks(List<Task> tasks, String[] additionalFields) throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
         final String fields = additionalFields == null ? "" : String.format("&fields=%s", Joiner.on(",").join(additionalFields));
 
         issueRequest(
             new HttpPost(
-                getServiceUrl("tasks/add", String.format("tasks=%s%s", URLEncoder.encode(getGson().toJson(new Task[] {t})), fields))
+                getServiceUrl("tasks/add", String.format("tasks=%s%s", URLEncoder.encode(getGson().toJson(tasks.toArray(new Task[0])), fields)))
+            )
+        );
+    }
+
+    public void commitTask(Task t, String[] additionalFields) throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
+        commitTasks(Arrays.asList(t), additionalFields);
+    }
+
+    public void commitTasks(List<Task> tasks, String[] additionalFields) throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
+        final String fields = additionalFields == null ? "" : String.format("&fields=%s", Joiner.on(",").join(additionalFields));
+
+        issueRequest(
+            new HttpPost(
+                getServiceUrl("tasks/edit", String.format("tasks=%s%s", URLEncoder.encode(getGson().toJson(tasks.toArray(new Task[0])), fields)))
             )
         );
     }
