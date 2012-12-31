@@ -51,7 +51,7 @@ public class LoginTroubleActivity extends Activity
         finish();
     }
 
-    private class LoginRequiredFragment extends Fragment {
+    public class LoginRequiredFragment extends Fragment {
         private static final int REQ_SET_LOGIN = 1;
 
         @Override
@@ -78,7 +78,7 @@ public class LoginTroubleActivity extends Activity
         }
     }
 
-    private class LoginFailedFragment extends Fragment {
+    public class LoginFailedFragment extends Fragment {
         private static final int REQ_SET_LOGIN = 1;
 
         @Override

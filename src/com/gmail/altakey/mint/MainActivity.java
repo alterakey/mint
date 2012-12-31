@@ -23,7 +23,7 @@ public class MainActivity extends Activity {
             .commit();
     }
 
-    private static class MainFragment extends ListFragment {
+    public static class MainFragment extends ListFragment {
         @Override
         public void onActivityCreated(Bundle savedInstanceState) {
             super.onActivityCreated(savedInstanceState);
