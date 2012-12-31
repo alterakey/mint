@@ -384,19 +384,16 @@ public class TaskListActivity extends Activity
 
         public void register() {
             final IntentFilter filter = new IntentFilter(ToodledoClientService.ACTION_LOGIN_TROUBLE);
-            Log.d("TLA.LTR", "registered");
             LocalBroadcastManager.getInstance(mmActivity).registerReceiver(this, filter);
         }
 
         public void unregister() {
-            Log.d("TLA.LTR", "unregistered");
             LocalBroadcastManager.getInstance(mmActivity).unregisterReceiver(this);
         }
 
         @Override
         public void onReceive(Context context, Intent intent) {
             final String type = intent.getStringExtra(ToodledoClientService.EXTRA_TROUBLE_TYPE);
-            Log.d("TLA.LTR", "received");
             if (LoginTroubleActivity.TYPE_REQUIRED.equals(type)
                 || LoginTroubleActivity.TYPE_FAILED.equals(type)) {
                 abortWithErrorType(type);

@@ -99,21 +99,18 @@ public class ToodledoClientService extends IntentService {
     }
 
     private void abort(String message) {
-        Log.d("TCS.abort", "mark");
         final Intent intent = new Intent(ACTION_LOGIN_TROUBLE);
         intent.putExtra(EXTRA_TROUBLE_MESSAGE, message);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
     private void fail() {
-        Log.d("TCS.fail", "mark");
         final Intent intent = new Intent(ACTION_LOGIN_TROUBLE);
         intent.putExtra(EXTRA_TROUBLE_TYPE, LoginTroubleActivity.TYPE_FAILED);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
     private void require() {
-        Log.d("TCS.require", "mark");
         final Intent intent = new Intent(ACTION_LOGIN_TROUBLE);
         intent.putExtra(EXTRA_TROUBLE_TYPE, LoginTroubleActivity.TYPE_REQUIRED);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
