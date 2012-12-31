@@ -62,7 +62,7 @@ public class ToodledoClientService extends IntentService {
         final String action = intent.getAction();
 
         try {
-            mDB.open();
+            mDB.openForWriting();
 
             try {
                 if (ACTION_REAUTH.equals(action)) {

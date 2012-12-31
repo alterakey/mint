@@ -47,8 +47,16 @@ public class DB {
     }
 
     public SQLiteDatabase open() {
+        return open(false);
+    }
+
+    public SQLiteDatabase openForWriting() {
+        return open(true);
+    }
+
+    private SQLiteDatabase open(boolean writable) {
         if (this.conn == null) {
-            this.conn = new SQLiteOpenHelper(mContext, "toodledo", null, 1) {
+            final SQLiteOpenHelper helper = new SQLiteOpenHelper(mContext, "toodledo", null, 1) {
                 @Override
                 public void onCreate(SQLiteDatabase db) {
                     db.execSQL("CREATE TABLE IF NOT EXISTS tasks (id INTEGER PRIMARY KEY AUTOINCREMENT, task BIGINT UNIQUE, title TEXT, modified BIGINT, completed TEXT, folder BIGINT, context BIGINT, priority INTEGER, star INTEGER, duedate BIGINT, status BIGINT)");
@@ -60,7 +68,13 @@ public class DB {
                 @Override
                 public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
                 }
-            }.getWritableDatabase();
+            };
+
+            if (writable == false) {
+                this.conn = helper.getReadableDatabase();
+            } else {
+                this.conn = helper.getWritableDatabase();
+            }
         }
         ++ssRefs;
         return this.conn;
