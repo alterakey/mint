@@ -26,6 +26,8 @@ public class ToodledoClientService extends IntentService {
     public static final String ACTION_UPDATE = "com.gmail.altakey.mint.UPDATE";
     public static final String ACTION_ADD = "com.gmail.altakey.mint.ADD";
     public static final String ACTION_LOGIN_TROUBLE = "com.gmail.altakey.mint.LOGIN_TROUBLE";
+    public static final String ACTION_ADD_DONE = "com.gmail.altakey.mint.ADD_DONE";
+    public static final String ACTION_UPDATE_DONE = "com.gmail.altakey.mint.UPDATE_DONE";
 
     public static final String EXTRA_TASKS = "tasks";
     public static final String EXTRA_TASK_FIELDS = "task_fields";
@@ -69,6 +71,7 @@ public class ToodledoClientService extends IntentService {
                     reauth();
                 } else if (ACTION_UPDATE.equals(action)) {
                     update();
+                    update_done();
                 } else {
                     final List<Task> tasks = getGson().fromJson(intent.getStringExtra(EXTRA_TASKS), new TypeToken<LinkedList<Task>>(){}.getType());
 
@@ -81,6 +84,7 @@ public class ToodledoClientService extends IntentService {
                             commit(tasks, fields);
                         } else if (ACTION_ADD.equals(action)) {
                             add(tasks, fields);
+                            add_done();
                         }
                     }
                 }
@@ -113,6 +117,16 @@ public class ToodledoClientService extends IntentService {
     private void require() {
         final Intent intent = new Intent(ACTION_LOGIN_TROUBLE);
         intent.putExtra(EXTRA_TROUBLE_TYPE, LoginTroubleActivity.TYPE_REQUIRED);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+    }
+
+    private void update_done() {
+        final Intent intent = new Intent(ACTION_UPDATE_DONE);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+    }
+
+    private void add_done() {
+        final Intent intent = new Intent(ACTION_ADD_DONE);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 

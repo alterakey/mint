@@ -166,7 +166,6 @@ public class TaskListActivity extends Activity
         public void onResume() {
             super.onResume();
             update();
-            reload();
         }
 
         @Override
@@ -183,7 +182,7 @@ public class TaskListActivity extends Activity
             return Authenticator.create(getActivity());
         }
 
-        public void reload() {
+        private void reload() {
             mAdapter.reload();
         }
 
@@ -383,7 +382,10 @@ public class TaskListActivity extends Activity
         private final Activity mmActivity = TaskListActivity.this;
 
         public void register() {
-            final IntentFilter filter = new IntentFilter(ToodledoClientService.ACTION_LOGIN_TROUBLE);
+            final IntentFilter filter = new IntentFilter();
+            filter.addAction(ToodledoClientService.ACTION_LOGIN_TROUBLE);
+            filter.addAction(ToodledoClientService.ACTION_UPDATE_DONE);
+            filter.addAction(ToodledoClientService.ACTION_ADD_DONE);
             LocalBroadcastManager.getInstance(mmActivity).registerReceiver(this, filter);
         }
 
@@ -393,13 +395,19 @@ public class TaskListActivity extends Activity
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            final String type = intent.getStringExtra(ToodledoClientService.EXTRA_TROUBLE_TYPE);
-            if (LoginTroubleActivity.TYPE_REQUIRED.equals(type)
-                || LoginTroubleActivity.TYPE_FAILED.equals(type)) {
-                abortWithErrorType(type);
+            final String action = intent.getAction();
+            if (ToodledoClientService.ACTION_UPDATE_DONE.equals(action)
+                || ToodledoClientService.ACTION_ADD_DONE.equals(action)) {
+                poke();
             } else {
-                final String error = intent.getStringExtra(ToodledoClientService.EXTRA_TROUBLE_MESSAGE);
-                Toast.makeText(mmActivity, String.format("fetch failure: %s", error), Toast.LENGTH_LONG).show();
+                final String type = intent.getStringExtra(ToodledoClientService.EXTRA_TROUBLE_TYPE);
+                if (LoginTroubleActivity.TYPE_REQUIRED.equals(type)
+                    || LoginTroubleActivity.TYPE_FAILED.equals(type)) {
+                    abortWithErrorType(type);
+                } else {
+                    final String error = intent.getStringExtra(ToodledoClientService.EXTRA_TROUBLE_MESSAGE);
+                    Toast.makeText(mmActivity, String.format("fetch failure: %s", error), Toast.LENGTH_LONG).show();
+                }
             }
         }
 
@@ -411,6 +419,13 @@ public class TaskListActivity extends Activity
             overridePendingTransition(0, 0);
             finish();
             overridePendingTransition(0, 0);
+        }
+
+        protected void poke() {
+            final TaskListFragment f = (TaskListFragment)getFragmentManager().findFragmentByTag(TaskListFragment.TAG);
+            if (f != null) {
+                f.reload();
+            }
         }
     }
 }
