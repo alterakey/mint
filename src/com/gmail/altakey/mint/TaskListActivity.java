@@ -187,6 +187,10 @@ public class TaskListActivity extends Activity
             mAdapter.reload();
         }
 
+        private void reloadSilently() {
+            mAdapter.reloadSilently();
+        }
+
         private void refresh() {
             mAdapter.notifyDataSetChanged();
         }
@@ -239,7 +243,12 @@ public class TaskListActivity extends Activity
 
             public void reload() {
                 mmmData.clear();
-                new TaskListLoadTask(mmmData).execute();
+                new TaskListLoadTask(mmmData, false).execute();
+            }
+
+            public void reloadSilently() {
+                mmmData.clear();
+                new TaskListLoadTask(mmmData, true).execute();
             }
 
             @Override
@@ -277,11 +286,16 @@ public class TaskListActivity extends Activity
         }
 
         private class TaskListLoadTask extends AsyncTask<Void, Void, List<Task>> {
-            private VolatileDialog mmProgress = new Progress();
+            private VolatileDialog mmProgress;
             private List<Map<String, ?>> mmData;
 
-            public TaskListLoadTask(List<Map<String, ?>> data) {
+            public TaskListLoadTask(List<Map<String, ?>> data, boolean silent) {
                 mmData = data;
+                if (silent) {
+                    mmProgress = new NullProgress();
+                } else {
+                    mmProgress = new Progress();
+                }
             }
 
             @Override
@@ -373,6 +387,16 @@ public class TaskListActivity extends Activity
                     mmmDialog.dismiss();
                 }
             }
+
+            private class NullProgress implements VolatileDialog {
+                @Override
+                public void show() {
+                }
+
+                @Override
+                public void dismiss() {
+                }
+            }
         }
     }
 
@@ -422,7 +446,7 @@ public class TaskListActivity extends Activity
         protected void poke() {
             final TaskListFragment f = (TaskListFragment)getFragmentManager().findFragmentByTag(TaskListFragment.TAG);
             if (f != null) {
-                f.reload();
+                f.reloadSilently();
             }
         }
     }
