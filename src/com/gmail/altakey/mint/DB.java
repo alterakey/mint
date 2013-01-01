@@ -15,8 +15,8 @@ import java.util.Date;
 
 // Primarily cares synchronizers
 public class DB {
-    public static SQLiteDatabase conn = null;
-    private static int ssRefs = 0;
+    private static SQLiteDatabase sConn;
+
     private Context mContext;
 
     public static class Filter {
@@ -55,7 +55,7 @@ public class DB {
     }
 
     private SQLiteDatabase open(boolean writable) {
-        if (this.conn == null) {
+        if (sConn == null) {
             final SQLiteOpenHelper helper = new SQLiteOpenHelper(mContext, "toodledo", null, 1) {
                 @Override
                 public void onCreate(SQLiteDatabase db) {
@@ -71,28 +71,20 @@ public class DB {
             };
 
             if (writable == false) {
-                this.conn = helper.getReadableDatabase();
+                sConn = helper.getReadableDatabase();
             } else {
-                this.conn = helper.getWritableDatabase();
+                sConn = helper.getWritableDatabase();
             }
         }
-        ++ssRefs;
-        return this.conn;
+        return sConn;
     }
 
     public void close() {
-        if (--ssRefs <= 0) {
-            if (this.conn != null) {
-                this.conn.close();
-                this.conn = null;
-            }
-            ssRefs = 0;
-        }
     }
 
     public Map<String, Long> updatedSince(TaskStatus s) {
         Map<String, Long> out = new HashMap<String, Long>();
-        Cursor c = conn.rawQuery("select lastedit_folder, lastedit_context, lastedit_task, lastdelete_task from status limit 1", null);
+        Cursor c = sConn.rawQuery("select lastedit_folder, lastedit_context, lastedit_task, lastdelete_task from status limit 1", null);
         if (c.getCount() > 0) {
             c.moveToFirst();
             if (s.lastedit_folder > c.getLong(0))
@@ -114,12 +106,12 @@ public class DB {
 
     public void update(ToodledoClient client) throws IOException, Authenticator.BogusException, Authenticator.FailureException, Authenticator.ErrorException {
         try {
-            conn.beginTransaction();
+            sConn.beginTransaction();
 
             TaskStatus st = client.getStatus();
             Map<String, Long> flags = updatedSince(st);
 
-            conn.execSQL("INSERT OR REPLACE INTO status (status, lastedit_folder, lastedit_context, lastedit_goal, lastedit_location, lastedit_task, lastdelete_task, lastedit_notebook, lastdelete_notebook) VALUES (?,?,?,?,?,?,?,?,?)",
+            sConn.execSQL("INSERT OR REPLACE INTO status (status, lastedit_folder, lastedit_context, lastedit_goal, lastedit_location, lastedit_task, lastdelete_task, lastedit_notebook, lastdelete_notebook) VALUES (?,?,?,?,?,?,?,?,?)",
                          new String[] {
                              st.id,
                              String.valueOf(st.lastedit_folder),
@@ -134,7 +126,7 @@ public class DB {
 
             if (flags.containsKey("folder_delete")) {
                 for (TaskFolder t : client.getFoldersDeletedAfter(flags.get("folder_delete"))) {
-                    conn.execSQL(
+                    sConn.execSQL(
                         "DELETE FROM folders WHERE folder=?",
                         new String[] {
                             String.valueOf(t.id)
@@ -144,7 +136,7 @@ public class DB {
 
             if (flags.containsKey("task_delete")) {
                 for (Task t : client.getTasksDeletedAfter(flags.get("task_delete"))) {
-                    conn.execSQL(
+                    sConn.execSQL(
                         "DELETE FROM tasks WHERE task=?",
                         new String[] {
                             String.valueOf(t.id)
@@ -154,7 +146,7 @@ public class DB {
 
             if (flags.containsKey("folder")) {
                 for (TaskFolder t : client.getFoldersAfter(flags.get("folder"))) {
-                    conn.execSQL(
+                    sConn.execSQL(
                         "INSERT OR REPLACE INTO folders (folder, name, private, archived, ord) VALUES (?,?,?,?,?)",
                         new String[] {
                             String.valueOf(t.id),
@@ -168,7 +160,7 @@ public class DB {
 
             if (flags.containsKey("context")) {
                 for (TaskContext t : client.getContextsAfter(flags.get("context"))) {
-                    conn.execSQL(
+                    sConn.execSQL(
                         "INSERT OR REPLACE INTO contexts (context, name) VALUES (?,?)",
                         new String[] {
                             String.valueOf(t.id),
@@ -179,7 +171,7 @@ public class DB {
 
             if (flags.containsKey("task")) {
                 for (Task t : client.getTasksAfter(flags.get("task"))) {
-                    conn.execSQL(
+                    sConn.execSQL(
                         "INSERT OR REPLACE INTO tasks (task, title, modified, completed, folder, context, priority, star, duedate, status) VALUES (?,?,?,?,?,?,?,?,?,?)",
                         new String[] {
                             String.valueOf(t.id),
@@ -196,15 +188,15 @@ public class DB {
                 }
             }
 
-            conn.setTransactionSuccessful();
+            sConn.setTransactionSuccessful();
         } finally {
-            conn.endTransaction();
+            sConn.endTransaction();
         }
     }
 
     public List<TaskFolder> getFolders() {
         List<TaskFolder> ret = new LinkedList<TaskFolder>();
-        Cursor c = conn.rawQuery("SELECT folder,name,private,archived,ord FROM folders", null);
+        Cursor c = sConn.rawQuery("SELECT folder,name,private,archived,ord FROM folders", null);
         try {
             c.moveToFirst();
             while (!c.isAfterLast()) {
@@ -219,7 +211,7 @@ public class DB {
 
     public List<TaskContext> getContext() {
         List<TaskContext> ret = new LinkedList<TaskContext>();
-        Cursor c = conn.rawQuery("SELECT context,name FROM contexts", null);
+        Cursor c = sConn.rawQuery("SELECT context,name FROM contexts", null);
         try {
             c.moveToFirst();
             while (!c.isAfterLast()) {
@@ -239,7 +231,7 @@ public class DB {
 
     public List<Task> getTasks(String filter, String order) {
         List<Task> ret = new LinkedList<Task>();
-        Cursor c = conn.rawQuery(
+        Cursor c = sConn.rawQuery(
             String.format(TASK_QUERY, filter, DEFAULT_ORDER), null);
         try {
             c.moveToFirst();
@@ -259,7 +251,7 @@ public class DB {
     public List<Task> getHotTasks() {
         List<Task> ret = new LinkedList<Task>();
         String due = String.format("%d", (new Date().getTime() + (7 * 86400 * 1000)) / 1000);
-        Cursor c = conn.rawQuery(
+        Cursor c = sConn.rawQuery(
             String.format(TASK_QUERY, HOT_FILTER, DEFAULT_ORDER), new String[] { due });
         try {
             c.moveToFirst();
@@ -277,7 +269,7 @@ public class DB {
     }
 
     public Task getTask(long taskId) {
-        Cursor c = conn.rawQuery(
+        Cursor c = sConn.rawQuery(
             String.format(TASK_QUERY, String.format("task=%d", taskId), DEFAULT_ORDER), null);
         try {
             c.moveToFirst();
@@ -295,17 +287,17 @@ public class DB {
 
     public void addTask(Task task) {
         try {
-            conn.beginTransaction();
-            conn.execSQL(
+            sConn.beginTransaction();
+            sConn.execSQL(
                 "INSERT INTO tasks (title,modified,completed,folder,context,priority,star,duedate,status) VALUES (?,?,?,?,?,?,?,?,?)",
                 new String[] {
                     task.title, String.valueOf(task.modified), String.valueOf(task.completed), String.valueOf(task.folder),
                     String.valueOf(task.context), String.valueOf(task.priority), String.valueOf(task.star), String.valueOf(task.duedate), task.status
                 }
             );
-            conn.setTransactionSuccessful();
+            sConn.setTransactionSuccessful();
         } finally {
-            conn.endTransaction();
+            sConn.endTransaction();
         }
     }
 }
