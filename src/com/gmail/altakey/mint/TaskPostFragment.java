@@ -86,7 +86,7 @@ public class TaskPostFragment extends DialogFragment {
             protected Void doInBackground(Void... params) {
                 DB db = new DB(getActivity());
                 try {
-                    db.open();
+                    db.openForWriting();
                     db.addTask(mmmTask);
                     return null;
                 } finally {
