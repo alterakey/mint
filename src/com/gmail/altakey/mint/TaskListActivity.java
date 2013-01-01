@@ -165,6 +165,7 @@ public class TaskListActivity extends Activity
         @Override
         public void onResume() {
             super.onResume();
+            reload();
             update();
         }
 
@@ -275,7 +276,7 @@ public class TaskListActivity extends Activity
             }
         }
 
-        private class TaskListLoadTask extends AsyncTask<Void, Void, Void> {
+        private class TaskListLoadTask extends AsyncTask<Void, Void, List<Task>> {
             private VolatileDialog mmProgress = new Progress();
             private List<Map<String, ?>> mmData;
 
@@ -289,37 +290,23 @@ public class TaskListActivity extends Activity
             }
 
             @Override
-            protected Void doInBackground(Void... args) {
+            protected List<Task> doInBackground(Void... args) {
                 DB db = new DB(getActivity());
                 try {
                     db.open();
 
-                    for (Task t : getTasks(db)) {
-                        if (t.completed != 0)
-                            continue;
+                    Log.d("TLT", String.format("loading %s", mFilterType));
+                    if ("hotlist".equals(mFilterType)) {
+                        return db.getHotTasks();
+                    } else {
+                        final int status = new DB.Filter(mFilterType).getStatus();
 
-                        TaskContext c = t.resolved.context;
-                        TaskFolder f = t.resolved.folder;
-
-                        Map<String, Object> map = new HashMap<String, Object>();
-                        map.put("task", t);
-                        map.put("title", t.title);
-                        map.put("priority", t.priority);
-
-                        if (f != null) {
-                            map.put("context_0", String.format("%s", f.name));
+                        if (status == DB.Filter.UNKNOWN) {
+                            return new LinkedList<Task>();
+                        } else {
+                            return db.getTasks(String.format("status=\"%d\" and completed=0", status), DB.DEFAULT_ORDER);
                         }
-                        if (c != null) {
-                            map.put("context_1", String.format("@%s", c.name));
-                        }
-
-                        if (t.duedate > 0) {
-                            map.put("due", new Formatter().format("%1$tY-%1$tm-%1$td", new Date(t.duedate * 1000)).toString());
-                        }
-                        //map.put("timer_flag", "(on)");
-                        mmData.add(map);
                     }
-                    return null;
                 } finally {
                     if (db != null) {
                         db.close();
@@ -327,23 +314,34 @@ public class TaskListActivity extends Activity
                 }
             }
 
-            private List<Task> getTasks(DB db) {
-                Log.d("TLT", String.format("loading %s", mFilterType));
-                if ("hotlist".equals(mFilterType)) {
-                    return db.getHotTasks();
-                } else {
-                    final int status = new DB.Filter(mFilterType).getStatus();
-
-                    if (status == DB.Filter.UNKNOWN) {
-                        return new LinkedList<Task>();
-                    } else {
-                        return db.getTasks(String.format("status=\"%d\" and completed=0", status), DB.DEFAULT_ORDER);
-                    }
-                }
-            }
-
             @Override
-            protected void onPostExecute(Void ret) {
+            protected void onPostExecute(List<Task> ret) {
+                for (Task t : ret) {
+                    if (t.completed != 0)
+                        continue;
+
+                    TaskContext c = t.resolved.context;
+                    TaskFolder f = t.resolved.folder;
+
+                    Map<String, Object> map = new HashMap<String, Object>();
+                    map.put("task", t);
+                    map.put("title", t.title);
+                    map.put("priority", t.priority);
+
+                    if (f != null) {
+                        map.put("context_0", String.format("%s", f.name));
+                    }
+                    if (c != null) {
+                        map.put("context_1", String.format("@%s", c.name));
+                    }
+
+                    if (t.duedate > 0) {
+                        map.put("due", new Formatter().format("%1$tY-%1$tm-%1$td", new Date(t.duedate * 1000)).toString());
+                    }
+                    //map.put("timer_flag", "(on)");
+                    mmData.add(map);
+                }
+
                 mmProgress.dismiss();
                 refresh();
             }
