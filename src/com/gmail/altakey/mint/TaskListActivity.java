@@ -33,7 +33,7 @@ public class TaskListActivity extends Activity
 {
     public static final String KEY_LIST_FILTER = "filter";
 
-    private LoginTroubleReceiver mLoginTroubleReceiver = new LoginTroubleReceiver();
+    private ClientStatusReceiver mClientStatusReceiver = new ClientStatusReceiver();
 
     /** Called when the activity is first created. */
     @Override
@@ -58,13 +58,13 @@ public class TaskListActivity extends Activity
     @Override
     public void onResume() {
         super.onResume();
-        mLoginTroubleReceiver.register();
+        mClientStatusReceiver.register();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        mLoginTroubleReceiver.unregister();
+        mClientStatusReceiver.unregister();
     }
 
     public static class TaskListFragment extends ListFragment
@@ -400,12 +400,11 @@ public class TaskListActivity extends Activity
         }
     }
 
-    private class LoginTroubleReceiver extends BroadcastReceiver {
+    private class ClientStatusReceiver extends BroadcastReceiver {
         private final Activity mmActivity = TaskListActivity.this;
 
         public void register() {
             final IntentFilter filter = new IntentFilter();
-            filter.addAction(ToodledoClientService.ACTION_LOGIN_TROUBLE);
             filter.addAction(ToodledoClientService.ACTION_UPDATE_DONE);
             filter.addAction(ToodledoClientService.ACTION_ADD_DONE);
             LocalBroadcastManager.getInstance(mmActivity).registerReceiver(this, filter);
@@ -421,29 +420,10 @@ public class TaskListActivity extends Activity
             if (ToodledoClientService.ACTION_UPDATE_DONE.equals(action)
                 || ToodledoClientService.ACTION_ADD_DONE.equals(action)) {
                 poke();
-            } else {
-                final String type = intent.getStringExtra(ToodledoClientService.EXTRA_TROUBLE_TYPE);
-                if (LoginTroubleActivity.TYPE_REQUIRED.equals(type)
-                    || LoginTroubleActivity.TYPE_FAILED.equals(type)) {
-                    abortWithErrorType(type);
-                } else {
-                    final String error = intent.getStringExtra(ToodledoClientService.EXTRA_TROUBLE_MESSAGE);
-                    Toast.makeText(mmActivity, String.format("fetch failure: %s", error), Toast.LENGTH_LONG).show();
-                }
             }
         }
 
-        protected void abortWithErrorType(String type) {
-            final Intent intent = new Intent(mmActivity, LoginTroubleActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            intent.putExtra(LoginTroubleActivity.KEY_TYPE, type);
-            startActivity(intent);
-            overridePendingTransition(0, 0);
-            finish();
-            overridePendingTransition(0, 0);
-        }
-
-        protected void poke() {
+        private void poke() {
             final TaskListFragment f = (TaskListFragment)getFragmentManager().findFragmentByTag(TaskListFragment.TAG);
             if (f != null) {
                 f.reloadSilently();

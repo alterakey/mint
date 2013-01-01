@@ -2,12 +2,17 @@ package com.gmail.altakey.mint;
 
 import android.app.Service;
 import android.app.IntentService;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -25,14 +30,11 @@ public class ToodledoClientService extends IntentService {
     public static final String ACTION_COMPLETE = "com.gmail.altakey.mint.COMPLETE";
     public static final String ACTION_UPDATE = "com.gmail.altakey.mint.UPDATE";
     public static final String ACTION_ADD = "com.gmail.altakey.mint.ADD";
-    public static final String ACTION_LOGIN_TROUBLE = "com.gmail.altakey.mint.LOGIN_TROUBLE";
     public static final String ACTION_ADD_DONE = "com.gmail.altakey.mint.ADD_DONE";
     public static final String ACTION_UPDATE_DONE = "com.gmail.altakey.mint.UPDATE_DONE";
 
     public static final String EXTRA_TASKS = "tasks";
     public static final String EXTRA_TASK_FIELDS = "task_fields";
-    public static final String EXTRA_TROUBLE_TYPE = "trouble_type";
-    public static final String EXTRA_TROUBLE_MESSAGE = "trouble_message";
 
     private NetworkTask mNetworkTask;
     private DB mDB;
@@ -103,21 +105,28 @@ public class ToodledoClientService extends IntentService {
     }
 
     private void abort(String message) {
-        final Intent intent = new Intent(ACTION_LOGIN_TROUBLE);
-        intent.putExtra(EXTRA_TROUBLE_MESSAGE, message);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        Toast.makeText(this, String.format("sync failure: %s", message), Toast.LENGTH_LONG).show();
     }
 
     private void fail() {
-        final Intent intent = new Intent(ACTION_LOGIN_TROUBLE);
-        intent.putExtra(EXTRA_TROUBLE_TYPE, LoginTroubleActivity.TYPE_FAILED);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        notifyLoginTrouble("Login failed");
     }
 
     private void require() {
-        final Intent intent = new Intent(ACTION_LOGIN_TROUBLE);
-        intent.putExtra(EXTRA_TROUBLE_TYPE, LoginTroubleActivity.TYPE_REQUIRED);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        notifyLoginTrouble("Setup synchronization");
+    }
+
+    private void notifyLoginTrouble(String tickerText) {
+        final NotificationManager nm = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+		final Notification notification = new Notification(R.drawable.icon, tickerText, System.currentTimeMillis());
+        notification.flags |= Notification.FLAG_AUTO_CANCEL;
+		final PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, ConfigActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP), 0);
+		notification.setLatestEventInfo(
+				this,
+				getText(R.string.app_name),
+				tickerText,
+				contentIntent);
+		nm.notify(1, notification);
     }
 
     private void update_done() {
