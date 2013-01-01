@@ -102,8 +102,17 @@ public class TaskPostFragment extends DialogFragment {
                 intent.setAction(ToodledoClientService.ACTION_ADD);
                 intent.putExtra(ToodledoClientService.EXTRA_TASKS, ToodledoClientService.asListOfTasks(mmmTask));
                 mmmContext.startService(intent);
+
+                // XXX
+                poke();
             }
 
+            private void poke() {
+                TaskListActivity.TaskListFragment f = (TaskListActivity.TaskListFragment)getFragmentManager().findFragmentByTag(TaskListActivity.TaskListFragment.TAG);
+                if (f != null) {
+                    f.reload();
+                }
+            }
         }
     }
 }
