@@ -25,7 +25,6 @@ import java.util.Date;
 import java.io.IOException;
 
 public class ToodledoClientService extends IntentService {
-    public static final String ACTION_REAUTH = "com.gmail.altakey.mint.REAUTH";
     public static final String ACTION_COMMIT = "com.gmail.altakey.mint.COMMIT";
     public static final String ACTION_COMPLETE = "com.gmail.altakey.mint.COMPLETE";
     public static final String ACTION_UPDATE = "com.gmail.altakey.mint.UPDATE";
@@ -69,9 +68,7 @@ public class ToodledoClientService extends IntentService {
             mDB.openForWriting();
 
             try {
-                if (ACTION_REAUTH.equals(action)) {
-                    reauth();
-                } else if (ACTION_UPDATE.equals(action)) {
+                if (ACTION_UPDATE.equals(action)) {
                     update();
                     update_done();
                 } else {
@@ -146,10 +143,6 @@ public class ToodledoClientService extends IntentService {
         builder.registerTypeAdapter(Task.class, new Task.JsonAdapter());
         builder.registerTypeAdapter(TaskContext.class, new TaskContext.JsonAdapter());
         return builder.create();
-    }
-
-    private void reauth() {
-        mClient.setAuthenticator(Authenticator.create(ToodledoClientService.this));
     }
 
     private void commit(List<Task> tasks, String[] fields) throws IOException, Authenticator.Exception {
