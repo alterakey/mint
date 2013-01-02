@@ -194,6 +194,10 @@ public class DB {
         }
     }
 
+    public void commit(ToodledoClient client) throws IOException, Authenticator.BogusException, Authenticator.FailureException, Authenticator.ErrorException {
+        Log.d("DB.commit", "TBD: commit to DB");
+    }
+
     public List<TaskFolder> getFolders() {
         List<TaskFolder> ret = new LinkedList<TaskFolder>();
         Cursor c = sConn.rawQuery("SELECT folder,name,private,archived,ord FROM folders", null);
