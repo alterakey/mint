@@ -87,15 +87,19 @@ public class TaskEditActivity extends Activity
 
         private void update(View v) {
             final TextView title = (TextView)v.findViewById(R.id.title);
+            final TextView note = (TextView)v.findViewById(R.id.note);
             if (mTask != null) {
                 title.setText(mTask.title);
+                note.setText(mTask.note);
             }
         }
 
         private void commit(View v) {
             final TextView title = (TextView)v.findViewById(R.id.title);
+            final TextView note = (TextView)v.findViewById(R.id.note);
             if (mTask != null) {
                 mTask.title = title.getText().toString();
+                mTask.note = note.getText().toString();
             }
         }
 

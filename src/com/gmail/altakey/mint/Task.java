@@ -12,7 +12,7 @@ import java.util.Date;
 public class Task {
     public long id;
     public String title;
-    public String description;
+    public String note;
     public long modified;
     public long completed;
     public long folder;
@@ -37,7 +37,7 @@ public class Task {
         Task task = new Task();
         task.id = c.getLong(0 + offset);
         task.title = c.getString(1 + offset);
-        task.description = c.getString(2 + offset);
+        task.note = c.getString(2 + offset);
         task.modified = c.getLong(3 + offset);
         task.completed = c.getLong(4 + offset);
         task.folder = c.getLong(5 + offset);
@@ -61,8 +61,8 @@ public class Task {
                     task.id = Long.valueOf(value);
                 } else if ("title".equals(name)) {
                     task.title = value;
-                } else if ("description".equals(name)) {
-                    task.description = value;
+                } else if ("note".equals(name)) {
+                    task.note = value;
                 } else if ("modified".equals(name)) {
                     task.modified = Long.valueOf(value);
                 } else if ("completed".equals(name)) {

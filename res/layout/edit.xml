@@ -16,12 +16,12 @@
   <TextView
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:text="Description" />
+      android:text="Note" />
   <EditText
-      android:id="@+id/desc"
+      android:id="@+id/note"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:hint="Task description" />
+      android:hint="Task note" />
   <TextView
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
