@@ -7,5 +7,55 @@
   <TextView
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:text="task edit" />
+      android:text="Title" />
+  <EditText
+      android:id="@+id/title"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:hint="Task title" />
+  <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="Description" />
+  <EditText
+      android:id="@+id/desc"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:hint="Task description" />
+  <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="Priority" />
+  <EditText
+      android:id="@+id/prio"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:hint="Priority" />
+  <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="Due" />
+  <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="48sp"
+      android:gravity="center_vertical"
+      android:text="(not set, tap to edit)" />
+  <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="Context" />
+  <EditText
+      android:id="@+id/context"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:hint="context" />
+  <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="Folder" />
+  <EditText
+      android:id="@+id/folder"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:hint="folder" />
 </LinearLayout>
