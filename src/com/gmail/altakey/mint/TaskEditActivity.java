@@ -54,6 +54,9 @@ public class TaskEditActivity extends Activity
     {
         public static final String TAG = "task_edit";
 
+        private static final int REQ_SET_DATE = 1;
+        private static final int REQ_SET_TIME = 2;
+
         private Task mTask;
 
         public static TaskEditFragment newInstance(long task) {
@@ -70,7 +73,9 @@ public class TaskEditActivity extends Activity
             v.findViewById(R.id.due).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    new DueDatePicker().show(getFragmentManager(), "datePicker");
+                    DialogFragment f = new DueDatePicker();
+                    f.setTargetFragment(TaskEditFragment.this, REQ_SET_DATE);
+                    f.show(getFragmentManager(), "datePicker");
                 }
             });
             update(v);
@@ -114,6 +119,20 @@ public class TaskEditActivity extends Activity
         }
 
         @Override
+        public void onActivityResult(int requestCode, int resultCode, Intent data) {
+            if (requestCode == TaskEditFragment.REQ_SET_DATE) {
+                final int[] yearMonthDay = data.getIntArrayExtra(DueDatePicker.EXTRA_DATE);
+                final Date date = new Date(
+                    yearMonthDay[0],
+                    yearMonthDay[1],
+                    yearMonthDay[2]
+                );
+
+                mTask.duedate = date.getTime() / 1000;
+            }
+        }
+
+        @Override
         public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
             inflater.inflate(R.menu.main, menu);
         }
@@ -131,6 +150,8 @@ public class TaskEditActivity extends Activity
     }
 
     public static class DueDatePicker extends DialogFragment implements DatePickerDialog.OnDateSetListener {
+        private static final String EXTRA_DATE = "date";
+
         // https://code.google.com/p/android/issues/detail?id=34860
         private boolean mmFired = false;
 
@@ -147,8 +168,15 @@ public class TaskEditActivity extends Activity
         public void onDateSet(DatePicker view, int year, int month, int day) {
             if (mmFired == false) {
                 mmFired = true;
+                callback(year, month, day);
                 new DueTimePicker().show(getFragmentManager(), "duetime");
             }
+        }
+
+        private void callback(int year, int month, int day) {
+            final Intent intent = new Intent();
+            intent.putExtra(EXTRA_DATE, new int[] { year, month, day });
+            getTargetFragment().onActivityResult(TaskEditFragment.REQ_SET_DATE, 0, intent);
         }
     }
 
