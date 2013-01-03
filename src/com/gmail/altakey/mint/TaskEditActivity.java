@@ -63,7 +63,9 @@ public class TaskEditActivity extends Activity
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
-            return inflater.inflate(R.layout.edit, root, false);
+            View v = inflater.inflate(R.layout.edit, root, false);
+            update(v);
+            return v;
         }
 
         @Override
@@ -78,10 +80,25 @@ public class TaskEditActivity extends Activity
                 db = new DB(getActivity());
                 db.open();
                 mTask = db.getTask(args.getLong(KEY_TASK_ID));
+                update(getView());
             } finally {
                 if (db != null) {
                     db.close();
                 }
+            }
+        }
+
+        private void update(View v) {
+            final TextView title = (TextView)v.findViewById(R.id.title);
+            if (mTask != null) {
+                title.setText(mTask.title);
+            }
+        }
+
+        private void commit(View v) {
+            final TextView title = (TextView)v.findViewById(R.id.title);
+            if (mTask != null) {
+                mTask.title = title.getText().toString();
             }
         }
 
@@ -93,6 +110,7 @@ public class TaskEditActivity extends Activity
         @Override
         public void onPause() {
             super.onPause();
+            commit(getView());
             final Intent intent = new Intent(getActivity(), ToodledoClientService.class);
             intent.setAction(ToodledoClientService.ACTION_COMMIT);
             intent.putExtra(ToodledoClientService.EXTRA_TASKS, ToodledoClientService.asListOfTasks(mTask));
