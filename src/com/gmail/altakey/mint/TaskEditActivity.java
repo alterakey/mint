@@ -5,6 +5,9 @@ import com.example.android.swipedismiss.*;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.DialogFragment;
+import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -25,6 +28,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Arrays;
+import java.util.Calendar;
 
 public class TaskEditActivity extends Activity
 {
@@ -63,6 +67,12 @@ public class TaskEditActivity extends Activity
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
             View v = inflater.inflate(R.layout.edit, root, false);
+            v.findViewById(R.id.due).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    new DueDatePicker().show(getFragmentManager(), "datePicker");
+                }
+            });
             update(v);
             return v;
         }
@@ -119,4 +129,41 @@ public class TaskEditActivity extends Activity
             getActivity().startService(intent);
         }
     }
+
+    public static class DueDatePicker extends DialogFragment implements DatePickerDialog.OnDateSetListener {
+        // https://code.google.com/p/android/issues/detail?id=34860
+        private boolean mmFired = false;
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            final Calendar c = Calendar.getInstance();
+            int year = c.get(Calendar.YEAR);
+            int month = c.get(Calendar.MONTH);
+            int day = c.get(Calendar.DAY_OF_MONTH);
+            return new DatePickerDialog(getActivity(), this, year, month, day);
+        }
+
+        @Override
+        public void onDateSet(DatePicker view, int year, int month, int day) {
+            if (mmFired == false) {
+                mmFired = true;
+                new DueTimePicker().show(getFragmentManager(), "duetime");
+            }
+        }
+    }
+
+    public static class DueTimePicker extends DialogFragment implements TimePickerDialog.OnTimeSetListener {
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            final Calendar c = Calendar.getInstance();
+            int hour = c.get(Calendar.HOUR);
+            int minute = c.get(Calendar.MINUTE);
+            return new TimePickerDialog(getActivity(), this, hour, minute, false);
+        }
+
+        @Override
+        public void onTimeSet(TimePicker view, int hour, int minute) {
+        }
+    }
+
 }

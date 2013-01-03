@@ -36,6 +36,7 @@
       android:layout_height="wrap_content"
       android:text="Due" />
   <TextView
+      android:id="@+id/due"
       android:layout_width="wrap_content"
       android:layout_height="48sp"
       android:gravity="center_vertical"
