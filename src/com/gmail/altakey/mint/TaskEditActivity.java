@@ -92,6 +92,7 @@ public class TaskEditActivity extends Activity
 
         @Override
         public void onPause() {
+            super.onPause();
             final Intent intent = new Intent(getActivity(), ToodledoClientService.class);
             intent.setAction(ToodledoClientService.ACTION_COMMIT);
             intent.putExtra(ToodledoClientService.EXTRA_TASKS, ToodledoClientService.asListOfTasks(mTask));
