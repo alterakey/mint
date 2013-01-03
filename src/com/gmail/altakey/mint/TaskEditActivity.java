@@ -123,7 +123,7 @@ public class TaskEditActivity extends Activity
             if (requestCode == TaskEditFragment.REQ_SET_DATE) {
                 final int[] yearMonthDay = data.getIntArrayExtra(DueDatePicker.EXTRA_DATE);
                 final Date date = new Date(
-                    yearMonthDay[0],
+                    yearMonthDay[0] - 1900,
                     yearMonthDay[1],
                     yearMonthDay[2]
                 );
