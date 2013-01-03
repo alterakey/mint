@@ -129,6 +129,7 @@ public class TaskEditActivity extends Activity
                 );
 
                 mTask.duedate = date.getTime() / 1000;
+                update(getView());
             } else if (requestCode == TaskEditFragment.REQ_SET_TIME) {
                 final int[] hourMinute = data.getIntArrayExtra(DueTimePicker.EXTRA_TIME);
                 final Date date = new Date(
@@ -138,6 +139,7 @@ public class TaskEditActivity extends Activity
                 );
 
                 mTask.duetime = date.getTime() / 1000;
+                update(getView());
             }
         }
 
