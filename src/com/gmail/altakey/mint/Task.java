@@ -12,6 +12,7 @@ import java.util.Date;
 public class Task {
     public long id;
     public String title;
+    public String description;
     public long modified;
     public long completed;
     public long folder;
@@ -36,14 +37,15 @@ public class Task {
         Task task = new Task();
         task.id = c.getLong(0 + offset);
         task.title = c.getString(1 + offset);
-        task.modified = c.getLong(2 + offset);
-        task.completed = c.getLong(3 + offset);
-        task.folder = c.getLong(4 + offset);
-        task.context = c.getLong(5 + offset);
-        task.priority = c.getLong(6 + offset);
-        task.star = c.getLong(7 + offset);
-        task.duedate = c.getLong(8 + offset);
-        task.status = c.getString(9 + offset);
+        task.description = c.getString(2 + offset);
+        task.modified = c.getLong(3 + offset);
+        task.completed = c.getLong(4 + offset);
+        task.folder = c.getLong(5 + offset);
+        task.context = c.getLong(6 + offset);
+        task.priority = c.getLong(7 + offset);
+        task.star = c.getLong(8 + offset);
+        task.duedate = c.getLong(9 + offset);
+        task.status = c.getString(10 + offset);
         return task;
     }
 
@@ -59,6 +61,8 @@ public class Task {
                     task.id = Long.valueOf(value);
                 } else if ("title".equals(name)) {
                     task.title = value;
+                } else if ("description".equals(name)) {
+                    task.description = value;
                 } else if ("modified".equals(name)) {
                     task.modified = Long.valueOf(value);
                 } else if ("completed".equals(name)) {

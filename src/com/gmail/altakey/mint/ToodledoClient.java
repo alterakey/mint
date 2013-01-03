@@ -101,7 +101,7 @@ public class ToodledoClient {
     public List<Task> getTasksAfter(long time) throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
         final ByteArrayOutputStream os = issueRequest(
             new HttpGet(
-                getServiceUrl("tasks/get", String.format("modafter=%s&fields=folder,context,star,priority,duedate,status", String.valueOf(time)))
+                getServiceUrl("tasks/get", String.format("modafter=%s&fields=description,folder,context,star,priority,duedate,status", String.valueOf(time)))
             )
         );
 
