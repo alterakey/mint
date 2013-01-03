@@ -92,6 +92,7 @@ public class Task {
                 .beginObject()
                 .name("id").value(task.id)
                 .name("title").value(task.title)
+                .name("note").value(task.note)
                 .name("modified").value(task.modified)
                 .name("completed").value(task.completed)
                 .name("folder").value(task.folder)
