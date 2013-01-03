@@ -50,7 +50,6 @@ public class TaskEditActivity extends Activity
     {
         public static final String TAG = "task_edit";
 
-        private ToodledoClient mClient;
         private Task mTask;
 
         public static TaskEditFragment newInstance(long task) {
@@ -72,8 +71,6 @@ public class TaskEditActivity extends Activity
         public void onActivityCreated(Bundle savedInstanceState) {
             super.onActivityCreated(savedInstanceState);
             Bundle args = getArguments();
-
-            mClient = new ToodledoClient(null, getActivity());
 
             DB db = null;
             try {
