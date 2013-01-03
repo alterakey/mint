@@ -129,6 +129,15 @@ public class TaskEditActivity extends Activity
                 );
 
                 mTask.duedate = date.getTime() / 1000;
+            } else if (requestCode == TaskEditFragment.REQ_SET_TIME) {
+                final int[] hourMinute = data.getIntArrayExtra(DueTimePicker.EXTRA_TIME);
+                final Date date = new Date(
+                    2012, 12, 10,
+                    hourMinute[0],
+                    hourMinute[1]
+                );
+
+                mTask.duetime = date.getTime() / 1000;
             }
         }
 
@@ -144,7 +153,7 @@ public class TaskEditActivity extends Activity
             final Intent intent = new Intent(getActivity(), ToodledoClientService.class);
             intent.setAction(ToodledoClientService.ACTION_COMMIT);
             intent.putExtra(ToodledoClientService.EXTRA_TASKS, ToodledoClientService.asListOfTasks(mTask));
-            intent.putExtra(ToodledoClientService.EXTRA_TASK_FIELDS, new String[] { "note", "duedate" });
+            intent.putExtra(ToodledoClientService.EXTRA_TASK_FIELDS, new String[] { "note", "duedate", "duetime" });
             getActivity().startService(intent);
         }
     }
@@ -169,18 +178,26 @@ public class TaskEditActivity extends Activity
             if (mmFired == false) {
                 mmFired = true;
                 callback(year, month, day);
-                new DueTimePicker().show(getFragmentManager(), "duetime");
+
+                DialogFragment f = new DueTimePicker();
+                f.setTargetFragment(getTargetFragment(), TaskEditFragment.REQ_SET_TIME);
+                f.show(getFragmentManager(), "duetime");
             }
         }
 
         private void callback(int year, int month, int day) {
             final Intent intent = new Intent();
             intent.putExtra(EXTRA_DATE, new int[] { year, month, day });
-            getTargetFragment().onActivityResult(TaskEditFragment.REQ_SET_DATE, 0, intent);
+            getTargetFragment().onActivityResult(getTargetRequestCode(), 0, intent);
         }
     }
 
     public static class DueTimePicker extends DialogFragment implements TimePickerDialog.OnTimeSetListener {
+        private static final String EXTRA_TIME = "time";
+
+        // https://code.google.com/p/android/issues/detail?id=34860
+        private boolean mmFired = false;
+
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             final Calendar c = Calendar.getInstance();
@@ -191,6 +208,16 @@ public class TaskEditActivity extends Activity
 
         @Override
         public void onTimeSet(TimePicker view, int hour, int minute) {
+            if (mmFired == false) {
+                mmFired = true;
+                callback(hour, minute);
+            }
+        }
+
+        private void callback(int hour, int minute) {
+            final Intent intent = new Intent();
+            intent.putExtra(EXTRA_TIME, new int[] { hour, minute });
+            getTargetFragment().onActivityResult(getTargetRequestCode(), 0, intent);
         }
     }
 
