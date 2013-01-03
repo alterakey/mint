@@ -103,9 +103,19 @@ public class TaskEditActivity extends Activity
         private void update(View v) {
             final TextView title = (TextView)v.findViewById(R.id.title);
             final TextView note = (TextView)v.findViewById(R.id.note);
+            final TextView due = (TextView)v.findViewById(R.id.due);
             if (mTask != null) {
                 title.setText(mTask.title);
                 note.setText(mTask.note);
+                if (mTask.duedate == 0) {
+                    due.setText("(not set, tap to edit)");
+                } else {
+                    if (mTask.duetime == 0) {
+                        due.setText(new Formatter().format("%1$tY-%1$tm-%1$td", new Date(mTask.duedate * 1000)).toString());
+                    } else {
+                        due.setText(new Formatter().format("%1$tY-%1$tm-%1$td %2$tH:%2$tM", new Date(mTask.duedate * 1000), new Date(mTask.duetime * 1000)).toString());
+                    }
+                }
             }
         }
 
