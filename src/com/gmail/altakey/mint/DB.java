@@ -59,7 +59,7 @@ public class DB {
             final SQLiteOpenHelper helper = new SQLiteOpenHelper(mContext, "toodledo", null, 1) {
                 @Override
                 public void onCreate(SQLiteDatabase db) {
-                    db.execSQL("CREATE TABLE IF NOT EXISTS tasks (id INTEGER PRIMARY KEY AUTOINCREMENT, task BIGINT UNIQUE, title TEXT, note TEXT, modified BIGINT, completed TEXT, folder BIGINT, context BIGINT, priority INTEGER, star INTEGER, duedate BIGINT, status BIGINT)");
+                    db.execSQL("CREATE TABLE IF NOT EXISTS tasks (id INTEGER PRIMARY KEY AUTOINCREMENT, task BIGINT UNIQUE, title TEXT, note TEXT, modified BIGINT, completed TEXT, folder BIGINT, context BIGINT, priority INTEGER, star INTEGER, duedate BIGINT, duetime BIGINT, status BIGINT)");
                     db.execSQL("CREATE TABLE IF NOT EXISTS folders (folder BIGINT PRIMARY KEY, name TEXT, private TEXT, archived TEXT, ord TEXT)");
                     db.execSQL("CREATE TABLE IF NOT EXISTS contexts (context BIGINT PRIMARY KEY, name TEXT)");
                     db.execSQL("CREATE TABLE IF NOT EXISTS status (status TEXT PRIMARY KEY, lastedit_folder BIGINT, lastedit_context BIGINT, lastedit_goal BIGINT, lastedit_location BIGINT, lastedit_task BIGINT, lastdelete_task BIGINT, lastedit_notebook BIGINT, lastdelete_notebook BIGINT)");
@@ -172,7 +172,7 @@ public class DB {
             if (flags.containsKey("task")) {
                 for (Task t : client.getTasksAfter(flags.get("task"))) {
                     sConn.execSQL(
-                        "INSERT OR REPLACE INTO tasks (task, title, note, modified, completed, folder, context, priority, star, duedate, status) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                        "INSERT OR REPLACE INTO tasks (task, title, note, modified, completed, folder, context, priority, star, duedate, duetime, status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
                         new String[] {
                             String.valueOf(t.id),
                             t.title,
@@ -184,6 +184,7 @@ public class DB {
                             String.valueOf(t.priority),
                             String.valueOf(t.star),
                             String.valueOf(t.duedate),
+                            String.valueOf(t.duetime),
                             String.valueOf(t.status)
                         });
                 }
@@ -229,7 +230,7 @@ public class DB {
         }
     }
 
-    private final String TASK_QUERY = "SELECT task,title,note,modified,completed,folder,context,priority,star,duedate,status,folder as folder_id,folders.name as folder_name,folders.private as folder_private,folders.archived as folder_archived,folders.ord as folder_ord,context as context_id,contexts.name as context_name FROM tasks left join folders using (folder) left join contexts using (context) where %s order by %s";
+    private final String TASK_QUERY = "SELECT task,title,note,modified,completed,folder,context,priority,star,duedate,duetime,status,folder as folder_id,folders.name as folder_name,folders.private as folder_private,folders.archived as folder_archived,folders.ord as folder_ord,context as context_id,contexts.name as context_name FROM tasks left join folders using (folder) left join contexts using (context) where %s order by %s";
     public static final String DEFAULT_ORDER = "duedate,priority desc";
     public static final String HOT_FILTER = "(priority=3 or (priority>=0 and duedate>0 and duedate<?)) and completed=0";
     public static final String ALL_FILTER = "1=1";
@@ -242,8 +243,8 @@ public class DB {
             c.moveToFirst();
             while (!c.isAfterLast()) {
                 Task task = Task.fromCursor(c, 0);
-                task.resolved.folder = TaskFolder.fromCursor(c, 11);
-                task.resolved.context = TaskContext.fromCursor(c, 16);
+                task.resolved.folder = TaskFolder.fromCursor(c, 12);
+                task.resolved.context = TaskContext.fromCursor(c, 17);
                 ret.add(task);
                 c.moveToNext();
             }
@@ -262,8 +263,8 @@ public class DB {
             c.moveToFirst();
             while (!c.isAfterLast()) {
                 Task task = Task.fromCursor(c, 0);
-                task.resolved.folder = TaskFolder.fromCursor(c, 11);
-                task.resolved.context = TaskContext.fromCursor(c, 16);
+                task.resolved.folder = TaskFolder.fromCursor(c, 12);
+                task.resolved.context = TaskContext.fromCursor(c, 17);
                 ret.add(task);
                 c.moveToNext();
             }
@@ -280,8 +281,8 @@ public class DB {
             c.moveToFirst();
             while (!c.isAfterLast()) {
                 Task task = Task.fromCursor(c, 0);
-                task.resolved.folder = TaskFolder.fromCursor(c, 11);
-                task.resolved.context = TaskContext.fromCursor(c, 16);
+                task.resolved.folder = TaskFolder.fromCursor(c, 12);
+                task.resolved.context = TaskContext.fromCursor(c, 17);
                 return task;
             }
             return null;
@@ -294,10 +295,10 @@ public class DB {
         try {
             sConn.beginTransaction();
             sConn.execSQL(
-                "INSERT INTO tasks (title,note,modified,completed,folder,context,priority,star,duedate,status) VALUES (?,?,?,?,?,?,?,?,?)",
+                "INSERT INTO tasks (title,note,modified,completed,folder,context,priority,star,duedate,duetime,status) VALUES (?,?,?,?,?,?,?,?,?,?)",
                 new String[] {
                     task.title, task.note, String.valueOf(task.modified), String.valueOf(task.completed), String.valueOf(task.folder),
-                    String.valueOf(task.context), String.valueOf(task.priority), String.valueOf(task.star), String.valueOf(task.duedate), task.status
+                    String.valueOf(task.context), String.valueOf(task.priority), String.valueOf(task.star), String.valueOf(task.duedate), String.valueOf(task.duetime), task.status
                 }
             );
             sConn.setTransactionSuccessful();
