@@ -13,7 +13,7 @@ public class TaskContext {
     public String name;
 
     public static TaskContext fromCursor(Cursor c, int offset) {
-        TaskContext context = new TaskContext();
+        final TaskContext context = new TaskContext();
         context.id = c.getLong(0 + offset);
         context.name = c.getString(1 + offset);
         return context;

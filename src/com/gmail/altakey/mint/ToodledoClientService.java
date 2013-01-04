@@ -137,7 +137,7 @@ public class ToodledoClientService extends IntentService {
     }
 
     private static Gson getGson() {
-        GsonBuilder builder = new GsonBuilder();
+        final GsonBuilder builder = new GsonBuilder();
         builder.registerTypeAdapter(TaskStatus.class, new TaskStatus.JsonAdapter());
         builder.registerTypeAdapter(TaskFolder.class, new TaskFolder.JsonAdapter());
         builder.registerTypeAdapter(Task.class, new Task.JsonAdapter());

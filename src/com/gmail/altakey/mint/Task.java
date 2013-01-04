@@ -35,7 +35,7 @@ public class Task {
     }
 
     public static Task fromCursor(Cursor c, int offset) {
-        Task task = new Task();
+        final Task task = new Task();
         task.id = c.getLong(0 + offset);
         task.title = c.getString(1 + offset);
         task.note = c.getString(2 + offset);

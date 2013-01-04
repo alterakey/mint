@@ -41,8 +41,8 @@ public class TaskEditActivity extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.plate);
 
-        Intent intent = getIntent();
-        long task = intent.getLongExtra(KEY_TASK_ID, -1);
+        final Intent intent = getIntent();
+        final long task = intent.getLongExtra(KEY_TASK_ID, -1);
 
         getFragmentManager()
             .beginTransaction()
@@ -85,18 +85,15 @@ public class TaskEditActivity extends Activity
         @Override
         public void onActivityCreated(Bundle savedInstanceState) {
             super.onActivityCreated(savedInstanceState);
-            Bundle args = getArguments();
+            final Bundle args = getArguments();
 
-            DB db = null;
+            final DB db = new DB(getActivity());
             try {
-                db = new DB(getActivity());
                 db.open();
                 mTask = db.getTask(args.getLong(KEY_TASK_ID));
                 update(getView());
             } finally {
-                if (db != null) {
-                    db.close();
-                }
+                db.close();
             }
         }
 
@@ -179,9 +176,9 @@ public class TaskEditActivity extends Activity
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             final Calendar c = Calendar.getInstance();
-            int year = c.get(Calendar.YEAR);
-            int month = c.get(Calendar.MONTH);
-            int day = c.get(Calendar.DAY_OF_MONTH);
+            final int year = c.get(Calendar.YEAR);
+            final int month = c.get(Calendar.MONTH);
+            final int day = c.get(Calendar.DAY_OF_MONTH);
             return new DatePickerDialog(getActivity(), this, year, month, day);
         }
 
@@ -191,7 +188,7 @@ public class TaskEditActivity extends Activity
                 mmFired = true;
                 callback(year, month, day);
 
-                DialogFragment f = new DueTimePicker();
+                final DialogFragment f = new DueTimePicker();
                 f.setTargetFragment(getTargetFragment(), TaskEditFragment.REQ_SET_TIME);
                 f.show(getFragmentManager(), "duetime");
             }
@@ -213,8 +210,8 @@ public class TaskEditActivity extends Activity
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             final Calendar c = Calendar.getInstance();
-            int hour = c.get(Calendar.HOUR);
-            int minute = c.get(Calendar.MINUTE);
+            final int hour = c.get(Calendar.HOUR);
+            final int minute = c.get(Calendar.MINUTE);
             return new TimePickerDialog(getActivity(), this, hour, minute, false);
         }
 

@@ -65,7 +65,7 @@ public class TaskPostFragment extends DialogFragment {
         }
 
         private String getActiveFilter() {
-            TaskListActivity.TaskListFragment f = (TaskListActivity.TaskListFragment)getFragmentManager().findFragmentByTag(TaskListActivity.TaskListFragment.TAG);
+            final TaskListActivity.TaskListFragment f = (TaskListActivity.TaskListFragment)getFragmentManager().findFragmentByTag(TaskListActivity.TaskListFragment.TAG);
             if (f == null) {
                 return null;
             } else {
@@ -84,15 +84,13 @@ public class TaskPostFragment extends DialogFragment {
 
             @Override
             protected Void doInBackground(Void... params) {
-                DB db = new DB(getActivity());
+                final DB db = new DB(getActivity());
                 try {
                     db.openForWriting();
                     db.addTask(mmmTask);
                     return null;
                 } finally {
-                    if (db != null) {
-                        db.close();
-                    }
+                    db.close();
                 }
             }
 
@@ -108,7 +106,7 @@ public class TaskPostFragment extends DialogFragment {
             }
 
             private void poke() {
-                TaskListActivity.TaskListFragment f = (TaskListActivity.TaskListFragment)getFragmentManager().findFragmentByTag(TaskListActivity.TaskListFragment.TAG);
+                final TaskListActivity.TaskListFragment f = (TaskListActivity.TaskListFragment)getFragmentManager().findFragmentByTag(TaskListActivity.TaskListFragment.TAG);
                 if (f != null) {
                     f.reload();
                 }

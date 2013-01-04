@@ -42,7 +42,7 @@ public class TaskListActivity extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.plate);
 
-        Intent intent = getIntent();
+        final Intent intent = getIntent();
         String filter = intent.getStringExtra(KEY_LIST_FILTER);
         if (filter == null) {
             filter = "hotlist";
@@ -305,7 +305,7 @@ public class TaskListActivity extends Activity
 
             @Override
             protected List<Task> doInBackground(Void... args) {
-                DB db = new DB(getActivity());
+                final DB db = new DB(getActivity());
                 try {
                     db.open();
 
@@ -322,9 +322,7 @@ public class TaskListActivity extends Activity
                         }
                     }
                 } finally {
-                    if (db != null) {
-                        db.close();
-                    }
+                    db.close();
                 }
             }
 
@@ -334,8 +332,8 @@ public class TaskListActivity extends Activity
                     if (t.completed != 0)
                         continue;
 
-                    TaskContext c = t.resolved.context;
-                    TaskFolder f = t.resolved.folder;
+                    final TaskContext c = t.resolved.context;
+                    final TaskFolder f = t.resolved.folder;
 
                     Map<String, Object> map = new HashMap<String, Object>();
                     map.put("task", t);

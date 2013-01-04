@@ -16,7 +16,7 @@ public class TaskFolder {
     public long ord;
 
     public static TaskFolder fromCursor(Cursor c, int offset) {
-        TaskFolder folder = new TaskFolder();
+        final TaskFolder folder = new TaskFolder();
         folder.id = c.getLong(0 + offset);
         folder.name = c.getString(1 + offset);
         folder.private_ = c.getLong(2 + offset);
