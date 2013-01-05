@@ -102,8 +102,8 @@ public class TaskListActivity extends Activity
         }
 
         public static TaskListFragment newInstance(String filter) {
-            TaskListFragment f = new TaskListFragment();
-            Bundle args = new Bundle();
+            final TaskListFragment f = new TaskListFragment();
+            final Bundle args = new Bundle();
             args.putString(KEY_LIST_FILTER, filter);
             f.setArguments(args);
             return f;
@@ -113,13 +113,13 @@ public class TaskListActivity extends Activity
         public void onActivityCreated(Bundle savedInstanceState) {
             super.onActivityCreated(savedInstanceState);
             final Context context = getActivity();
-            Bundle args = getArguments();
+            final Bundle args = getArguments();
 
             mAdapter = new TaskListAdapterBuilder().build();
             mFilterType = args.getString(KEY_LIST_FILTER, "hotlist");
 
-            ListView listView = getListView();
-            SwipeDismissListViewTouchListener touchListener =
+            final ListView listView = getListView();
+            final SwipeDismissListViewTouchListener touchListener =
                 new SwipeDismissListViewTouchListener(
                     listView,
                     new SwipeDismissListViewTouchListener.OnDismissCallback() {
@@ -205,7 +205,7 @@ public class TaskListActivity extends Activity
         public class TaskListAdapterBuilder {
             public TaskListAdapter build() {
                 final List<Map<String, ?>> data = new LinkedList<Map<String, ?>>();
-                TaskListAdapter adapter = new TaskListAdapter(
+                final TaskListAdapter adapter = new TaskListAdapter(
                     getActivity(),
                     data
                     );
@@ -226,7 +226,7 @@ public class TaskListActivity extends Activity
             }
 
             public void removeTask(Task t) {
-                Queue<Map<String, ?>> toBeRemoved = new LinkedList<Map<String, ?>>();
+                final Queue<Map<String, ?>> toBeRemoved = new LinkedList<Map<String, ?>>();
                 for (Map<String, ?> e: mmmData) {
                     if (e.get("task") == t) {
                         toBeRemoved.add(e);
@@ -254,8 +254,8 @@ public class TaskListActivity extends Activity
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 convertView = super.getView(position, convertView, parent);
-                View priority = convertView.findViewById(R.id.list_task_prio);
-                Map<String, ?> map = mmmData.get(position);
+                final View priority = convertView.findViewById(R.id.list_task_prio);
+                final Map<String, ?> map = mmmData.get(position);
                 final Task task = (Task)map.get("task");
 
                 switch (((Long)map.get("priority")).intValue()) {

@@ -60,8 +60,8 @@ public class TaskEditActivity extends Activity
         private Task mTask;
 
         public static TaskEditFragment newInstance(long task) {
-            TaskEditFragment f = new TaskEditFragment();
-            Bundle args = new Bundle();
+            final TaskEditFragment f = new TaskEditFragment();
+            final Bundle args = new Bundle();
             args.putLong(KEY_TASK_ID, task);
             f.setArguments(args);
             return f;
@@ -69,7 +69,7 @@ public class TaskEditActivity extends Activity
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
-            View v = inflater.inflate(R.layout.edit, root, false);
+            final View v = inflater.inflate(R.layout.edit, root, false);
             v.findViewById(R.id.due).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
