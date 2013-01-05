@@ -317,7 +317,7 @@ public class DB {
                 "UPDATE tasks SET title=?,note=?,modified=?,completed=?,folder=?,context=?,priority=?,star=?,duedate=?,duetime=?,status=? WHERE id=?",
                 new String[] {
                     task.title, task.note, String.valueOf(task.modified), String.valueOf(task.completed), String.valueOf(task.folder),
-                    String.valueOf(task.context), String.valueOf(task.priority), String.valueOf(task.star), String.valueOf(task.duedate), String.valueOf(task.duetime), task.status, String.valueOf(task.id)
+                    String.valueOf(task.context), String.valueOf(task.priority), String.valueOf(task.star), String.valueOf(task.duedate), String.valueOf(task.duetime), task.status, String.valueOf(task._id)
                 }
             );
             sConn.setTransactionSuccessful();
