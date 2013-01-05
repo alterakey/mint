@@ -298,7 +298,7 @@ public class DB {
         try {
             sConn.beginTransaction();
             sConn.execSQL(
-                "INSERT INTO tasks (cookie,title,note,modified,completed,folder,context,priority,star,duedate,duetime,status) VALUES (?,?,?,?,?,?,?,?,?,?)",
+                "INSERT INTO tasks (cookie,title,note,modified,completed,folder,context,priority,star,duedate,duetime,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
                 new String[] {
                     nextCookie(), task.title, task.note, String.valueOf(task.modified), String.valueOf(task.completed), String.valueOf(task.folder),
                     String.valueOf(task.context), String.valueOf(task.priority), String.valueOf(task.star), String.valueOf(task.duedate), String.valueOf(task.duetime), task.status
