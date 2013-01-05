@@ -102,28 +102,15 @@ public class ToodledoClientService extends IntentService {
     }
 
     private void abort(String message) {
-        Toast.makeText(this, String.format("sync failure: %s", message), Toast.LENGTH_LONG).show();
+        new Notifier(this).boo(String.format("sync failure: %s", message));
     }
 
     private void fail() {
-        notifyLoginTrouble("Login failed");
+        new Notifier(this).notify("Login failed", Notifier.NOTIFY_LOGIN_FAILED);
     }
 
     private void require() {
-        notifyLoginTrouble("Setup synchronization");
-    }
-
-    private void notifyLoginTrouble(String tickerText) {
-        final NotificationManager nm = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
-		final Notification notification = new Notification(R.drawable.icon, tickerText, System.currentTimeMillis());
-        notification.flags |= Notification.FLAG_AUTO_CANCEL;
-		final PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, ConfigActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP), 0);
-		notification.setLatestEventInfo(
-				this,
-				getText(R.string.app_name),
-				tickerText,
-				contentIntent);
-		nm.notify(1, notification);
+        new Notifier(this).notifyOnce("Setup synchronization", Notifier.NOTIFY_LOGIN_REQUIRED);
     }
 
     private void update_done() {
