@@ -5,4 +5,6 @@
     <string name="config_title_version">Project Mint</string>
     <string name="config_title_user_id">User ID</string>
     <string name="config_title_user_password">User Password</string>
+    <string name="config_title_reset_notifications">Reset Notifications</string>
+    <string name="config_desc_reset_notifications" />
 </resources>

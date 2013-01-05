@@ -12,6 +12,9 @@
             android:title="@string/config_title_user_password"
 	    android:inputType="textPassword" />
     <Preference
+	android:title="@string/config_title_reset_notifications"
+	android:summary="@string/config_desc_reset_notifications"/>
+    <Preference
 	android:title="@string/config_title_version"
 	android:summary="@string/app_version" />
 </PreferenceScreen>
