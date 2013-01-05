@@ -65,7 +65,7 @@ public class TaskPostFragment extends DialogFragment {
         }
 
         private String getActiveFilter() {
-            final TaskListActivity.TaskListFragment f = (TaskListActivity.TaskListFragment)getFragmentManager().findFragmentByTag(TaskListActivity.TaskListFragment.TAG);
+            final TaskListActivity.TaskListFragment f = (TaskListActivity.TaskListFragment)getTargetFragment();
             if (f == null) {
                 return null;
             } else {
@@ -106,7 +106,7 @@ public class TaskPostFragment extends DialogFragment {
             }
 
             private void poke() {
-                final TaskListActivity.TaskListFragment f = (TaskListActivity.TaskListFragment)getFragmentManager().findFragmentByTag(TaskListActivity.TaskListFragment.TAG);
+                final TaskListActivity.TaskListFragment f = (TaskListActivity.TaskListFragment)getTargetFragment();
                 if (f != null) {
                     f.reload();
                 }

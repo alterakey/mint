@@ -5,6 +5,7 @@ import com.example.android.swipedismiss.*;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.DialogFragment;
 import android.app.ListFragment;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
@@ -156,7 +157,9 @@ public class TaskListActivity extends Activity
                 startActivity(new Intent(getActivity(), ConfigActivity.class));
                 return false;
             case R.id.main_post:
-                new TaskPostFragment().show(getFragmentManager(), "post_task");
+                final DialogFragment f = new TaskPostFragment();
+                f.setTargetFragment(this, 0);
+                f.show(getFragmentManager(), "post_task");
                 return false;
             }
             return super.onOptionsItemSelected(item);
