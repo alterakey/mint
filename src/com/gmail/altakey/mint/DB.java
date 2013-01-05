@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.LinkedList;
 import java.util.Date;
 import java.security.SecureRandom;
+import java.security.NoSuchAlgorithmException;
+import java.math.BigInteger;
 
 // Primarily cares synchronizers
 public class DB {
@@ -298,7 +300,7 @@ public class DB {
             sConn.execSQL(
                 "INSERT INTO tasks (cookie,title,note,modified,completed,folder,context,priority,star,duedate,duetime,status) VALUES (?,?,?,?,?,?,?,?,?,?)",
                 new String[] {
-                    nextCookie, task.title, task.note, String.valueOf(task.modified), String.valueOf(task.completed), String.valueOf(task.folder),
+                    nextCookie(), task.title, task.note, String.valueOf(task.modified), String.valueOf(task.completed), String.valueOf(task.folder),
                     String.valueOf(task.context), String.valueOf(task.priority), String.valueOf(task.star), String.valueOf(task.duedate), String.valueOf(task.duetime), task.status
                 }
             );
@@ -309,8 +311,12 @@ public class DB {
     }
 
     public static String nextCookie() {
-        final byte[] buffer = new byte[32];
-        SecureRandom.getInstance(SecureRandom.SHA1PRNG).nextBytes(buffer);
-        return String.format("%064x", new BigInteger(buffer));
+        try {
+            final byte[] buffer = new byte[32];
+            SecureRandom.getInstance("SHA1PRNG").nextBytes(buffer);
+            return String.format("%064x", new BigInteger(buffer));
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
