@@ -310,6 +310,22 @@ public class DB {
         }
     }
 
+    public void commitTask(Task task) {
+        try {
+            sConn.beginTransaction();
+            sConn.execSQL(
+                "UPDATE tasks SET title=?,note=?,modified=?,completed=?,folder=?,context=?,priority=?,star=?,duedate=?,duetime=?,status=? WHERE id=?",
+                new String[] {
+                    task.title, task.note, String.valueOf(task.modified), String.valueOf(task.completed), String.valueOf(task.folder),
+                    String.valueOf(task.context), String.valueOf(task.priority), String.valueOf(task.star), String.valueOf(task.duedate), String.valueOf(task.duetime), task.status, String.valueOf(task.id)
+                }
+            );
+            sConn.setTransactionSuccessful();
+        } finally {
+            sConn.endTransaction();
+        }
+    }
+
     public static String nextCookie() {
         try {
             final byte[] buffer = new byte[32];

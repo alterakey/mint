@@ -159,6 +159,15 @@ public class TaskEditActivity extends Activity
         public void onPause() {
             super.onPause();
             commit(getView());
+
+            final DB db = new DB(getActivity());
+            try {
+                db.openForWriting();
+                db.commitTask(mTask);
+            } finally {
+                db.close();
+            }
+
             final Intent intent = new Intent(getActivity(), ToodledoClientService.class);
             intent.setAction(ToodledoClientService.ACTION_COMMIT);
             intent.putExtra(ToodledoClientService.EXTRA_TASKS, ToodledoClientService.asListOfTasks(mTask));
