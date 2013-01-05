@@ -1,16 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-  <item android:id="@+id/main_filter_context"
-	android:icon="@android:drawable/ic_menu_edit"
-	android:title="Context"
-	android:showAsAction="ifRoom" />
-  <item android:id="@+id/main_post"
-	android:icon="@android:drawable/ic_menu_add"
-	android:title="Post task"
-	android:showAsAction="ifRoom" />
-  <item android:id="@+id/main_add"
-	android:icon="@android:drawable/ic_menu_add"
-	android:title="Create task" />
   <item android:id="@+id/main_preferences"
 	android:icon="@android:drawable/ic_menu_preferences"
 	android:title="Preferences" />

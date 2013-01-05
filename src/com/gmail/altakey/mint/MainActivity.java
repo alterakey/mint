@@ -11,6 +11,9 @@ import android.widget.ListAdapter;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.view.View;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.MenuInflater;
 
 public class MainActivity extends Activity {
     @Override
@@ -25,8 +28,24 @@ public class MainActivity extends Activity {
 
     public static class MainFragment extends ListFragment {
         @Override
+        public boolean onOptionsItemSelected(MenuItem item) {
+            switch (item.getItemId()) {
+            case R.id.main_preferences:
+                startActivity(new Intent(getActivity(), ConfigActivity.class));
+                return false;
+            }
+            return super.onOptionsItemSelected(item);
+        }
+
+        @Override
+        public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+            inflater.inflate(R.menu.main, menu);
+        }
+
+        @Override
         public void onActivityCreated(Bundle savedInstanceState) {
             super.onActivityCreated(savedInstanceState);
+            setHasOptionsMenu(true);
             setListAdapter(new AdapterBuilder(getActivity()).build());
         }
 
