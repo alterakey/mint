@@ -129,9 +129,20 @@ public class TaskListActivity extends Activity
                             for (int position : reverseSortedPositions) {
                                 final Map<String, ?> e = (Map<String, ?>)mAdapter.getItem(position);
                                 final Task task = (Task)e.get("task");
+
+                                task.markAsDone();
+
+                                final DB db = new DB(getActivity());
+                                try {
+                                    db.openForWriting();
+                                    db.commitTask(task);
+                                } finally {
+                                    db.close();
+                                }
+
                                 final Intent intent = new Intent(context, ToodledoClientService.class);
-                                intent.setAction(ToodledoClientService.ACTION_COMPLETE);
-                                intent.putExtra(ToodledoClientService.EXTRA_TASKS, ToodledoClientService.asListOfTasks((Task)e.get("task")));
+                                intent.setAction(ToodledoClientService.ACTION_COMMIT);
+                                intent.putExtra(ToodledoClientService.EXTRA_TASKS, ToodledoClientService.asListOfTasks(task));
                                 context.startService(intent);
                                 mAdapter.remove(position);
                             }
