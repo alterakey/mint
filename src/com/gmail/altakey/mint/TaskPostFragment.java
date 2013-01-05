@@ -49,7 +49,30 @@ public class TaskPostFragment extends DialogFragment {
 
         @Override
         public void onClick(DialogInterface dialog, int which) {
-            new TaskAddTask(getActivity(), build()).execute();
+            final Context context = getActivity();
+            final Task task = build();
+            final DB db = new DB(context);
+
+            try {
+                db.openForWriting();
+                db.addTask(task);
+            } finally {
+                db.close();
+            }
+
+            final Intent intent = new Intent(context, ToodledoClientService.class);
+            intent.setAction(ToodledoClientService.ACTION_ADD);
+            intent.putExtra(ToodledoClientService.EXTRA_TASKS, ToodledoClientService.asListOfTasks(task));
+            context.startService(intent);
+
+            poke();
+        }
+
+        private void poke() {
+            final TaskListActivity.TaskListFragment f = (TaskListActivity.TaskListFragment)getTargetFragment();
+            if (f != null) {
+                f.reload();
+            }
         }
 
         private Task build() {
@@ -70,46 +93,6 @@ public class TaskPostFragment extends DialogFragment {
                 return null;
             } else {
                 return f.getFilter();
-            }
-        }
-
-        private class TaskAddTask extends AsyncTask<Void, Void, Void> {
-            private Task mmmTask;
-            private Context mmmContext;
-
-            public TaskAddTask(Context ctx, Task task) {
-                mmmTask = task;
-                mmmContext = ctx;
-            }
-
-            @Override
-            protected Void doInBackground(Void... params) {
-                final DB db = new DB(getActivity());
-                try {
-                    db.openForWriting();
-                    db.addTask(mmmTask);
-                    return null;
-                } finally {
-                    db.close();
-                }
-            }
-
-            @Override
-            protected void onPostExecute(Void ret) {
-                final Intent intent = new Intent(mmmContext, ToodledoClientService.class);
-                intent.setAction(ToodledoClientService.ACTION_ADD);
-                intent.putExtra(ToodledoClientService.EXTRA_TASKS, ToodledoClientService.asListOfTasks(mmmTask));
-                mmmContext.startService(intent);
-
-                // XXX
-                poke();
-            }
-
-            private void poke() {
-                final TaskListActivity.TaskListFragment f = (TaskListActivity.TaskListFragment)getTargetFragment();
-                if (f != null) {
-                    f.reload();
-                }
             }
         }
     }
