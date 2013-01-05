@@ -32,7 +32,11 @@ public class Task {
     };
 
     public void markAsDone() {
-        completed = new Date().getTime() / 1000;
+        markAsDone(new Date().getTime());
+    }
+
+    public void markAsDone(long at) {
+        completed = at / 1000;
     }
 
     public static Task fromCursor(Cursor c, int offset) {

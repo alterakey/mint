@@ -138,7 +138,7 @@ public class ToodledoClientService extends IntentService {
     private void complete(List<Task> tasks) throws IOException, Authenticator.Exception {
         final long now = new Date().getTime();
         for (Task t : tasks) {
-            t.completed = now / 1000;
+            t.markAsDone(now);
         }
         mClient.commitTasks(tasks, null);
     }
