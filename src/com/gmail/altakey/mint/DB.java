@@ -233,7 +233,7 @@ public class DB {
         }
     }
 
-    private final String TASK_QUERY = "SELECT task,title,note,modified,completed,folder,context,priority,star,duedate,duetime,status,folder as folder_id,folders.name as folder_name,folders.private as folder_private,folders.archived as folder_archived,folders.ord as folder_ord,context as context_id,contexts.name as context_name FROM tasks left join folders using (folder) left join contexts using (context) where %s order by %s";
+    private final String TASK_QUERY = "SELECT tasks.id,task,title,note,modified,completed,folder,context,priority,star,duedate,duetime,status,folder as folder_id,folders.name as folder_name,folders.private as folder_private,folders.archived as folder_archived,folders.ord as folder_ord,context as context_id,contexts.name as context_name FROM tasks left join folders using (folder) left join contexts using (context) where %s order by %s";
     public static final String DEFAULT_ORDER = "duedate,priority desc";
     public static final String HOT_FILTER = "(priority=3 or (priority>=0 and duedate>0 and duedate<?)) and completed=0";
     public static final String ALL_FILTER = "1=1";
@@ -246,8 +246,8 @@ public class DB {
             c.moveToFirst();
             while (!c.isAfterLast()) {
                 Task task = Task.fromCursor(c, 0);
-                task.resolved.folder = TaskFolder.fromCursor(c, 12);
-                task.resolved.context = TaskContext.fromCursor(c, 17);
+                task.resolved.folder = TaskFolder.fromCursor(c, 13);
+                task.resolved.context = TaskContext.fromCursor(c, 18);
                 ret.add(task);
                 c.moveToNext();
             }
@@ -266,8 +266,8 @@ public class DB {
             c.moveToFirst();
             while (!c.isAfterLast()) {
                 Task task = Task.fromCursor(c, 0);
-                task.resolved.folder = TaskFolder.fromCursor(c, 12);
-                task.resolved.context = TaskContext.fromCursor(c, 17);
+                task.resolved.folder = TaskFolder.fromCursor(c, 13);
+                task.resolved.context = TaskContext.fromCursor(c, 18);
                 ret.add(task);
                 c.moveToNext();
             }

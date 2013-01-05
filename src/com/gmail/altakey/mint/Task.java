@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.Date;
 
 public class Task {
+    public long _id;
     public long id;
     public String title;
     public String note;
@@ -36,18 +37,19 @@ public class Task {
 
     public static Task fromCursor(Cursor c, int offset) {
         final Task task = new Task();
-        task.id = c.getLong(0 + offset);
-        task.title = c.getString(1 + offset);
-        task.note = c.getString(2 + offset);
-        task.modified = c.getLong(3 + offset);
-        task.completed = c.getLong(4 + offset);
-        task.folder = c.getLong(5 + offset);
-        task.context = c.getLong(6 + offset);
-        task.priority = c.getLong(7 + offset);
-        task.star = c.getLong(8 + offset);
-        task.duedate = c.getLong(9 + offset);
-        task.duetime = c.getLong(10 + offset);
-        task.status = c.getString(11 + offset);
+        task._id = c.getLong(0 + offset);
+        task.id = c.getLong(1 + offset);
+        task.title = c.getString(2 + offset);
+        task.note = c.getString(3 + offset);
+        task.modified = c.getLong(4 + offset);
+        task.completed = c.getLong(5 + offset);
+        task.folder = c.getLong(6 + offset);
+        task.context = c.getLong(7 + offset);
+        task.priority = c.getLong(8 + offset);
+        task.star = c.getLong(9 + offset);
+        task.duedate = c.getLong(10 + offset);
+        task.duetime = c.getLong(11 + offset);
+        task.status = c.getString(12 + offset);
         return task;
     }
 
