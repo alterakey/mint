@@ -21,6 +21,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.preference.PreferenceActivity;
+import android.preference.Preference;
 
 public class ConfigActivity extends PreferenceActivity implements
         SharedPreferences.OnSharedPreferenceChangeListener {
@@ -34,6 +35,7 @@ public class ConfigActivity extends PreferenceActivity implements
         addPreferencesFromResource(R.xml.config);
         mUserId = (EditTextPreference)getPreferenceScreen().findPreference(ConfigKey.USER_ID);
         mUserPassword = (EditTextPreference)getPreferenceScreen().findPreference(ConfigKey.USER_PASSWORD);
+        getPreferenceScreen().findPreference(ConfigKey.RESET_NOTIFICATIONS).setOnPreferenceClickListener(new ResetNotificationAction());
     }
 
     @Override
@@ -67,6 +69,16 @@ public class ConfigActivity extends PreferenceActivity implements
     private void updateSummary(SharedPreferences sharedPreferences, String key) {
         if (key.equals(ConfigKey.USER_ID)) {
             mUserId.setSummary(mUserId.getText());
+        }
+    }
+
+    private class ResetNotificationAction implements Preference.OnPreferenceClickListener {
+        @Override
+        public boolean onPreferenceClick(Preference pref) {
+            Notifier notifier = new Notifier(ConfigActivity.this);
+            notifier.clear();
+            notifier.info("Notifications are reset.");
+            return true;
         }
     }
 

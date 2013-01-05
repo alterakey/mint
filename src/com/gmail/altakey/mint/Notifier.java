@@ -48,6 +48,10 @@ public class Notifier {
         Toast.makeText(mContext, text, Toast.LENGTH_LONG).show();
     }
 
+    public void info(String text) {
+        Toast.makeText(mContext, text, Toast.LENGTH_SHORT).show();
+    }
+
     public void clear() {
         final SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(mContext);
         pref.edit()
