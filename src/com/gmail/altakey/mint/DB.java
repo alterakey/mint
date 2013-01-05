@@ -277,9 +277,9 @@ public class DB {
         }
     }
 
-    public Task getTask(long taskId) {
+    public Task getTaskById(long taskId) {
         Cursor c = sConn.rawQuery(
-            String.format(TASK_QUERY, String.format("task=%d", taskId), DEFAULT_ORDER), null);
+            String.format(TASK_QUERY, String.format("id=%d", taskId), DEFAULT_ORDER), null);
         try {
             c.moveToFirst();
             while (!c.isAfterLast()) {

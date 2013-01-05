@@ -90,7 +90,7 @@ public class TaskEditActivity extends Activity
             final DB db = new DB(getActivity());
             try {
                 db.open();
-                mTask = db.getTask(args.getLong(KEY_TASK_ID));
+                mTask = db.getTaskById(args.getLong(KEY_TASK_ID));
                 update(getView());
             } finally {
                 db.close();

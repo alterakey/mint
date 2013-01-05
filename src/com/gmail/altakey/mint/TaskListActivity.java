@@ -189,7 +189,7 @@ public class TaskListActivity extends Activity
             final Map<String, ?> map = (Map<String, ?>)mAdapter.getItem(position);
             final Task task = (Task)map.get("task");
             final Intent intent = new Intent(getActivity(), TaskEditActivity.class);
-            intent.putExtra(TaskEditActivity.KEY_TASK_ID, task.id);
+            intent.putExtra(TaskEditActivity.KEY_TASK_ID, task._id);
             startActivity(intent);
         }
 
