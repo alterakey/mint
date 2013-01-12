@@ -48,7 +48,7 @@ public class Task {
         note = note.replaceAll("\n?(mint:[0-9a-f]{32,})", "");
     }
 
-    public void isReplica() {
+    public boolean isReplica() {
         return note.contains(String.format("(mint:%s)", _cookie));
     }
 
