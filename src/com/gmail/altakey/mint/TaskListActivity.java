@@ -13,6 +13,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -271,23 +272,24 @@ public class TaskListActivity extends Activity
                 final View priority = convertView.findViewById(R.id.list_task_prio);
                 final Map<String, ?> map = mmmData.get(position);
                 final Task task = (Task)map.get("task");
+                final Resources res = getResources();
 
                 switch (((Long)map.get("priority")).intValue()) {
                 case -1:
-                    priority.setBackgroundColor(0xff0000ff);
+                    priority.setBackgroundColor(res.getColor(R.color.prio_negative));
                     break;
                 case 0:
-                    priority.setBackgroundColor(0xff00ff00);
+                    priority.setBackgroundColor(res.getColor(R.color.prio_low));
                     break;
                 case 1:
-                    priority.setBackgroundColor(0xffffff00);
+                    priority.setBackgroundColor(res.getColor(R.color.prio_normal));
                     break;
                 case 2:
-                    priority.setBackgroundColor(0xffff8800);
+                    priority.setBackgroundColor(res.getColor(R.color.prio_high));
                     break;
                 case 3:
                 default:
-                    priority.setBackgroundColor(0xffff0000);
+                    priority.setBackgroundColor(res.getColor(R.color.prio_top));
                     break;
                 }
                 return convertView;
