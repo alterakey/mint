@@ -219,9 +219,9 @@ public class TaskEditActivity extends Activity
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             final Calendar c = Calendar.getInstance();
-            final int hour = c.get(Calendar.HOUR);
+            final int hour = c.get(Calendar.HOUR_OF_DAY);
             final int minute = c.get(Calendar.MINUTE);
-            return new TimePickerDialog(getActivity(), this, hour, minute, false);
+            return new TimePickerDialog(getActivity(), this, hour, minute, true);
         }
 
         @Override
