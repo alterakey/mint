@@ -12,4 +12,19 @@
         <item name="android:backgroundStacked">@color/actionbar</item>
         <item name="android:backgroundSplit">@color/actionbar</item>
     </style>
+
+    <style name="count">
+      <item name="android:gravity">center|center_vertical</item>
+      <item name="android:textSize">12sp</item>
+      <item name="android:layout_width">wrap_content</item>
+      <item name="android:layout_height">wrap_content</item>
+      <item name="android:minEms">2</item>
+      <item name="android:background">@drawable/background_count</item>
+      <item name="android:textColor">@color/count_digit</item>
+      <item name="android:textStyle">bold</item>
+      <item name="android:paddingLeft">8dp</item>
+      <item name="android:paddingRight">8dp</item>
+      <item name="android:paddingTop">4dp</item>
+      <item name="android:paddingBottom">4dp</item>
+    </style>
 </resources>

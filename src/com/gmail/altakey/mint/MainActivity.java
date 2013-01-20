@@ -8,12 +8,17 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.ListAdapter;
-import android.widget.ArrayAdapter;
+import android.widget.SimpleAdapter;
 import android.widget.ListView;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuInflater;
+
+import java.util.List;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.HashMap;
 
 public class MainActivity extends Activity {
     @Override
@@ -51,7 +56,6 @@ public class MainActivity extends Activity {
 
         @Override
         public void onListItemClick(ListView lv, View v, int pos, long id) {
-            final String target = (String)getListAdapter().getItem(pos);
             Intent intent = new Intent(getActivity(), TaskListActivity.class);
             intent.putExtra(TaskListActivity.KEY_LIST_FILTER, AdapterBuilder.FILTERS[pos]);
             startActivity(intent);
@@ -68,7 +72,17 @@ public class MainActivity extends Activity {
             }
 
             public ListAdapter build() {
-                return new ArrayAdapter<String>(mmmContext, R.layout.main_list_item, TITLES);
+                final List<Map<String, ?>> data = new LinkedList<Map<String, ?>>();
+                for (String title: TITLES) {
+                    final Map<String, Object> column = new HashMap<String, Object>();
+                    column.put("title", title);
+                    data.add(column);
+                }
+                return new SimpleAdapter(
+                    mmmContext, data, R.layout.main_list_item,
+                    new String[] { "title" },
+                    new int[] { android.R.id.text1 }
+                );
             }
         }
     }
