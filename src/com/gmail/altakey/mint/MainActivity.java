@@ -68,7 +68,7 @@ public class MainActivity extends Activity {
             }
 
             public ListAdapter build() {
-                return new ArrayAdapter<String>(mmmContext, android.R.layout.simple_list_item_1, TITLES);
+                return new ArrayAdapter<String>(mmmContext, R.layout.main_list_item, TITLES);
             }
         }
     }
