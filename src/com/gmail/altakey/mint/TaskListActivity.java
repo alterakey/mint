@@ -290,11 +290,6 @@ public class TaskListActivity extends Activity
                     priority.setBackgroundColor(0xffff0000);
                     break;
                 }
-                if (task.grayedout) {
-                    convertView.setBackgroundColor(0x80ffffff);
-                } else {
-                    convertView.setBackgroundColor(0x00000000);
-                }
                 return convertView;
             }
         }
