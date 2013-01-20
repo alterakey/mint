@@ -5,6 +5,10 @@
     <color name="plate">#111111</color>
     <color name="count_background">#444444</color>
     <color name="count_digit">#aaaaaa</color>
+    <color name="label_folder_background">#aaaacc</color>
+    <color name="label_folder_text">#000044</color>
+    <color name="label_context_background">#aaccaa</color>
+    <color name="label_context_text">#004400</color>
 
     <color name="prio_top">#ff0000</color>
     <color name="prio_high">#ff8800</color>

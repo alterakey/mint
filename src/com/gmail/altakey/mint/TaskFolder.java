@@ -25,6 +25,10 @@ public class TaskFolder {
         return folder;
     }
 
+    public boolean isNull() {
+        return id == 0;
+    }
+
     public static class JsonAdapter extends TypeAdapter<TaskFolder> {
         @Override
         public TaskFolder read(JsonReader reader) throws IOException {

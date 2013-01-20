@@ -235,8 +235,8 @@ public class TaskListActivity extends Activity
                 super(ctx,
                       data,
                       R.layout.list_item,
-                      new String[] { "title", "context_0", "context_1", "context_2", "due", "timer_flag" },
-                      new int[] { R.id.list_task_title, R.id.list_task_context_0, R.id.list_task_context_1, R.id.list_task_context_2, R.id.list_task_due, R.id.list_task_timer_flag });
+                      new String[] { "title", "folder_0", "context_0", "due", "timer_flag" },
+                      new int[] { R.id.list_task_title, R.id.list_task_folder_0, R.id.list_task_context_0, R.id.list_task_due, R.id.list_task_timer_flag });
                 mmmData = data;
             }
 
@@ -292,6 +292,18 @@ public class TaskListActivity extends Activity
                     priority.setBackgroundColor(res.getColor(R.color.prio_top));
                     break;
                 }
+
+                if (null == map.get("folder_0")) {
+                    convertView.findViewById(R.id.list_task_folder_0).setVisibility(View.GONE);
+                } else {
+                    convertView.findViewById(R.id.list_task_folder_0).setVisibility(View.VISIBLE);
+                }
+                if (null == map.get("context_0")) {
+                    convertView.findViewById(R.id.list_task_context_0).setVisibility(View.GONE);
+                } else {
+                    convertView.findViewById(R.id.list_task_context_0).setVisibility(View.VISIBLE);
+                }
+
                 return convertView;
             }
         }
@@ -351,11 +363,11 @@ public class TaskListActivity extends Activity
                     map.put("title", t.title);
                     map.put("priority", t.priority);
 
-                    if (f != null) {
-                        map.put("context_0", String.format("%s", f.name));
+                    if (!f.isNull()) {
+                        map.put("folder_0", String.format("%s", f.name));
                     }
-                    if (c != null) {
-                        map.put("context_1", String.format("@%s", c.name));
+                    if (!c.isNull()) {
+                        map.put("context_0", String.format("%s", c.name));
                     }
 
                     if (t.duedate > 0) {

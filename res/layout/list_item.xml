@@ -3,8 +3,9 @@
     android:orientation="horizontal"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:padding="4dp"
+    android:padding="8dp"
     android:background="@color/list_item"
+    android:gravity="center_vertical"
     >
   <FrameLayout
       android:layout_width="6dp"
@@ -36,8 +37,9 @@
 	  android:gravity="fill_horizontal"
 	  android:layout_weight="1"
 	  android:text="Test Item"
-	  android:textSize="18sp"
+	  android:textSize="16sp"
 	  android:textStyle="bold"
+	  android:textColor="#ffffff"
 	  />
       <TextView
 	  android:id="@+id/list_task_due"
@@ -59,39 +61,16 @@
 	  android:layout_gravity="fill_horizontal"
 	  android:layout_weight="1"
 	  >
-	<FrameLayout
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content"
-	    android:padding="1dp">
-	  <TextView
-	      android:id="@+id/list_task_context_0"
-	      android:layout_width="wrap_content"
-	      android:layout_height="wrap_content"
-	      android:text="\@here"
-	      />
-	</FrameLayout>
-	<FrameLayout
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content"
-	    android:padding="1dp">
-	  <TextView
-	      android:id="@+id/list_task_context_1"
-	      android:layout_width="wrap_content"
-	      android:layout_height="wrap_content"
-	      android:text="\@there"
-	      />
-	</FrameLayout>
-	<FrameLayout
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content"
-	    android:padding="1dp">
-	  <TextView
-	      android:id="@+id/list_task_context_2"
-	      android:layout_width="wrap_content"
-	      android:layout_height="wrap_content"
-	      android:text="\@anywhere"
-	      />
-	</FrameLayout>
+	<TextView
+	    style="@style/label_folder"
+	    android:id="@+id/list_task_folder_0"
+	    android:text="\@here"
+	    />
+	<TextView
+	    style="@style/label_context"
+	    android:id="@+id/list_task_context_0"
+	    android:text="\@here"
+	    />
       </LinearLayout>
       <TextView
 	  android:id="@+id/list_task_timer_flag"

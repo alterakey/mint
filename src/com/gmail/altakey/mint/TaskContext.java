@@ -19,6 +19,10 @@ public class TaskContext {
         return context;
     }
 
+    public boolean isNull() {
+        return id == 0;
+    }
+
     public static class JsonAdapter extends TypeAdapter<TaskContext> {
         @Override
         public TaskContext read(JsonReader reader) throws IOException {
