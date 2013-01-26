@@ -204,7 +204,7 @@ public class TaskListActivity extends Activity
                     return false;
                 }
 
-                mActionMode = getActivity().startActionMode(new TaskSelectionMode());
+                getActivity().startActionMode(new TaskSelectionMode());
                 v.setSelected(true);
                 return true;
             }
@@ -396,6 +396,8 @@ public class TaskListActivity extends Activity
         private class TaskSelectionMode implements ActionMode.Callback {
             @Override
             public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                mActionMode = mode;
+
                 final MenuInflater inflater = mode.getMenuInflater();
                 inflater.inflate(R.menu.list_selection, menu);
                 return true;
