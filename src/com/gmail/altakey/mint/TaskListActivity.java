@@ -42,6 +42,8 @@ public class TaskListActivity extends Activity
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+
         setContentView(R.layout.plate);
 
         final Intent intent = getIntent();
@@ -308,21 +310,15 @@ public class TaskListActivity extends Activity
         }
 
         private class TaskListLoadTask extends AsyncTask<Void, Void, List<Task>> {
-            private VolatileDialog mmProgress;
             private List<Map<String, ?>> mmData;
 
             public TaskListLoadTask(List<Map<String, ?>> data, boolean silent) {
                 mmData = data;
-                if (silent) {
-                    mmProgress = new NullProgress();
-                } else {
-                    mmProgress = new Progress();
-                }
             }
 
             @Override
             protected void onPreExecute() {
-                mmProgress.show();
+                getActivity().setProgressBarIndeterminateVisibility(true);
             }
 
             @Override
@@ -376,46 +372,9 @@ public class TaskListActivity extends Activity
                     mmData.add(map);
                 }
 
-                mmProgress.dismiss();
+                getActivity().setProgressBarIndeterminateVisibility(false);
+                Log.d("TLA", String.format("before refresh: items: %d", mmData.size()));
                 refresh();
-            }
-
-            private class Progress implements VolatileDialog {
-                private Dialog mmmDialog;
-
-                @Override
-                public void show() {
-                    final ProgressDialog dialog = new ProgressDialog(getActivity());
-                    dialog.setTitle("Getting tasks");
-                    dialog.setMessage("Querying tasks...");
-                    dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                    dialog.setIndeterminate(true);
-                    dialog.setCancelable(true);
-                    dialog.setCanceledOnTouchOutside(true);
-                    dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-                        @Override
-                        public void onCancel(DialogInterface dialog) {
-                            cancel(true);
-                        }
-                    });
-                    mmmDialog = dialog;
-                    mmmDialog.show();
-                }
-
-                @Override
-                public void dismiss() {
-                    mmmDialog.dismiss();
-                }
-            }
-
-            private class NullProgress implements VolatileDialog {
-                @Override
-                public void show() {
-                }
-
-                @Override
-                public void dismiss() {
-                }
             }
         }
     }
