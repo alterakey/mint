@@ -135,13 +135,15 @@ public class ToodledoClient {
     }
 
     public void addTasks(List<Task> tasks, String[] additionalFields) throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
-        final String fields = additionalFields == null ? "" : String.format("&fields=%s", Joiner.on(",").join(additionalFields));
+        if (tasks.size() > 0) {
+            final String fields = additionalFields == null ? "" : String.format("&fields=%s", Joiner.on(",").join(additionalFields));
 
-        issueRequest(
-            new HttpPost(
-                getServiceUrl("tasks/add", String.format("tasks=%s%s", URLEncoder.encode(getGson().toJson(tasks.toArray(new Task[0])), "UTF-8"), fields))
-            )
-        );
+            issueRequest(
+                new HttpPost(
+                    getServiceUrl("tasks/add", String.format("tasks=%s%s", URLEncoder.encode(getGson().toJson(tasks.toArray(new Task[0])), "UTF-8"), fields))
+                    )
+                );
+        }
     }
 
     public void commitTask(Task t, String[] additionalFields) throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
@@ -149,13 +151,15 @@ public class ToodledoClient {
     }
 
     public void commitTasks(List<Task> tasks, String[] additionalFields) throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
-        final String fields = additionalFields == null ? "" : String.format("&fields=%s", Joiner.on(",").join(additionalFields));
+        if (tasks.size() > 0) {
+            final String fields = additionalFields == null ? "" : String.format("&fields=%s", Joiner.on(",").join(additionalFields));
 
-        issueRequest(
-            new HttpPost(
-                getServiceUrl("tasks/edit", String.format("tasks=%s%s", URLEncoder.encode(getGson().toJson(tasks.toArray(new Task[0])), "UTF-8"), fields))
-            )
-        );
+            issueRequest(
+                new HttpPost(
+                    getServiceUrl("tasks/edit", String.format("tasks=%s%s", URLEncoder.encode(getGson().toJson(tasks.toArray(new Task[0])), "UTF-8"), fields))
+                    )
+                );
+        }
     }
 
     public TaskStatus getStatus() throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
