@@ -201,6 +201,14 @@ public class DB {
 
     public void commit(ToodledoClient client) throws IOException, Authenticator.BogusException, Authenticator.FailureException, Authenticator.ErrorException {
         Log.d("DB.commit", "TBD: commit to DB");
+        try {
+            sConn.beginTransaction();
+
+            final TaskStatus st = client.getStatus();
+            client.commitTasks(getTasks(String.format("tasks.id is null or tasks.modified > %d", st.lastedit_task), NO_ORDER));
+        } finally {
+            sConn.endTransaction();
+        }
     }
 
     public List<TaskFolder> getFolders() {
