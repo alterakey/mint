@@ -44,6 +44,11 @@ public class Notifier {
         }
     }
 
+    public void cancel() {
+        final NotificationManager nm = (NotificationManager)mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+		nm.cancel(1);
+    }
+
     public void boo(String text) {
         Toast.makeText(mContext, text, Toast.LENGTH_LONG).show();
     }
