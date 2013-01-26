@@ -205,7 +205,7 @@ public class DB {
             sConn.beginTransaction();
 
             final TaskStatus st = client.getStatus();
-            client.commitTasks(getTasks(String.format("tasks.id is null or tasks.modified > %d", st.lastedit_task), NO_ORDER));
+            client.commitTasks(getTasks(String.format("tasks.id is null or tasks.modified > %d", st.lastedit_task), null), new String[] { "note", "duedate", "duetime" });
         } finally {
             sConn.endTransaction();
         }

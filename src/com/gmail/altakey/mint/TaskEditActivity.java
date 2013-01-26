@@ -169,9 +169,7 @@ public class TaskEditActivity extends Activity
             }
 
             final Intent intent = new Intent(getActivity(), ToodledoClientService.class);
-            intent.setAction(ToodledoClientService.ACTION_COMMIT);
-            intent.putExtra(ToodledoClientService.EXTRA_TASKS, ToodledoClientService.asListOfTasks(mTask));
-            intent.putExtra(ToodledoClientService.EXTRA_TASK_FIELDS, new String[] { "note", "duedate", "duetime" });
+            intent.setAction(ToodledoClientService.ACTION_SYNC);
             getActivity().startService(intent);
         }
     }

@@ -142,8 +142,7 @@ public class TaskListActivity extends Activity
                                 }
 
                                 final Intent intent = new Intent(context, ToodledoClientService.class);
-                                intent.setAction(ToodledoClientService.ACTION_COMMIT);
-                                intent.putExtra(ToodledoClientService.EXTRA_TASKS, ToodledoClientService.asListOfTasks(task));
+                                intent.setAction(ToodledoClientService.ACTION_SYNC);
                                 context.startService(intent);
                                 mAdapter.remove(position);
                             }
@@ -213,7 +212,7 @@ public class TaskListActivity extends Activity
         private void update() {
             final Context context = getActivity();
             final Intent intent = new Intent(context, ToodledoClientService.class);
-            intent.setAction(ToodledoClientService.ACTION_UPDATE);
+            intent.setAction(ToodledoClientService.ACTION_SYNC);
             context.startService(intent);
         }
 
@@ -426,8 +425,7 @@ public class TaskListActivity extends Activity
 
         public void register() {
             final IntentFilter filter = new IntentFilter();
-            filter.addAction(ToodledoClientService.ACTION_UPDATE_DONE);
-            filter.addAction(ToodledoClientService.ACTION_ADD_DONE);
+            filter.addAction(ToodledoClientService.ACTION_SYNC_DONE);
             LocalBroadcastManager.getInstance(mmActivity).registerReceiver(this, filter);
         }
 
@@ -438,8 +436,7 @@ public class TaskListActivity extends Activity
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
-            if (ToodledoClientService.ACTION_UPDATE_DONE.equals(action)
-                || ToodledoClientService.ACTION_ADD_DONE.equals(action)) {
+            if (ToodledoClientService.ACTION_SYNC_DONE.equals(action)) {
                 poke();
             }
         }

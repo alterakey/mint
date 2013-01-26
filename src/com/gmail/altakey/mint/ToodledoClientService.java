@@ -25,6 +25,7 @@ import java.io.IOException;
 
 public class ToodledoClientService extends IntentService {
     public static final String ACTION_SYNC = "com.gmail.altakey.mint.SYNC";
+    public static final String ACTION_SYNC_DONE = "com.gmail.altakey.mint.SYNC_DONE";
 
     public static final String EXTRA_TASKS = "tasks";
     public static final String EXTRA_TASK_FIELDS = "task_fields";
