@@ -221,7 +221,6 @@ public class DB {
     }
 
     public void commit(ToodledoClient client) throws IOException, Authenticator.BogusException, Authenticator.FailureException, Authenticator.ErrorException {
-        Log.d("DB.commit", "TBD: commit to DB");
         try {
             sConn.beginTransaction();
 
