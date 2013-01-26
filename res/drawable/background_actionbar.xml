@@ -6,7 +6,7 @@
       <solid android:color="@color/actionbar" />
     </shape>
   </item>
-  <item android:top="31dp">
+  <item android:top="47dp">
     <shape>
       <solid android:color="@color/plate" />
     </shape>
