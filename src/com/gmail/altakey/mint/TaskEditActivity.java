@@ -158,19 +158,21 @@ public class TaskEditActivity extends Activity
         @Override
         public void onPause() {
             super.onPause();
-            commit(getView());
+            if (mTask != null) {
+                commit(getView());
 
-            final DB db = new DB(getActivity());
-            try {
-                db.openForWriting();
-                db.commitTask(mTask);
-            } finally {
-                db.close();
+                final DB db = new DB(getActivity());
+                try {
+                    db.openForWriting();
+                    db.commitTask(mTask);
+                } finally {
+                    db.close();
+                }
+
+                final Intent intent = new Intent(getActivity(), ToodledoClientService.class);
+                intent.setAction(ToodledoClientService.ACTION_SYNC);
+                getActivity().startService(intent);
             }
-
-            final Intent intent = new Intent(getActivity(), ToodledoClientService.class);
-            intent.setAction(ToodledoClientService.ACTION_SYNC);
-            getActivity().startService(intent);
         }
     }
 
