@@ -108,11 +108,32 @@ public class DB {
     }
 
     public void update(ToodledoClient client) throws IOException, Authenticator.BogusException, Authenticator.FailureException, Authenticator.ErrorException {
+        final TaskStatus st = client.getStatus();
+        final Map<String, Long> flags = updatedSince(st);
+        final Map<String, List<?>> data = new HashMap<String, List<?>>();
+
+        if (flags.containsKey("folder_delete")) {
+            data.put("folder_delete", client.getFoldersDeletedAfter(flags.get("folder_delete")));
+        }
+
+        if (flags.containsKey("task_delete")) {
+            data.put("task_delete", client.getTasksDeletedAfter(flags.get("task_delete")));
+        }
+
+        if (flags.containsKey("folder")) {
+            data.put("folder", client.getFoldersAfter(flags.get("folder")));
+        }
+
+        if (flags.containsKey("context")) {
+            data.put("context", client.getContextsAfter(flags.get("context")));
+        }
+
+        if (flags.containsKey("task")) {
+            data.put("task", client.getTasksAfter(flags.get("task")));
+        }
+
         try {
             sConn.beginTransaction();
-
-            TaskStatus st = client.getStatus();
-            Map<String, Long> flags = updatedSince(st);
 
             sConn.execSQL("INSERT OR REPLACE INTO status (status, lastedit_folder, lastedit_context, lastedit_goal, lastedit_location, lastedit_task, lastdelete_task, lastedit_notebook, lastdelete_notebook) VALUES (?,?,?,?,?,?,?,?,?)",
                          new String[] {
@@ -127,8 +148,8 @@ public class DB {
                              String.valueOf(st.lastdelete_notebook)
                          });
 
-            if (flags.containsKey("folder_delete")) {
-                for (TaskFolder t : client.getFoldersDeletedAfter(flags.get("folder_delete"))) {
+            if (data.containsKey("folder_delete")) {
+                for (TaskFolder t : (List<TaskFolder>)data.get("folder_delete")) {
                     sConn.execSQL(
                         "DELETE FROM folders WHERE folder=?",
                         new String[] {
@@ -137,8 +158,8 @@ public class DB {
                 }
             }
 
-            if (flags.containsKey("task_delete")) {
-                for (Task t : client.getTasksDeletedAfter(flags.get("task_delete"))) {
+            if (data.containsKey("task_delete")) {
+                for (Task t : (List<Task>)data.get("task_delete")) {
                     sConn.execSQL(
                         "DELETE FROM tasks WHERE task=?",
                         new String[] {
@@ -147,8 +168,8 @@ public class DB {
                 }
             }
 
-            if (flags.containsKey("folder")) {
-                for (TaskFolder t : client.getFoldersAfter(flags.get("folder"))) {
+            if (data.containsKey("folder")) {
+                for (TaskFolder t : (List<TaskFolder>)data.get("folder")) {
                     sConn.execSQL(
                         "INSERT OR REPLACE INTO folders (folder, name, private, archived, ord) VALUES (?,?,?,?,?)",
                         new String[] {
@@ -161,8 +182,8 @@ public class DB {
                 }
             }
 
-            if (flags.containsKey("context")) {
-                for (TaskContext t : client.getContextsAfter(flags.get("context"))) {
+            if (data.containsKey("context")) {
+                for (TaskContext t : (List<TaskContext>)data.get("context")) {
                     sConn.execSQL(
                         "INSERT OR REPLACE INTO contexts (context, name) VALUES (?,?)",
                         new String[] {
@@ -172,8 +193,8 @@ public class DB {
                 }
             }
 
-            if (flags.containsKey("task")) {
-                for (Task t : client.getTasksAfter(flags.get("task"))) {
+            if (data.containsKey("task")) {
+                for (Task t : (List<Task>)data.get("task")) {
                     sConn.execSQL(
                         "INSERT OR REPLACE INTO tasks (task, title, note, modified, completed, folder, context, priority, star, duedate, duetime, status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
                         new String[] {
