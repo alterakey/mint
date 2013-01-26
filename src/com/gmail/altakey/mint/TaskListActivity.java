@@ -77,6 +77,7 @@ public class TaskListActivity extends Activity
 
         private TaskListAdapter mAdapter;
         private String mFilterType;
+        private ActionMode mActionMode;
 
         public static class Filter {
             private static final String[] ALL = { "hotlist", "inbox", "next_action", "reference", "waiting", "someday" };
@@ -153,6 +154,7 @@ public class TaskListActivity extends Activity
                     });
             listView.setOnTouchListener(touchListener);
             listView.setOnScrollListener(touchListener.makeScrollListener());
+            listView.setOnItemLongClickListener(new SelectionModeListener());
 
             setHasOptionsMenu(true);
             setListAdapter(mAdapter);
@@ -193,6 +195,19 @@ public class TaskListActivity extends Activity
             final Intent intent = new Intent(getActivity(), TaskEditActivity.class);
             intent.putExtra(TaskEditActivity.KEY_TASK_ID, task._id);
             startActivity(intent);
+        }
+
+        private class SelectionModeListener implements AdapterView.OnItemLongClickListener {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View v, int position, long id) {
+                if (mActionMode != null) {
+                    return false;
+                }
+
+                mActionMode = getActivity().startActionMode(new TaskSelectionMode());
+                v.setSelected(true);
+                return true;
+            }
         }
 
         private Authenticator getAuthenticator() {
@@ -375,6 +390,37 @@ public class TaskListActivity extends Activity
                 getActivity().setProgressBarIndeterminateVisibility(false);
                 Log.d("TLA", String.format("before refresh: items: %d", mmData.size()));
                 refresh();
+            }
+        }
+
+        private class TaskSelectionMode implements ActionMode.Callback {
+            @Override
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                final MenuInflater inflater = mode.getMenuInflater();
+                inflater.inflate(R.menu.list_selection, menu);
+                return true;
+            }
+
+            @Override
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                switch (item.getItemId()) {
+                case R.id.list_selection_delete:
+                    Toast.makeText(getActivity(), "TBD: remove tasks", Toast.LENGTH_SHORT).show();
+                    mode.finish();
+                    return true;
+                default:
+                    return false;
+                }
+            }
+
+            @Override
+            public void onDestroyActionMode(ActionMode mode) {
+                mActionMode = null;
             }
         }
     }
