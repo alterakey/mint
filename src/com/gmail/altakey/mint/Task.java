@@ -49,7 +49,7 @@ public class Task {
     }
 
     public String getContentKey() {
-        return String.format("%d.%d.%d.%s", context, folder, status, title)
+        return String.format("%d.%d.%d.%s", context, folder, status, title);
     }
 
     public boolean isReplica() {
