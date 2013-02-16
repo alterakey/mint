@@ -1,7 +1,7 @@
 package com.gmail.altakey.mint;
 
 import android.app.Activity;
-import android.app.ListFragment;
+import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.ListAdapter;
 import android.widget.SimpleAdapter;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.view.View;
 import android.view.Menu;
@@ -31,7 +32,16 @@ public class MainActivity extends Activity {
             .commit();
     }
 
-    public static class MainFragment extends ListFragment {
+    public static class MainFragment extends Fragment {
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+            final View v = inflater.inflate(R.layout.main, container, false);
+            final ListView lv = (ListView) v.findViewById(android.R.id.list);
+            lv.setAdapter(new AdapterBuilder(getActivity()).build());
+            lv.setOnItemClickListener(new ItemClickAction());
+            return v;
+        }
+
         @Override
         public boolean onOptionsItemSelected(MenuItem item) {
             switch (item.getItemId()) {
@@ -51,14 +61,15 @@ public class MainActivity extends Activity {
         public void onActivityCreated(Bundle savedInstanceState) {
             super.onActivityCreated(savedInstanceState);
             setHasOptionsMenu(true);
-            setListAdapter(new AdapterBuilder(getActivity()).build());
         }
 
-        @Override
-        public void onListItemClick(ListView lv, View v, int pos, long id) {
-            Intent intent = new Intent(getActivity(), TaskListActivity.class);
-            intent.putExtra(TaskListActivity.KEY_LIST_FILTER, AdapterBuilder.FILTERS[pos]);
-            startActivity(intent);
+        private class ItemClickAction implements AdapterView.OnItemClickListener {
+            @Override
+            public void onItemClick(AdapterView<?> lv, View v, int pos, long id) {
+                Intent intent = new Intent(getActivity(), TaskListActivity.class);
+                intent.putExtra(TaskListActivity.KEY_LIST_FILTER, AdapterBuilder.FILTERS[pos]);
+                startActivity(intent);
+            }
         }
 
         private static class AdapterBuilder {
