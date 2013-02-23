@@ -168,6 +168,17 @@ public class TaskListFragment extends ListFragment
         startActivity(intent);
     }
 
+    public void reload() {
+        mAdapter.reload();
+    }
+
+    private void update() {
+        final Context context = getActivity();
+        final Intent intent = new Intent(context, ToodledoClientService.class);
+        intent.setAction(ToodledoClientService.ACTION_SYNC);
+        context.startService(intent);
+    }
+
     private class SelectionModeListener implements AdapterView.OnItemLongClickListener {
         @Override
         public boolean onItemLongClick(AdapterView<?> parent, View v, int position, long id) {
@@ -179,29 +190,6 @@ public class TaskListFragment extends ListFragment
             v.setSelected(true);
             return true;
         }
-    }
-
-    private Authenticator getAuthenticator() {
-        return Authenticator.create(getActivity());
-    }
-
-    public void reload() {
-        mAdapter.reload();
-    }
-
-    private void reloadSilently() {
-        mAdapter.reloadSilently();
-    }
-
-    private void refresh() {
-        mAdapter.notifyDataSetChanged();
-    }
-
-    private void update() {
-        final Context context = getActivity();
-        final Intent intent = new Intent(context, ToodledoClientService.class);
-        intent.setAction(ToodledoClientService.ACTION_SYNC);
-        context.startService(intent);
     }
 
     public class TaskListAdapterBuilder {
@@ -360,7 +348,7 @@ public class TaskListFragment extends ListFragment
 
             getActivity().setProgressBarIndeterminateVisibility(false);
             Log.d("TLA", String.format("before refresh: items: %d", mmData.size()));
-            refresh();
+            mAdapter.notifyDataSetChanged();
         }
     }
 
@@ -417,7 +405,7 @@ public class TaskListFragment extends ListFragment
         }
 
         private void poke() {
-            reloadSilently();
+            mAdapter.reloadSilently();
         }
     }
 }
