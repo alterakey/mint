@@ -4,30 +4,33 @@ import android.content.UriMatcher;
 import android.net.Uri;
 
 public class ProviderMap {
+    public static final String AUTHORITY_TASK = TaskProvider.class.getCanonicalName();
+    public static final String AUTHORITY_FOLDER = TaskProvider.class.getCanonicalName();
+    public static final String AUTHORITY_CONTEXT = TaskProvider.class.getCanonicalName();
+
     private static UriMatcher sMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
-    private static final int TASKS = 1;
-    private static final int TASKS_ID = 2;
-    private static final int FOLDERS = 3;
-    private static final int FOLDERS_ID = 4;
-    private static final int CONTEXTS = 5;
-    private static final int CONTEXTS_ID = 6;
-    private static final int STATUSES = 7;
-    private static final int STATUSES_ID = 8;
+    public static final int TASKS = 1;
+    public static final int TASKS_ID = 2;
+    public static final int FOLDERS = 3;
+    public static final int FOLDERS_ID = 4;
+    public static final int CONTEXTS = 5;
+    public static final int CONTEXTS_ID = 6;
+    public static final int STATUSES = 7;
+    public static final int STATUSES_ID = 8;
 
     private static final String SINGLE_ITEM_TYPE = "vnd.android.cursor.item/%s";
     private static final String MULTIPLE_ITEM_TYPE = "vnd.android.cursor.dir/%s";
 
     static {
-        final String taskProvider = TaskProvider.class.getCanonicalName();
-        sMatcher.addURI(taskProvider, "tasks", TASKS);
-        sMatcher.addURI(taskProvider, "tasks/#", TASKS);
-        sMatcher.addURI(taskProvider, "folders", FOLDERS);
-        sMatcher.addURI(taskProvider, "folders/#", FOLDERS_ID);
-        sMatcher.addURI(taskProvider, "contexts", CONTEXTS);
-        sMatcher.addURI(taskProvider, "contexts/#", CONTEXTS_ID);
-        sMatcher.addURI(taskProvider, "statuses", STATUSES);
-        sMatcher.addURI(taskProvider, "statuses/#", STATUSES_ID);
+        sMatcher.addURI(AUTHORITY_TASK, "tasks", TASKS);
+        sMatcher.addURI(AUTHORITY_TASK, "tasks/#", TASKS_ID);
+        sMatcher.addURI(AUTHORITY_TASK, "folders", FOLDERS);
+        sMatcher.addURI(AUTHORITY_TASK, "folders/#", FOLDERS_ID);
+        sMatcher.addURI(AUTHORITY_TASK, "contexts", CONTEXTS);
+        sMatcher.addURI(AUTHORITY_TASK, "contexts/#", CONTEXTS_ID);
+        sMatcher.addURI(AUTHORITY_TASK, "statuses", STATUSES);
+        sMatcher.addURI(AUTHORITY_TASK, "statuses/#", STATUSES_ID);
     }
 
     private final Uri mUri;
@@ -36,8 +39,12 @@ public class ProviderMap {
         mUri = uri;
     }
 
-    public String getType() {
-        switch (sMatcher.match(mUri)) {
+    public int getResourceType() {
+        return sMatcher.match(mUri);
+    }
+
+    public String getContentType() {
+        switch (getResourceType()) {
         case TASKS:
             return String.format(MULTIPLE_ITEM_TYPE, "task");
         case TASKS_ID:
