@@ -66,7 +66,11 @@ public class TaskProvider extends ContentProvider {
     public static final int COL_CONTEXT_ID = 19;
     public static final int COL_CONTEXT_NAME = 20;
 
-    private static final String TASK_QUERY = "SELECT tasks.id,tasks.cookie,task,title,note,modified,completed,folder,context,priority,star,duedate,duetime,status,folder as folder_id,folders.name as folder_name,folders.private as folder_private,folders.archived as folder_archived,folders.ord as folder_ord,context as context_id,contexts.name as context_name FROM tasks left join folders using (folder) left join contexts using (context) where %s %s";
+    private static final String TASK_QUERY = "SELECT tasks.id,tasks.cookie,task,title,note,modified,completed,priority,star,duedate,duetime,status,folder as folder_id,folders.name as folder_name,folders.private as folder_private,folders.archived as folder_archived,folders.ord as folder_ord,context as context_id,contexts.name as context_name FROM tasks left join folders using (folder) left join contexts using (context) where %s %s";
+
+    private static final String TASK_INSERT_QUERY = "insert into tasks (cookie,task,title,note,modified,completed,folder,context,priority,star,duedate,duetime,status) values (?,?,?,?,?,?,(select id from folders where name=?),(select id from contexts from name=?),?,?,?,?,?,?)";
+
+    private static final String TASK_REPLACE_QUERY = "replace into tasks (id,cookie,task,title,note,modified,completed,folder,context,priority,star,duedate,duetime,status) values (?,?,?,?,?,?,?,(select id from folders where name=?),(select id from contexts from name=?),?,?,?,?,?,?)";
 
     private SQLiteOpenHelper mHelper;
 
@@ -97,7 +101,44 @@ public class TaskProvider extends ContentProvider {
 
     @Override
     public Uri insert(Uri uri, ContentValues values) {
-        return null;
+        final SQLiteDatabase db = mHelper.getWritableDatabase();
+
+        try {
+            db.beginTransaction();
+
+            switch (new ProviderMap(uri).getResourceType()) {
+            case ProviderMap.TASKS:
+                final SQLiteStatement stmt =
+                    new SQLiteStatement(
+                        db,
+                        String.format(TASK_INSERT_QUERY),
+                        new Object[] {
+                            newCookie(),
+                            null,
+                            values.get("title"),
+                            values.get("note"),
+                            values.get("modified"),
+                            values.get("completed"),
+                            values.get("folder_name"),
+                            values.get("context_name"),
+                            values.get("priority"),
+                            values.get("star"),
+                            values.get("duedate"),
+                            values.get("duetime"),
+                            values.get("status")
+                        }
+                );
+                try {
+                    return ContentUris.withAppendedId(uri, stmt.executeInsert());
+                } finally {
+                    stmt.close();
+                }
+            default:
+                return null;
+            }
+        } finally {
+            db.endTransaction();
+        }
     }
 
     @Override
