@@ -7,8 +7,14 @@ import android.net.Uri;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteStatement;
+import android.database.sqlite.SQLiteStatement;
 import android.content.UriMatcher;
 import android.content.ContentUris;
+import android.database.Cursor;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class TaskProvider extends ContentProvider {
     public static final Uri CONTENT_URI = Uri.parse(String.format("content://%s/tasks", ProviderMap.AUTHORITY_TASK));
@@ -66,11 +72,15 @@ public class TaskProvider extends ContentProvider {
     public static final int COL_CONTEXT_ID = 19;
     public static final int COL_CONTEXT_NAME = 20;
 
-    private static final String TASK_QUERY = "SELECT tasks.id,tasks.cookie,task,title,note,modified,completed,priority,star,duedate,duetime,status,folder as folder_id,folders.name as folder_name,folders.private as folder_private,folders.archived as folder_archived,folders.ord as folder_ord,context as context_id,contexts.name as context_name FROM tasks left join folders using (folder) left join contexts using (context) where %s %s";
+    private static final String TASK_QUERY = "SELECT tasks.id,tasks.cookie,task,title,note,modified,completed,priority,star,duedate,duetime,status,folder AS folder_id,folders.name AS folder_name,folders.private AS folder_private,folders.archived AS folder_archived,folders.ord AS folder_ord,context AS context_id,contexts.name AS context_name FROM tasks LEFT JOIN folders USING (folder) LEFT JOIN contexts USING (context) WHERE %s %s";
 
-    private static final String TASK_INSERT_QUERY = "insert into tasks (cookie,task,title,note,modified,completed,folder,context,priority,star,duedate,duetime,status) values (?,?,?,?,?,?,(select id from folders where name=?),(select id from contexts from name=?),?,?,?,?,?,?)";
+    private static final String TASK_INSERT_QUERY = "INSERT INTO tasks (cookie,task,title,note,modified,completed,folder,context,priority,star,duedate,duetime,status) VALUES (?,?,?,?,?,?,(SELECT id FROM folders WHERE name=? LIMIT 1),(SELECT id FROM contexts WHERE name=? LIMIT 1),?,?,?,?,?,?)";
 
-    private static final String TASK_REPLACE_QUERY = "replace into tasks (id,cookie,task,title,note,modified,completed,folder,context,priority,star,duedate,duetime,status) values (?,?,?,?,?,?,?,(select id from folders where name=?),(select id from contexts from name=?),?,?,?,?,?,?)";
+    private static final String TASK_REPLACE_QUERY = "REPLACE INTO tasks (id,cookie,task,title,note,modified,completed,folder,context,priority,star,duedate,duetime,status) VALUES (?,?,?,?,?,?,?,(SELECT id FROM folders WHERE name=? LIMIT 1),(SELECT id FROM contexts WHERE name=? LIMIT 1),?,?,?,?,?,?)";
+
+    private static final String TASK_UPDATE_QUERY = "UPDATE tasks set cookie=?,task=?,title=?,note=?,modified=?,completed=?,folder=(SELECT id FROM folders WHERE name=?),context=(SELECT id FROM contexts WHERE name=?),priority=?,star=?,duedate=?,duetime=?,status=? %s";
+
+    private static final String TASK_DELETE_QUERY = "DELETE tasks %s";
 
     private SQLiteOpenHelper mHelper;
 
@@ -102,52 +112,110 @@ public class TaskProvider extends ContentProvider {
     @Override
     public Uri insert(Uri uri, ContentValues values) {
         final SQLiteDatabase db = mHelper.getWritableDatabase();
+        final int resourceType = new ProviderMap(uri).getResourceType();
 
-        try {
-            db.beginTransaction();
-
-            switch (new ProviderMap(uri).getResourceType()) {
-            case ProviderMap.TASKS:
-                final SQLiteStatement stmt =
-                    new SQLiteStatement(
-                        db,
-                        String.format(TASK_INSERT_QUERY),
-                        new Object[] {
-                            newCookie(),
-                            null,
-                            values.get("title"),
-                            values.get("note"),
-                            values.get("modified"),
-                            values.get("completed"),
-                            values.get("folder_name"),
-                            values.get("context_name"),
-                            values.get("priority"),
-                            values.get("star"),
-                            values.get("duedate"),
-                            values.get("duetime"),
-                            values.get("status")
-                        }
-                );
-                try {
-                    return ContentUris.withAppendedId(uri, stmt.executeInsert());
-                } finally {
-                    stmt.close();
-                }
-            default:
-                return null;
+        if (resourceType == ProviderMap.TASKS) {
+            final SQLiteStatement stmt = db.compileStatement(TASK_INSERT_QUERY);
+            stmt.bindString(1, (String)values.get("cookie"));
+            stmt.bindString(2, (String)values.get("task"));
+            stmt.bindString(3, (String)values.get("title"));
+            stmt.bindString(4, (String)values.get("note"));
+            stmt.bindString(5, (String)values.get("modified"));
+            stmt.bindString(6, (String)values.get("completed"));
+            stmt.bindString(7, (String)values.get("folder_name"));
+            stmt.bindString(8, (String)values.get("cnotext_name"));
+            stmt.bindString(9, (String)values.get("priority"));
+            stmt.bindString(10, (String)values.get("star"));
+            stmt.bindString(11, (String)values.get("duedate"));
+            stmt.bindString(12, (String)values.get("duetime"));
+            stmt.bindString(13, (String)values.get("status"));
+            try {
+                return ContentUris.withAppendedId(uri, stmt.executeInsert());
+            } finally {
+                stmt.close();
             }
-        } finally {
-            db.endTransaction();
+        } else if (resourceType == ProviderMap.TASKS_ID) {
+            final SQLiteStatement stmt = db.compileStatement(TASK_REPLACE_QUERY);
+            stmt.bindString(1, (String)values.get("id"));
+            stmt.bindString(2, (String)values.get("cookie"));
+            stmt.bindString(3, (String)values.get("task"));
+            stmt.bindString(4, (String)values.get("title"));
+            stmt.bindString(5, (String)values.get("note"));
+            stmt.bindString(6, (String)values.get("modified"));
+            stmt.bindString(7, (String)values.get("completed"));
+            stmt.bindString(8, (String)values.get("folder_name"));
+            stmt.bindString(9, (String)values.get("cnotext_name"));
+            stmt.bindString(10, (String)values.get("priority"));
+            stmt.bindString(11, (String)values.get("star"));
+            stmt.bindString(12, (String)values.get("duedate"));
+            stmt.bindString(13, (String)values.get("duetime"));
+            stmt.bindString(14, (String)values.get("status"));
+            try {
+                stmt.executeInsert();
+                return uri;
+            } finally {
+                stmt.close();
+            }
+        } else {
+            return null;
         }
     }
 
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        return 0;
+        final SQLiteDatabase db = mHelper.getWritableDatabase();
+        final int resourceType = new ProviderMap(uri).getResourceType();
+
+        if (resourceType == ProviderMap.TASKS) {
+            final SQLiteStatement stmt = db.compileStatement(String.format(TASK_UPDATE_QUERY, selection == null ? "" : String.format("WHERE %s", selection)));
+            stmt.bindString(1, (String)values.get("cookie"));
+            stmt.bindString(2, (String)values.get("task"));
+            stmt.bindString(3, (String)values.get("title"));
+            stmt.bindString(4, (String)values.get("note"));
+            stmt.bindString(5, (String)values.get("modified"));
+            stmt.bindString(6, (String)values.get("completed"));
+            stmt.bindString(7, (String)values.get("folder_name"));
+            stmt.bindString(8, (String)values.get("cnotext_name"));
+            stmt.bindString(9, (String)values.get("priority"));
+            stmt.bindString(10, (String)values.get("star"));
+            stmt.bindString(11, (String)values.get("duedate"));
+            stmt.bindString(12, (String)values.get("duetime"));
+            stmt.bindString(13, (String)values.get("status"));
+
+            int offset = 14;
+            for (final String arg: selectionArgs) {
+                stmt.bindString(offset++, arg);
+            }
+            try {
+                return stmt.executeUpdateDelete();
+            } finally {
+                stmt.close();
+            }
+        } else {
+            return 0;
+        }
     }
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        return 0;
+        final SQLiteDatabase db = mHelper.getWritableDatabase();
+
+        switch (new ProviderMap(uri).getResourceType()) {
+        case ProviderMap.TASKS:
+            final SQLiteStatement stmt =
+                db.compileStatement(String.format(TASK_DELETE_QUERY, selection == null ? "" : String.format("WHERE %s", selection)));
+
+            int offset = 1;
+            for (final String arg: selectionArgs) {
+                stmt.bindString(offset++, arg);
+            }
+            try {
+                return stmt.executeUpdateDelete();
+            } finally {
+                stmt.close();
+            }
+        default:
+            return 0;
+        }
     }
 }
