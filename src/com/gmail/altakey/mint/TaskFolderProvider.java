@@ -27,6 +27,7 @@ public class TaskFolderProvider extends ContentProvider {
     public static final String NO_ORDER = "";
     public static final String ID_FILTER = "_id=?";
     public static final String ALL_FILTER = "1=1";
+    public static final String MULTIPLE_FOLDERS_FILTER = "folder in (%s)";
 
     public static final String COLUMN_ID = "_id";
     public static final String COLUMN_FOLDER = "folder";
@@ -119,7 +120,11 @@ public class TaskFolderProvider extends ContentProvider {
         final SQLiteDatabase db = mHelper.getWritableDatabase();
         final int resourceType = new ProviderMap(uri).getResourceType();
 
-        if (resourceType == ProviderMap.TASKS) {
+        if (resourceType == ProviderMap.FOLDERS) {
+            if (MULTIPLE_FOLDERS_FILTER.equals(selection)) {
+                selection = new FilterExpander(selection, selectionArgs).expand();
+            }
+
             final SQLiteStatement stmt = db.compileStatement(String.format(FOLDER_UPDATE_QUERY, selection == null ? "" : String.format("WHERE %s", selection)));
             stmt.bindString(1, (String)values.get("folder"));
             stmt.bindString(2, (String)values.get("name"));
@@ -146,7 +151,11 @@ public class TaskFolderProvider extends ContentProvider {
         final SQLiteDatabase db = mHelper.getWritableDatabase();
 
         switch (new ProviderMap(uri).getResourceType()) {
-        case ProviderMap.TASKS:
+        case ProviderMap.FOLDERS:
+            if (MULTIPLE_FOLDERS_FILTER.equals(selection)) {
+                selection = new FilterExpander(selection, selectionArgs).expand();
+            }
+
             final SQLiteStatement stmt =
                 db.compileStatement(String.format(FOLDER_DELETE_QUERY, selection == null ? "" : String.format("WHERE %s", selection)));
 

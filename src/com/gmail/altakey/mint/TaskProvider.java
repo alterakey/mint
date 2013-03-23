@@ -28,6 +28,7 @@ public class TaskProvider extends ContentProvider {
     public static final String HOTLIST_FILTER = "(priority=3 or (priority>=0 and duedate>0 and duedate<?)) and completed=0";
     public static final String ID_FILTER = "tasks._id=?";
     public static final String ALL_FILTER = "1=1";
+    public static final String MULTIPLE_TASKS_FILTER = "task in (%s)";
 
     public static final String COLUMN_ID = "_id";
     public static final String COLUMN_COOKIE = "cookie";
@@ -75,11 +76,11 @@ public class TaskProvider extends ContentProvider {
 
     private static final String TASK_QUERY = "SELECT tasks._id,tasks.cookie,task,title,note,modified,completed,priority,star,duedate,duetime,status,folder AS folder_id,folders.name AS folder_name,folders.private AS folder_private,folders.archived AS folder_archived,folders.ord AS folder_ord,context AS context_id,contexts.name AS context_name FROM tasks LEFT JOIN folders USING (folder) LEFT JOIN contexts USING (context) WHERE %s %s";
 
-    private static final String TASK_INSERT_QUERY = "INSERT INTO tasks (cookie,task,title,note,modified,completed,folder,context,priority,star,duedate,duetime,status) VALUES (?,?,?,?,?,?,(SELECT folder FROM folders WHERE name=? LIMIT 1),(SELECT context FROM contexts WHERE name=? LIMIT 1),?,?,?,?,?,?)";
+    private static final String TASK_INSERT_QUERY = "INSERT INTO tasks (cookie,task,title,note,modified,completed,folder,context,priority,star,duedate,duetime,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
-    private static final String TASK_REPLACE_QUERY = "REPLACE INTO tasks (id,cookie,task,title,note,modified,completed,folder,context,priority,star,duedate,duetime,status) VALUES (?,?,?,?,?,?,?,(SELECT folder FROM folders WHERE name=? LIMIT 1),(SELECT context FROM contexts WHERE name=? LIMIT 1),?,?,?,?,?,?)";
+    private static final String TASK_REPLACE_QUERY = "REPLACE INTO tasks (id,cookie,task,title,note,modified,completed,folder,context,priority,star,duedate,duetime,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
-    private static final String TASK_UPDATE_QUERY = "UPDATE tasks set cookie=?,task=?,title=?,note=?,modified=?,completed=?,folder=(SELECT folder FROM folders WHERE name=?),context=(SELECT context FROM contexts WHERE name=?),priority=?,star=?,duedate=?,duetime=?,status=? %s";
+    private static final String TASK_UPDATE_QUERY = "UPDATE tasks set cookie=?,task=?,title=?,note=?,modified=?,completed=?,folder=?,context=?,priority=?,star=?,duedate=?,duetime=?,status=? %s";
 
     private static final String TASK_DELETE_QUERY = "DELETE tasks %s";
 
@@ -123,8 +124,8 @@ public class TaskProvider extends ContentProvider {
             stmt.bindString(4, (String)values.get("note"));
             stmt.bindString(5, (String)values.get("modified"));
             stmt.bindString(6, (String)values.get("completed"));
-            stmt.bindString(7, (String)values.get("folder_name"));
-            stmt.bindString(8, (String)values.get("cnotext_name"));
+            stmt.bindString(7, (String)values.get("folder"));
+            stmt.bindString(8, (String)values.get("cnotext"));
             stmt.bindString(9, (String)values.get("priority"));
             stmt.bindString(10, (String)values.get("star"));
             stmt.bindString(11, (String)values.get("duedate"));
@@ -144,8 +145,8 @@ public class TaskProvider extends ContentProvider {
             stmt.bindString(5, (String)values.get("note"));
             stmt.bindString(6, (String)values.get("modified"));
             stmt.bindString(7, (String)values.get("completed"));
-            stmt.bindString(8, (String)values.get("folder_name"));
-            stmt.bindString(9, (String)values.get("cnotext_name"));
+            stmt.bindString(8, (String)values.get("folder"));
+            stmt.bindString(9, (String)values.get("cnotext"));
             stmt.bindString(10, (String)values.get("priority"));
             stmt.bindString(11, (String)values.get("star"));
             stmt.bindString(12, (String)values.get("duedate"));
@@ -168,6 +169,10 @@ public class TaskProvider extends ContentProvider {
         final int resourceType = new ProviderMap(uri).getResourceType();
 
         if (resourceType == ProviderMap.TASKS) {
+            if (MULTIPLE_TASKS_FILTER.equals(selection)) {
+                selection = new FilterExpander(selection, selectionArgs).expand();
+            }
+
             final SQLiteStatement stmt = db.compileStatement(String.format(TASK_UPDATE_QUERY, selection == null ? "" : String.format("WHERE %s", selection)));
             stmt.bindString(1, (String)values.get("cookie"));
             stmt.bindString(2, (String)values.get("task"));
@@ -175,8 +180,8 @@ public class TaskProvider extends ContentProvider {
             stmt.bindString(4, (String)values.get("note"));
             stmt.bindString(5, (String)values.get("modified"));
             stmt.bindString(6, (String)values.get("completed"));
-            stmt.bindString(7, (String)values.get("folder_name"));
-            stmt.bindString(8, (String)values.get("cnotext_name"));
+            stmt.bindString(7, (String)values.get("folder"));
+            stmt.bindString(8, (String)values.get("cnotext"));
             stmt.bindString(9, (String)values.get("priority"));
             stmt.bindString(10, (String)values.get("star"));
             stmt.bindString(11, (String)values.get("duedate"));
@@ -203,6 +208,10 @@ public class TaskProvider extends ContentProvider {
 
         switch (new ProviderMap(uri).getResourceType()) {
         case ProviderMap.TASKS:
+            if (MULTIPLE_TASKS_FILTER.equals(selection)) {
+                selection = new FilterExpander(selection, selectionArgs).expand();
+            }
+
             final SQLiteStatement stmt =
                 db.compileStatement(String.format(TASK_DELETE_QUERY, selection == null ? "" : String.format("WHERE %s", selection)));
 
