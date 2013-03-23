@@ -26,6 +26,7 @@ public class TaskFolderProvider extends ContentProvider {
     public static final String DEFAULT_ORDER = "order by name";
     public static final String NO_ORDER = "";
     public static final String ID_FILTER = "_id=?";
+    public static final String ALL_FILTER = "1=1";
 
     public static final String COLUMN_ID = "_id";
     public static final String COLUMN_FOLDER = "folder";
@@ -69,7 +70,7 @@ public class TaskFolderProvider extends ContentProvider {
 
         switch (new ProviderMap(uri).getResourceType()) {
         case ProviderMap.FOLDERS:
-            return db.rawQuery(String.format(FOLDER_QUERY, selection, sortOrder), selectionArgs);
+            return db.rawQuery(String.format(FOLDER_QUERY, selection == null ? ALL_FILTER : selection, sortOrder == null ? DEFAULT_ORDER : sortOrder), selectionArgs);
         case ProviderMap.FOLDERS_ID:
             return db.rawQuery(String.format(FOLDER_QUERY, ID_FILTER, NO_ORDER), new String[] { String.valueOf(ContentUris.parseId(uri)) });
         default:

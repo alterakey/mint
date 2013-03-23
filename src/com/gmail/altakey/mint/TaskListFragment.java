@@ -119,6 +119,7 @@ public class TaskListFragment extends ListFragment
         setHasOptionsMenu(true);
         setListAdapter(mAdapter);
         setListShown(false);
+        getLoaderManager().enableDebugLogging(true);
         getLoaderManager().initLoader(1, null, mTaskLoaderManip);
     }
 
@@ -239,13 +240,13 @@ public class TaskListFragment extends ListFragment
                 break;
             }
 
-            if (task.folder < 0) {
+            if (task.resolved.folder == null) {
                 taskFolder.setVisibility(View.GONE);
             } else {
                 taskFolder.setText(task.resolved.folder.name);
                 taskFolder.setVisibility(View.VISIBLE);
             }
-            if (task.context < 0) {
+            if (task.resolved.context == null) {
                 taskContext.setVisibility(View.GONE);
             } else {
                 taskContext.setText(task.resolved.context.name);

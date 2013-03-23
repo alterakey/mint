@@ -26,6 +26,7 @@ public class TaskContextProvider extends ContentProvider {
     public static final String DEFAULT_ORDER = "order by name";
     public static final String NO_ORDER = "";
     public static final String ID_FILTER = "_id=?";
+    public static final String ALL_FILTER = "1=1";
 
     public static final String COLUMN_ID = "_id";
     public static final String COLUMN_CONTEXT = "context";
@@ -63,7 +64,7 @@ public class TaskContextProvider extends ContentProvider {
 
         switch (new ProviderMap(uri).getResourceType()) {
         case ProviderMap.CONTEXTS:
-            return db.rawQuery(String.format(CONTEXT_QUERY, selection, sortOrder), selectionArgs);
+            return db.rawQuery(String.format(CONTEXT_QUERY, selection == null ? ALL_FILTER : selection, sortOrder == null ? DEFAULT_ORDER : sortOrder), selectionArgs);
         case ProviderMap.CONTEXTS_ID:
             return db.rawQuery(String.format(CONTEXT_QUERY, ID_FILTER, NO_ORDER), new String[] { String.valueOf(ContentUris.parseId(uri)) });
         default:

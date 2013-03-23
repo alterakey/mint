@@ -27,6 +27,7 @@ public class TaskProvider extends ContentProvider {
     public static final String NO_ORDER = "";
     public static final String HOTLIST_FILTER = "(priority=3 or (priority>=0 and duedate>0 and duedate<?)) and completed=0";
     public static final String ID_FILTER = "tasks._id=?";
+    public static final String ALL_FILTER = "1=1";
 
     public static final String COLUMN_ID = "_id";
     public static final String COLUMN_COOKIE = "cookie";
@@ -101,7 +102,7 @@ public class TaskProvider extends ContentProvider {
 
         switch (new ProviderMap(uri).getResourceType()) {
         case ProviderMap.TASKS:
-            return db.rawQuery(String.format(TASK_QUERY, selection, sortOrder), selectionArgs);
+            return db.rawQuery(String.format(TASK_QUERY, selection == null ? ALL_FILTER : selection, sortOrder == null ? DEFAULT_ORDER : sortOrder), selectionArgs);
         case ProviderMap.TASKS_ID:
             return db.rawQuery(String.format(TASK_QUERY, ID_FILTER, NO_ORDER), new String[] { String.valueOf(ContentUris.parseId(uri)) });
         default:
