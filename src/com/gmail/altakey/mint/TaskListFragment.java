@@ -88,36 +88,9 @@ public class TaskListFragment extends ListFragment
         getActivity().setTitle(new TaskListFragment.Filter(mFilterType).getTitle());
 
         final ListView listView = getListView();
-        final SwipeDismissListViewTouchListener touchListener =
-            new SwipeDismissListViewTouchListener(
-                listView,
-                new SwipeDismissListViewTouchListener.OnDismissCallback() {
-                    @Override
-                    public void onDismiss(ListView listView, int[] reverseSortedPositions) {
-                        for (int position : reverseSortedPositions) {
-                            final Map<String, ?> e = (Map<String, ?>)mAdapter.getItem(position);
-                            final Task task = (Task)e.get("task");
-
-                            task.markAsDone();
-
-                            final DB db = new DB(getActivity());
-                            try {
-                                db.openForWriting();
-                                db.commitTask(task);
-                            } finally {
-                                db.close();
-                            }
-
-                            final Intent intent = new Intent(context, ToodledoClientService.class);
-                            intent.setAction(ToodledoClientService.ACTION_SYNC);
-                            context.startService(intent);
-                            mAdapter.remove(position);
-                        }
-                        mAdapter.notifyDataSetChanged();
-                    }
-                });
-        listView.setOnTouchListener(touchListener);
-        listView.setOnScrollListener(touchListener.makeScrollListener());
+        final TaskSwipeDismissAction action = new TaskSwipeDismissAction(listView);
+        listView.setOnTouchListener(action);
+        listView.setOnScrollListener(action.makeScrollListener());
         listView.setOnItemLongClickListener(new SelectionModeListener());
 
         setHasOptionsMenu(true);
@@ -406,6 +379,37 @@ public class TaskListFragment extends ListFragment
 
         private void poke() {
             mAdapter.reloadSilently();
+        }
+    }
+
+    private class TaskSwipeDismissAction extends SwipeDismissListViewTouchListener {
+        public TaskSwipeDismissAction(final ListView lv) {
+            super(lv, new SwipeDismissListViewTouchListener.OnDismissCallback() {
+                @Override
+                public void onDismiss(ListView listView, int[] reverseSortedPositions) {
+                    for (int position : reverseSortedPositions) {
+                        final Map<String, ?> e = (Map<String, ?>)mAdapter.getItem(position);
+                        final Task task = (Task)e.get("task");
+
+                        task.markAsDone();
+
+                        final DB db = new DB(getActivity());
+                        try {
+                            db.openForWriting();
+                            db.commitTask(task);
+                        } finally {
+                            db.close();
+                        }
+
+                        final Context context = getActivity();
+                        final Intent intent = new Intent(context, ToodledoClientService.class);
+                        intent.setAction(ToodledoClientService.ACTION_SYNC);
+                        context.startService(intent);
+                        mAdapter.remove(position);
+                    }
+                    mAdapter.notifyDataSetChanged();
+                }
+            });
         }
     }
 }
