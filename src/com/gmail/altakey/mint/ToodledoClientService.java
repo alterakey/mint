@@ -30,7 +30,6 @@ public class ToodledoClientService extends IntentService {
     public static final String EXTRA_TASKS = "tasks";
     public static final String EXTRA_TASK_FIELDS = "task_fields";
 
-    private NetworkTask mNetworkTask;
     private DB mDB;
     private ToodledoClient mClient;
 
