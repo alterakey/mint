@@ -103,7 +103,7 @@ public class DB {
         final Cursor c = mContext.getContentResolver().query(TaskProvider.CONTENT_URI, TaskProvider.PROJECTION, filter, args, order);
         try {
             for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
-                Task task = Task.fromCursor(c, 0);
+                final Task task = Task.fromCursor(c, 0);
                 task.resolved.folder = TaskFolder.fromCursor(c, 14);
                 task.resolved.context = TaskContext.fromCursor(c, 19);
                 ret.add(task);
