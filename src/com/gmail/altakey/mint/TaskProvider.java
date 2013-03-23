@@ -20,15 +20,15 @@ public class TaskProvider extends ContentProvider {
     public static final Uri CONTENT_URI = Uri.parse(String.format("content://%s/tasks", ProviderMap.AUTHORITY_TASK));
 
     public static final String[] PROJECTION = new String[] {
-        "id", "cookie", "task", "title", "note", "modified", "completed", "folder", "context", "priority", "star", "duedate", "duetime", "status", "folder_id", "folder_name", "folder_private", "folder_archived", "folder_ord", "context_id", "context_name"
+        "_id", "cookie", "task", "title", "note", "modified", "completed", "folder", "context", "priority", "star", "duedate", "duetime", "status", "folder_id", "folder_name", "folder_private", "folder_archived", "folder_ord", "context_id", "context_name"
     };
 
     public static final String DEFAULT_ORDER = "order by duedate,priority desc";
     public static final String NO_ORDER = "";
     public static final String HOTLIST_FILTER = "(priority=3 or (priority>=0 and duedate>0 and duedate<?)) and completed=0";
-    public static final String ID_FILTER = "tasks.id=?";
+    public static final String ID_FILTER = "tasks._id=?";
 
-    public static final String COLUMN_ID = "id";
+    public static final String COLUMN_ID = "_id";
     public static final String COLUMN_COOKIE = "cookie";
     public static final String COLUMN_TASK = "task";
     public static final String COLUMN_TITLE = "title";
@@ -72,13 +72,13 @@ public class TaskProvider extends ContentProvider {
     public static final int COL_CONTEXT_ID = 19;
     public static final int COL_CONTEXT_NAME = 20;
 
-    private static final String TASK_QUERY = "SELECT tasks.id,tasks.cookie,task,title,note,modified,completed,priority,star,duedate,duetime,status,folder AS folder_id,folders.name AS folder_name,folders.private AS folder_private,folders.archived AS folder_archived,folders.ord AS folder_ord,context AS context_id,contexts.name AS context_name FROM tasks LEFT JOIN folders USING (folder) LEFT JOIN contexts USING (context) WHERE %s %s";
+    private static final String TASK_QUERY = "SELECT tasks._id,tasks.cookie,task,title,note,modified,completed,priority,star,duedate,duetime,status,folder AS folder_id,folders.name AS folder_name,folders.private AS folder_private,folders.archived AS folder_archived,folders.ord AS folder_ord,context AS context_id,contexts.name AS context_name FROM tasks LEFT JOIN folders USING (folder) LEFT JOIN contexts USING (context) WHERE %s %s";
 
-    private static final String TASK_INSERT_QUERY = "INSERT INTO tasks (cookie,task,title,note,modified,completed,folder,context,priority,star,duedate,duetime,status) VALUES (?,?,?,?,?,?,(SELECT id FROM folders WHERE name=? LIMIT 1),(SELECT id FROM contexts WHERE name=? LIMIT 1),?,?,?,?,?,?)";
+    private static final String TASK_INSERT_QUERY = "INSERT INTO tasks (cookie,task,title,note,modified,completed,folder,context,priority,star,duedate,duetime,status) VALUES (?,?,?,?,?,?,(SELECT folder FROM folders WHERE name=? LIMIT 1),(SELECT context FROM contexts WHERE name=? LIMIT 1),?,?,?,?,?,?)";
 
-    private static final String TASK_REPLACE_QUERY = "REPLACE INTO tasks (id,cookie,task,title,note,modified,completed,folder,context,priority,star,duedate,duetime,status) VALUES (?,?,?,?,?,?,?,(SELECT id FROM folders WHERE name=? LIMIT 1),(SELECT id FROM contexts WHERE name=? LIMIT 1),?,?,?,?,?,?)";
+    private static final String TASK_REPLACE_QUERY = "REPLACE INTO tasks (id,cookie,task,title,note,modified,completed,folder,context,priority,star,duedate,duetime,status) VALUES (?,?,?,?,?,?,?,(SELECT folder FROM folders WHERE name=? LIMIT 1),(SELECT context FROM contexts WHERE name=? LIMIT 1),?,?,?,?,?,?)";
 
-    private static final String TASK_UPDATE_QUERY = "UPDATE tasks set cookie=?,task=?,title=?,note=?,modified=?,completed=?,folder=(SELECT id FROM folders WHERE name=?),context=(SELECT id FROM contexts WHERE name=?),priority=?,star=?,duedate=?,duetime=?,status=? %s";
+    private static final String TASK_UPDATE_QUERY = "UPDATE tasks set cookie=?,task=?,title=?,note=?,modified=?,completed=?,folder=(SELECT folder FROM folders WHERE name=?),context=(SELECT context FROM contexts WHERE name=?),priority=?,star=?,duedate=?,duetime=?,status=? %s";
 
     private static final String TASK_DELETE_QUERY = "DELETE tasks %s";
 
@@ -136,7 +136,7 @@ public class TaskProvider extends ContentProvider {
             }
         } else if (resourceType == ProviderMap.TASKS_ID) {
             final SQLiteStatement stmt = db.compileStatement(TASK_REPLACE_QUERY);
-            stmt.bindString(1, (String)values.get("id"));
+            stmt.bindString(1, (String)values.get("_id"));
             stmt.bindString(2, (String)values.get("cookie"));
             stmt.bindString(3, (String)values.get("task"));
             stmt.bindString(4, (String)values.get("title"));

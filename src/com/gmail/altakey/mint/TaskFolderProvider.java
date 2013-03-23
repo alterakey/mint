@@ -20,14 +20,15 @@ public class TaskFolderProvider extends ContentProvider {
     public static final Uri CONTENT_URI = Uri.parse(String.format("content://%s/folders", ProviderMap.AUTHORITY_FOLDER));
 
     public static final String[] PROJECTION = new String[] {
-        "id", "name", "private", "archived", "ord"
+        "_id", "folder", "name", "private", "archived", "ord"
     };
 
     public static final String DEFAULT_ORDER = "order by name";
     public static final String NO_ORDER = "";
-    public static final String ID_FILTER = "id=?";
+    public static final String ID_FILTER = "_id=?";
 
-    public static final String COLUMN_ID = "id";
+    public static final String COLUMN_ID = "_id";
+    public static final String COLUMN_FOLDER = "folder";
     public static final String COLUMN_NAME = "name";
     public static final String COLUMN_PRIVATE = "private";
     public static final String COLUMN_ARCHIVED = "archived";
@@ -39,13 +40,13 @@ public class TaskFolderProvider extends ContentProvider {
     public static final int COL_ARCHIVED = 3;
     public static final int COL_ORD = 4;
 
-    private static final String FOLDER_QUERY = "SELECT id,name,private,archived,ord FROM folders WHERE %s %s";
+    private static final String FOLDER_QUERY = "SELECT _id,folder,name,private,archived,ord FROM folders WHERE %s %s";
 
-    private static final String FOLDER_INSERT_QUERY = "INSERT INTO folders (name,private,archived,ord) VALUES (?,?,?,?)";
+    private static final String FOLDER_INSERT_QUERY = "INSERT INTO folders (folder,name,private,archived,ord) VALUES (?,?,?,?,?)";
 
-    private static final String FOLDER_REPLACE_QUERY = "REPLACE INTO folders (id,name,private,archived,ord) VALUES (?,?,?,?,?)";
+    private static final String FOLDER_REPLACE_QUERY = "REPLACE INTO folders (_id,folder,name,private,archived,ord) VALUES (?,?,?,?,?,?)";
 
-    private static final String FOLDER_UPDATE_QUERY = "UPDATE folders set name=?,private=?,archived=?,ord=? %s";
+    private static final String FOLDER_UPDATE_QUERY = "UPDATE folders set folder=?,name=?,private=?,archived=?,ord=? %s";
 
     private static final String FOLDER_DELETE_QUERY = "DELETE folders %s";
 
@@ -83,10 +84,11 @@ public class TaskFolderProvider extends ContentProvider {
 
         if (resourceType == ProviderMap.FOLDERS) {
             final SQLiteStatement stmt = db.compileStatement(FOLDER_INSERT_QUERY);
-            stmt.bindString(1, (String)values.get("name"));
-            stmt.bindString(2, (String)values.get("private"));
-            stmt.bindString(3, (String)values.get("archived"));
-            stmt.bindString(4, (String)values.get("ord"));
+            stmt.bindString(1, (String)values.get("folder"));
+            stmt.bindString(2, (String)values.get("name"));
+            stmt.bindString(3, (String)values.get("private"));
+            stmt.bindString(4, (String)values.get("archived"));
+            stmt.bindString(5, (String)values.get("ord"));
             try {
                 return ContentUris.withAppendedId(uri, stmt.executeInsert());
             } finally {
@@ -94,11 +96,12 @@ public class TaskFolderProvider extends ContentProvider {
             }
         } else if (resourceType == ProviderMap.FOLDERS_ID) {
             final SQLiteStatement stmt = db.compileStatement(FOLDER_REPLACE_QUERY);
-            stmt.bindString(1, (String)values.get("id"));
-            stmt.bindString(2, (String)values.get("name"));
-            stmt.bindString(3, (String)values.get("private"));
-            stmt.bindString(4, (String)values.get("archived"));
-            stmt.bindString(5, (String)values.get("ord"));
+            stmt.bindString(1, (String)values.get("_id"));
+            stmt.bindString(2, (String)values.get("folder"));
+            stmt.bindString(3, (String)values.get("name"));
+            stmt.bindString(4, (String)values.get("private"));
+            stmt.bindString(5, (String)values.get("archived"));
+            stmt.bindString(6, (String)values.get("ord"));
             try {
                 stmt.executeInsert();
                 return uri;
@@ -117,12 +120,13 @@ public class TaskFolderProvider extends ContentProvider {
 
         if (resourceType == ProviderMap.TASKS) {
             final SQLiteStatement stmt = db.compileStatement(String.format(FOLDER_UPDATE_QUERY, selection == null ? "" : String.format("WHERE %s", selection)));
-            stmt.bindString(1, (String)values.get("name"));
-            stmt.bindString(2, (String)values.get("private"));
-            stmt.bindString(3, (String)values.get("archived"));
-            stmt.bindString(4, (String)values.get("ord"));
+            stmt.bindString(1, (String)values.get("folder"));
+            stmt.bindString(2, (String)values.get("name"));
+            stmt.bindString(3, (String)values.get("private"));
+            stmt.bindString(4, (String)values.get("archived"));
+            stmt.bindString(5, (String)values.get("ord"));
 
-            int offset = 5;
+            int offset = 6;
             for (final String arg: selectionArgs) {
                 stmt.bindString(offset++, arg);
             }

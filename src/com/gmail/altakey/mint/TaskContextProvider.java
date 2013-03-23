@@ -20,26 +20,27 @@ public class TaskContextProvider extends ContentProvider {
     public static final Uri CONTENT_URI = Uri.parse(String.format("content://%s/contexts", ProviderMap.AUTHORITY_CONTEXT));
 
     public static final String[] PROJECTION = new String[] {
-        "id", "name"
+        "_id", "context", "name"
     };
 
     public static final String DEFAULT_ORDER = "order by name";
     public static final String NO_ORDER = "";
-    public static final String ID_FILTER = "id=?";
+    public static final String ID_FILTER = "_id=?";
 
-    public static final String COLUMN_ID = "id";
+    public static final String COLUMN_ID = "_id";
+    public static final String COLUMN_CONTEXT = "context";
     public static final String COLUMN_NAME = "name";
 
     public static final int COL_ID = 0;
     public static final int COL_NAME = 1;
 
-    private static final String CONTEXT_QUERY = "SELECT id,name FROM contexts WHERE %s %s";
+    private static final String CONTEXT_QUERY = "SELECT _id,context,name FROM contexts WHERE %s %s";
 
-    private static final String CONTEXT_INSERT_QUERY = "INSERT INTO contexts (name) VALUES (?,?,?,?)";
+    private static final String CONTEXT_INSERT_QUERY = "INSERT INTO contexts (context,name) VALUES (?,?)";
 
-    private static final String CONTEXT_REPLACE_QUERY = "REPLACE INTO contexts (id,name) VALUES (?,?,?,?,?)";
+    private static final String CONTEXT_REPLACE_QUERY = "REPLACE INTO contexts (_id,context,name) VALUES (?,?,?)";
 
-    private static final String CONTEXT_UPDATE_QUERY = "UPDATE contexts set name=? %s";
+    private static final String CONTEXT_UPDATE_QUERY = "UPDATE contexts set context=?,name=? %s";
 
     private static final String CONTEXT_DELETE_QUERY = "DELETE contexts %s";
 
@@ -77,7 +78,8 @@ public class TaskContextProvider extends ContentProvider {
 
         if (resourceType == ProviderMap.CONTEXTS) {
             final SQLiteStatement stmt = db.compileStatement(CONTEXT_INSERT_QUERY);
-            stmt.bindString(1, (String)values.get("name"));
+            stmt.bindString(1, (String)values.get("context"));
+            stmt.bindString(2, (String)values.get("name"));
             try {
                 return ContentUris.withAppendedId(uri, stmt.executeInsert());
             } finally {
@@ -85,8 +87,9 @@ public class TaskContextProvider extends ContentProvider {
             }
         } else if (resourceType == ProviderMap.CONTEXTS_ID) {
             final SQLiteStatement stmt = db.compileStatement(CONTEXT_REPLACE_QUERY);
-            stmt.bindString(1, (String)values.get("id"));
-            stmt.bindString(2, (String)values.get("name"));
+            stmt.bindString(1, (String)values.get("_id"));
+            stmt.bindString(2, (String)values.get("context"));
+            stmt.bindString(3, (String)values.get("name"));
             try {
                 stmt.executeInsert();
                 return uri;
@@ -105,9 +108,10 @@ public class TaskContextProvider extends ContentProvider {
 
         if (resourceType == ProviderMap.TASKS) {
             final SQLiteStatement stmt = db.compileStatement(String.format(CONTEXT_UPDATE_QUERY, selection == null ? "" : String.format("WHERE %s", selection)));
-            stmt.bindString(1, (String)values.get("name"));
+            stmt.bindString(1, (String)values.get("context"));
+            stmt.bindString(2, (String)values.get("name"));
 
-            int offset = 2;
+            int offset = 3;
             for (final String arg: selectionArgs) {
                 stmt.bindString(offset++, arg);
             }
