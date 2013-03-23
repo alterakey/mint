@@ -77,9 +77,9 @@ public class TaskProvider extends ContentProvider {
 
     private static final String TASK_QUERY = "SELECT tasks._id,tasks.cookie,task,title,note,modified,completed,priority,star,duedate,duetime,status,folder AS folder_id,folders.name AS folder_name,folders.private AS folder_private,folders.archived AS folder_archived,folders.ord AS folder_ord,context AS context_id,contexts.name AS context_name FROM tasks LEFT JOIN folders USING (folder) LEFT JOIN contexts USING (context) WHERE %s %s";
 
-    private static final String TASK_INSERT_QUERY = "INSERT INTO tasks (cookie,task,title,note,modified,completed,folder,context,priority,star,duedate,duetime,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+    private static final String TASK_INSERT_QUERY = "INSERT INTO tasks (cookie,task,title,note,modified,completed,folder,context,priority,star,duedate,duetime,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
-    private static final String TASK_REPLACE_QUERY = "REPLACE INTO tasks (id,cookie,task,title,note,modified,completed,folder,context,priority,star,duedate,duetime,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+    private static final String TASK_REPLACE_QUERY = "REPLACE INTO tasks (_id,cookie,task,title,note,modified,completed,folder,context,priority,star,duedate,duetime,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
     private static final String TASK_UPDATE_QUERY = "UPDATE tasks set cookie=?,task=?,title=?,note=?,modified=?,completed=?,folder=?,context=?,priority=?,star=?,duedate=?,duetime=?,status=? %s";
 
