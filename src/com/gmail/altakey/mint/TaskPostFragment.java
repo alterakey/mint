@@ -63,15 +63,6 @@ public class TaskPostFragment extends DialogFragment {
             final Intent intent = new Intent(context, ToodledoClientService.class);
             intent.setAction(ToodledoClientService.ACTION_SYNC);
             context.startService(intent);
-
-            poke();
-        }
-
-        private void poke() {
-            final TaskListFragment f = (TaskListFragment)getTargetFragment();
-            if (f != null) {
-                f.reload();
-            }
         }
 
         private Task build() {

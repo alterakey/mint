@@ -9,6 +9,8 @@ import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 
 public class TaskContext {
+    public static final int COLUMNS = 2;
+
     public long id;
     public String name;
 

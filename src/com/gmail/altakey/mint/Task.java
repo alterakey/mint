@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.util.Date;
 
 public class Task {
+    public static final int COLUMNS = 14;
+
     public long _id;
     public String _cookie;
     public long id;
@@ -72,6 +74,13 @@ public class Task {
         task.duedate = c.getLong(offset++);
         task.duetime = c.getLong(offset++);
         task.status = c.getString(offset++);
+        if (c.getColumnCount() > offset) {
+            task.resolved.folder = TaskFolder.fromCursor(c, offset);
+            offset += TaskFolder.COLUMNS;
+            if (c.getColumnCount() > offset) {
+                task.resolved.context = TaskContext.fromCursor(c, offset);
+            }
+        }
         return task;
     }
 

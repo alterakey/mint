@@ -8,12 +8,16 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.ListFragment;
 import android.app.ProgressDialog;
+import android.app.LoaderManager;
+import android.content.CursorLoader;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.Loader;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -30,6 +34,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Arrays;
+import java.text.SimpleDateFormat;
 
 public class TaskListFragment extends ListFragment
 {
@@ -40,6 +45,8 @@ public class TaskListFragment extends ListFragment
     private String mFilterType;
     private ActionMode mActionMode;
     private ClientStatusReceiver mClientStatusReceiver = new ClientStatusReceiver();
+
+    private TaskLoaderManipulator mTaskLoaderManip = new TaskLoaderManipulator();
 
     public static class Filter {
         private static final String[] ALL = { "hotlist", "inbox", "next_action", "reference", "waiting", "someday" };
@@ -62,6 +69,22 @@ public class TaskListFragment extends ListFragment
                 return "?";
             }
         }
+
+        public String getSelection() {
+            if ("hotlist".equals(mmFilter)) {
+                return TaskProvider.HOTLIST_FILTER;
+            } else {
+                return null;
+            }
+        }
+
+        public String[] getSelectionArgs() {
+            if ("hotlist".equals(mmFilter)) {
+                return new String[] { String.valueOf(new Date(new Date().getTime() + 7 * 86400 * 1000).getTime()) };
+            } else {
+                return null;
+            }
+        }
     }
 
     public String getFilter() {
@@ -82,7 +105,7 @@ public class TaskListFragment extends ListFragment
         final Context context = getActivity();
         final Bundle args = getArguments();
 
-        mAdapter = new TaskListAdapterBuilder().build();
+        mAdapter = new TaskListAdapter(getActivity(), null);
         mFilterType = args.getString(ARG_FILTER, "hotlist");
 
         getActivity().setTitle(new TaskListFragment.Filter(mFilterType).getTitle());
@@ -95,6 +118,8 @@ public class TaskListFragment extends ListFragment
 
         setHasOptionsMenu(true);
         setListAdapter(mAdapter);
+        setListShown(false);
+        getLoaderManager().initLoader(1, null, mTaskLoaderManip);
     }
 
     @Override
@@ -121,7 +146,7 @@ public class TaskListFragment extends ListFragment
     public void onResume() {
         super.onResume();
         mClientStatusReceiver.register();
-        reload();
+        getLoaderManager().restartLoader(1, null, mTaskLoaderManip);
         update();
     }
 
@@ -134,15 +159,9 @@ public class TaskListFragment extends ListFragment
     @Override
     public void onListItemClick(ListView lv, View v, int position, long id) {
         super.onListItemClick(lv, v, position, id);
-        final Map<String, ?> map = (Map<String, ?>)mAdapter.getItem(position);
-        final Task task = (Task)map.get("task");
         final Intent intent = new Intent(getActivity(), TaskEditActivity.class);
-        intent.putExtra(TaskEditActivity.KEY_TASK_ID, task._id);
+        intent.putExtra(TaskEditActivity.KEY_TASK_ID, id);
         startActivity(intent);
-    }
-
-    public void reload() {
-        mAdapter.reload();
     }
 
     private void update() {
@@ -165,64 +184,43 @@ public class TaskListFragment extends ListFragment
         }
     }
 
-    public class TaskListAdapterBuilder {
-        public TaskListAdapter build() {
-            final List<Map<String, ?>> data = new LinkedList<Map<String, ?>>();
-            final TaskListAdapter adapter = new TaskListAdapter(
-                getActivity(),
-                data
-                );
-            return adapter;
-        }
-    }
-
-    private class TaskListAdapter extends SimpleAdapter {
-        private List<Map<String, ?>> mmmData;
-
-        public TaskListAdapter(Context ctx, List<Map<String, ?>> data) {
-            super(ctx,
-                  data,
-                  R.layout.list_item,
-                  new String[] { "title", "folder_0", "context_0", "due", "timer_flag" },
-                  new int[] { R.id.list_task_title, R.id.list_task_folder_0, R.id.list_task_context_0, R.id.list_task_due, R.id.list_task_timer_flag });
-            mmmData = data;
+    private class TaskListAdapter extends CursorAdapter {
+        public TaskListAdapter(Context context, Cursor c) {
+            super(context, c);
         }
 
-        public void removeTask(Task t) {
-            final Queue<Map<String, ?>> toBeRemoved = new LinkedList<Map<String, ?>>();
-            for (Map<String, ?> e: mmmData) {
-                if (e.get("task") == t) {
-                    toBeRemoved.add(e);
-                }
-            }
-            for (Map<String, ?> e: toBeRemoved) {
-                mmmData.remove(e);
-            }
+        public TaskListAdapter(Context context, Cursor c, boolean autoRequery) {
+            super(context, c, autoRequery);
         }
 
-        public void remove(int pos) {
-            mmmData.remove(pos);
-        }
-
-        public void reload() {
-            mmmData.clear();
-            new TaskListLoadTask(mmmData, false).execute();
-        }
-
-        public void reloadSilently() {
-            mmmData.clear();
-            new TaskListLoadTask(mmmData, true).execute();
+        public TaskListAdapter(Context context, Cursor c, int flags) {
+            super(context, c, flags);
         }
 
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            convertView = super.getView(position, convertView, parent);
-            final View priority = convertView.findViewById(R.id.list_task_prio);
-            final Map<String, ?> map = mmmData.get(position);
-            final Task task = (Task)map.get("task");
+        public View newView(Context context, Cursor cursor, ViewGroup parent) {
+            final LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            final View v = inflater.inflate(R.layout.list_item, parent, false);
+            bindView(v, context, cursor);
+            return v;
+        }
+
+        @Override
+        public void bindView(View view, Context context, Cursor cursor) {
+            final TextView title = (TextView)view.findViewById(R.id.list_task_title);
+            final TextView taskFolder = (TextView)view.findViewById(R.id.list_task_folder_0);
+            final TextView taskContext = (TextView)view.findViewById(R.id.list_task_context_0);
+            final TextView due = (TextView)view.findViewById(R.id.list_task_due);
+            final TextView timerFlag = (TextView)view.findViewById(R.id.list_task_timer_flag);
+            final View priority = view.findViewById(R.id.list_task_prio);
+            final Task task = Task.fromCursor(cursor, 0);
             final Resources res = getResources();
 
-            switch (((Long)map.get("priority")).intValue()) {
+            title.setText(task.title);
+            due.setText(new SimpleDateFormat("yyyy/MM/dd").format(task.duedate));
+            timerFlag.setText("");
+
+            switch ((int)task.priority) {
             case -1:
                 priority.setBackgroundColor(res.getColor(R.color.prio_negative));
                 break;
@@ -241,87 +239,47 @@ public class TaskListFragment extends ListFragment
                 break;
             }
 
-            if (null == map.get("folder_0")) {
-                convertView.findViewById(R.id.list_task_folder_0).setVisibility(View.GONE);
+            if (task.folder < 0) {
+                taskFolder.setVisibility(View.GONE);
             } else {
-                convertView.findViewById(R.id.list_task_folder_0).setVisibility(View.VISIBLE);
+                taskFolder.setText(task.resolved.folder.name);
+                taskFolder.setVisibility(View.VISIBLE);
             }
-            if (null == map.get("context_0")) {
-                convertView.findViewById(R.id.list_task_context_0).setVisibility(View.GONE);
+            if (task.context < 0) {
+                taskContext.setVisibility(View.GONE);
             } else {
-                convertView.findViewById(R.id.list_task_context_0).setVisibility(View.VISIBLE);
+                taskContext.setText(task.resolved.context.name);
+                taskContext.setVisibility(View.VISIBLE);
             }
-
-            return convertView;
         }
     }
 
-    private class TaskListLoadTask extends AsyncTask<Void, Void, List<Task>> {
-        private List<Map<String, ?>> mmData;
-
-        public TaskListLoadTask(List<Map<String, ?>> data, boolean silent) {
-            mmData = data;
-        }
-
+    private class TaskLoaderManipulator implements LoaderManager.LoaderCallbacks<Cursor> {
         @Override
-        protected void onPreExecute() {
+        public Loader<Cursor> onCreateLoader(int id, Bundle args) {
             getActivity().setProgressBarIndeterminateVisibility(true);
+            setListShown(false);
+            final Filter filter = new Filter(mFilterType);
+            return new CursorLoader(
+                getActivity(),
+                TaskProvider.CONTENT_URI,
+                TaskProvider.PROJECTION,
+                filter.getSelection(),
+                filter.getSelectionArgs(),
+                TaskProvider.DEFAULT_ORDER
+            );
         }
 
         @Override
-        protected List<Task> doInBackground(Void... args) {
-            final DB db = new DB(getActivity());
-            try {
-                db.open();
-
-                Log.d("TLT", String.format("loading %s", mFilterType));
-                if ("hotlist".equals(mFilterType)) {
-                    return db.getHotTasks();
-                } else {
-                    final int status = new DB.Filter(mFilterType).getStatus();
-
-                    if (status == DB.Filter.UNKNOWN) {
-                        return new LinkedList<Task>();
-                    } else {
-                        return db.getTasks(String.format("status=\"%d\" and completed=0", status), TaskProvider.DEFAULT_ORDER);
-                    }
-                }
-            } finally {
-                db.close();
-            }
-        }
-
-        @Override
-        protected void onPostExecute(List<Task> ret) {
-            for (Task t : ret) {
-                if (t.completed != 0)
-                    continue;
-
-                final TaskContext c = t.resolved.context;
-                final TaskFolder f = t.resolved.folder;
-
-                Map<String, Object> map = new HashMap<String, Object>();
-                map.put("task", t);
-                map.put("title", t.title);
-                map.put("priority", t.priority);
-
-                if (!f.isNull()) {
-                    map.put("folder_0", String.format("%s", f.name));
-                }
-                if (!c.isNull()) {
-                    map.put("context_0", String.format("%s", c.name));
-                }
-
-                if (t.duedate > 0) {
-                    map.put("due", new Formatter().format("%1$tY-%1$tm-%1$td", new Date(t.duedate * 1000)).toString());
-                }
-                //map.put("timer_flag", "(on)");
-                mmData.add(map);
-            }
-
+        public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
             getActivity().setProgressBarIndeterminateVisibility(false);
-            Log.d("TLA", String.format("before refresh: items: %d", mmData.size()));
-            mAdapter.notifyDataSetChanged();
+            mAdapter.changeCursor(data);
+            setListShown(true);
+        }
+
+        @Override
+        public void onLoaderReset(Loader<Cursor> loader) {
+            mAdapter.changeCursor(null);
         }
     }
 
@@ -373,12 +331,8 @@ public class TaskListFragment extends ListFragment
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
             if (ToodledoClientService.ACTION_SYNC_DONE.equals(action)) {
-                poke();
+                getLoaderManager().restartLoader(1, null, mTaskLoaderManip);
             }
-        }
-
-        private void poke() {
-            mAdapter.reloadSilently();
         }
     }
 
@@ -388,26 +342,9 @@ public class TaskListFragment extends ListFragment
                 @Override
                 public void onDismiss(ListView listView, int[] reverseSortedPositions) {
                     for (int position : reverseSortedPositions) {
-                        final Map<String, ?> e = (Map<String, ?>)mAdapter.getItem(position);
-                        final Task task = (Task)e.get("task");
-
-                        task.markAsDone();
-
-                        final DB db = new DB(getActivity());
-                        try {
-                            db.openForWriting();
-                            db.commitTask(task);
-                        } finally {
-                            db.close();
-                        }
-
-                        final Context context = getActivity();
-                        final Intent intent = new Intent(context, ToodledoClientService.class);
-                        intent.setAction(ToodledoClientService.ACTION_SYNC);
-                        context.startService(intent);
-                        mAdapter.remove(position);
+                        final long id = mAdapter.getItemId(position);
+                        Toast.makeText(getActivity(), "TBD: mark task #%d as done", Toast.LENGTH_SHORT).show();
                     }
-                    mAdapter.notifyDataSetChanged();
                 }
             });
         }

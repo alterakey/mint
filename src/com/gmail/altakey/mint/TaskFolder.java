@@ -9,6 +9,8 @@ import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 
 public class TaskFolder {
+    public static final int COLUMNS = 5;
+
     public long id;
     public String name;
     public long private_;
