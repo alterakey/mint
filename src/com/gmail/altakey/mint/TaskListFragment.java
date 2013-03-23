@@ -310,7 +310,7 @@ public class TaskListFragment extends ListFragment
                     if (status == DB.Filter.UNKNOWN) {
                         return new LinkedList<Task>();
                     } else {
-                        return db.getTasks(String.format("status=\"%d\" and completed=0", status), DB.DEFAULT_ORDER);
+                        return db.getTasks(String.format("status=\"%d\" and completed=0", status), TaskProvider.DEFAULT_ORDER);
                     }
                 }
             } finally {

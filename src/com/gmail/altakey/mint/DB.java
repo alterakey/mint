@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 import android.database.Cursor;
+import android.content.ContentValues;
 
 import java.io.IOException;
 import java.util.Map;
@@ -12,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Date;
+import java.text.SimpleDateFormat;
 
 import java.util.UUID;
 
@@ -72,7 +74,7 @@ public class DB {
 
     public List<TaskFolder> getFolders() {
         final List<TaskFolder> ret = new LinkedList<TaskFolder>();
-        final Cursor c = sConn.rawQuery("SELECT folder,name,private,archived,ord FROM folders", null);
+        final Cursor c = mContext.getContentResolver().query(TaskFolderProvider.CONTENT_URI, TaskFolderProvider.PROJECTION, null, null, null);
         try {
             for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
                 ret.add(TaskFolder.fromCursor(c, 0));
@@ -85,7 +87,7 @@ public class DB {
 
     public List<TaskContext> getContext() {
         final List<TaskContext> ret = new LinkedList<TaskContext>();
-        final Cursor c = sConn.rawQuery("SELECT context,name FROM contexts", null);
+        final Cursor c = mContext.getContentResolver().query(TaskContextProvider.CONTENT_URI, TaskContextProvider.PROJECTION, null, null, null);
         try {
             for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
                 ret.add(TaskContext.fromCursor(c, 0));
@@ -96,15 +98,9 @@ public class DB {
         }
     }
 
-    private final String TASK_QUERY = "SELECT tasks.id,tasks.cookie,task,title,note,modified,completed,folder,context,priority,star,duedate,duetime,status,folder as folder_id,folders.name as folder_name,folders.private as folder_private,folders.archived as folder_archived,folders.ord as folder_ord,context as context_id,contexts.name as context_name FROM tasks left join folders using (folder) left join contexts using (context) where %s order by %s";
-    public static final String DEFAULT_ORDER = "duedate,priority desc";
-    public static final String HOT_FILTER = "(priority=3 or (priority>=0 and duedate>0 and duedate<?)) and completed=0";
-    public static final String ALL_FILTER = "1=1";
-
-    public List<Task> getTasks(String filter, String order) {
+    private List<Task> getTasks(String filter, String[] args, String order) {
         final List<Task> ret = new LinkedList<Task>();
-        final Cursor c = sConn.rawQuery(
-            String.format(TASK_QUERY, filter, DEFAULT_ORDER), null);
+        final Cursor c = mContext.getContentResolver().query(TaskProvider.CONTENT_URI, TaskProvider.PROJECTION, filter, args, order);
         try {
             for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
                 Task task = Task.fromCursor(c, 0);
@@ -116,71 +112,53 @@ public class DB {
         } finally {
             c.close();
         }
+    }
+
+    public List<Task> getTasks(String filter, String order) {
+        return getTasks(filter, null, order);
     }
 
     public List<Task> getHotTasks() {
-        final List<Task> ret = new LinkedList<Task>();
-        final String due = String.format("%d", (new Date().getTime() + (7 * 86400 * 1000)) / 1000);
-        final Cursor c = sConn.rawQuery(
-            String.format(TASK_QUERY, HOT_FILTER, DEFAULT_ORDER), new String[] { due });
-        try {
-            for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
-                Task task = Task.fromCursor(c, 0);
-                task.resolved.folder = TaskFolder.fromCursor(c, 14);
-                task.resolved.context = TaskContext.fromCursor(c, 19);
-                ret.add(task);
-            }
-            return ret;
-        } finally {
-            c.close();
-        }
+        final String due = new SimpleDateFormat("yyyy-MM-dd").format(new Date(new Date().getTime() + 7 * 86400 * 1000));
+        return getTasks(TaskProvider.HOTLIST_FILTER, new String[] { due }, TaskProvider.DEFAULT_ORDER);
     }
 
     public Task getTaskById(long taskId) {
-        final Cursor c = sConn.rawQuery(
-            String.format(TASK_QUERY, String.format("id=%d", taskId), DEFAULT_ORDER), null);
-        try {
-            for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
-                Task task = Task.fromCursor(c, 0);
-                task.resolved.folder = TaskFolder.fromCursor(c, 14);
-                task.resolved.context = TaskContext.fromCursor(c, 19);
-            }
-            return null;
-        } finally {
-            c.close();
-        }
+        return getTasks(TaskProvider.ID_FILTER, new String[] { String.valueOf(taskId) }, TaskProvider.DEFAULT_ORDER).get(0);
     }
 
     public void addTask(Task task) {
-        try {
-            sConn.beginTransaction();
-            sConn.execSQL(
-                "INSERT INTO tasks (cookie,title,note,modified,completed,folder,context,priority,star,duedate,duetime,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
-                new String[] {
-                    nextCookie(), task.title, task.note, String.valueOf(task.modified), String.valueOf(task.completed), String.valueOf(task.folder),
-                    String.valueOf(task.context), String.valueOf(task.priority), String.valueOf(task.star), String.valueOf(task.duedate), String.valueOf(task.duetime), task.status
-                }
-            );
-            sConn.setTransactionSuccessful();
-        } finally {
-            sConn.endTransaction();
-        }
+        final ContentValues values = new ContentValues();
+        values.put(TaskProvider.COLUMN_COOKIE, nextCookie());
+        values.put(TaskProvider.COLUMN_TITLE, task.title);
+        values.put(TaskProvider.COLUMN_NOTE, task.note);
+        values.put(TaskProvider.COLUMN_MODIFIED, task.modified);
+        values.put(TaskProvider.COLUMN_COMPLETED, task.completed);
+        values.put(TaskProvider.COLUMN_FOLDER, task.folder);
+        values.put(TaskProvider.COLUMN_CONTEXT, task.context);
+        values.put(TaskProvider.COLUMN_PRIORITY, task.priority);
+        values.put(TaskProvider.COLUMN_STAR, task.star);
+        values.put(TaskProvider.COLUMN_DUEDATE, task.duedate);
+        values.put(TaskProvider.COLUMN_DUETIME, task.duetime);
+        values.put(TaskProvider.COLUMN_STATUS, task.status);
+        mContext.getContentResolver().insert(TaskProvider.CONTENT_URI, values);
     }
 
     public void commitTask(Task task) {
-        try {
-            sConn.beginTransaction();
-            sConn.execSQL(
-                "UPDATE tasks SET title=?,note=?,modified=?,completed=?,folder=?,context=?,priority=?,star=?,duedate=?,duetime=?,status=? WHERE id=?",
-                new String[] {
-                    task.title, task.note, String.valueOf(task.modified), String.valueOf(task.completed), String.valueOf(task.folder),
-                    String.valueOf(task.context), String.valueOf(task.priority), String.valueOf(task.star), String.valueOf(task.duedate), String.valueOf(task.duetime), task.status, String.valueOf(task._id)
-                }
-            );
-            sConn.setTransactionSuccessful();
-        } finally {
-            sConn.endTransaction();
-        }
+        final ContentValues values = new ContentValues();
+        values.put(TaskProvider.COLUMN_COOKIE, nextCookie());
+        values.put(TaskProvider.COLUMN_TITLE, task.title);
+        values.put(TaskProvider.COLUMN_NOTE, task.note);
+        values.put(TaskProvider.COLUMN_MODIFIED, task.modified);
+        values.put(TaskProvider.COLUMN_COMPLETED, task.completed);
+        values.put(TaskProvider.COLUMN_FOLDER, task.folder);
+        values.put(TaskProvider.COLUMN_CONTEXT, task.context);
+        values.put(TaskProvider.COLUMN_PRIORITY, task.priority);
+        values.put(TaskProvider.COLUMN_STAR, task.star);
+        values.put(TaskProvider.COLUMN_DUEDATE, task.duedate);
+        values.put(TaskProvider.COLUMN_DUETIME, task.duetime);
+        values.put(TaskProvider.COLUMN_STATUS, task.status);
+        mContext.getContentResolver().update(TaskProvider.CONTENT_URI, values, TaskProvider.ID_FILTER, new String[] { String.valueOf(task.id) });
     }
 
     public static String nextCookie() {
