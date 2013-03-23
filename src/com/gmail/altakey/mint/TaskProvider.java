@@ -126,7 +126,7 @@ public class TaskProvider extends ContentProvider {
             stmt.bindString(5, (String)values.get("modified"));
             stmt.bindString(6, (String)values.get("completed"));
             stmt.bindString(7, (String)values.get("folder"));
-            stmt.bindString(8, (String)values.get("cnotext"));
+            stmt.bindString(8, (String)values.get("context"));
             stmt.bindString(9, (String)values.get("priority"));
             stmt.bindString(10, (String)values.get("star"));
             stmt.bindString(11, (String)values.get("duedate"));
@@ -147,7 +147,7 @@ public class TaskProvider extends ContentProvider {
             stmt.bindString(6, (String)values.get("modified"));
             stmt.bindString(7, (String)values.get("completed"));
             stmt.bindString(8, (String)values.get("folder"));
-            stmt.bindString(9, (String)values.get("cnotext"));
+            stmt.bindString(9, (String)values.get("context"));
             stmt.bindString(10, (String)values.get("priority"));
             stmt.bindString(11, (String)values.get("star"));
             stmt.bindString(12, (String)values.get("duedate"));
