@@ -74,10 +74,8 @@ public class DB {
         List<TaskFolder> ret = new LinkedList<TaskFolder>();
         Cursor c = sConn.rawQuery("SELECT folder,name,private,archived,ord FROM folders", null);
         try {
-            c.moveToFirst();
-            while (!c.isAfterLast()) {
+            for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
                 ret.add(TaskFolder.fromCursor(c, 0));
-                c.moveToNext();
             }
             return ret;
         } finally {
@@ -89,10 +87,8 @@ public class DB {
         List<TaskContext> ret = new LinkedList<TaskContext>();
         Cursor c = sConn.rawQuery("SELECT context,name FROM contexts", null);
         try {
-            c.moveToFirst();
-            while (!c.isAfterLast()) {
+            for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
                 ret.add(TaskContext.fromCursor(c, 0));
-                c.moveToNext();
             }
             return ret;
         } finally {
@@ -110,13 +106,11 @@ public class DB {
         Cursor c = sConn.rawQuery(
             String.format(TASK_QUERY, filter, DEFAULT_ORDER), null);
         try {
-            c.moveToFirst();
-            while (!c.isAfterLast()) {
+            for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
                 Task task = Task.fromCursor(c, 0);
                 task.resolved.folder = TaskFolder.fromCursor(c, 14);
                 task.resolved.context = TaskContext.fromCursor(c, 19);
                 ret.add(task);
-                c.moveToNext();
             }
             return ret;
         } finally {
@@ -130,13 +124,11 @@ public class DB {
         Cursor c = sConn.rawQuery(
             String.format(TASK_QUERY, HOT_FILTER, DEFAULT_ORDER), new String[] { due });
         try {
-            c.moveToFirst();
-            while (!c.isAfterLast()) {
+            for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
                 Task task = Task.fromCursor(c, 0);
                 task.resolved.folder = TaskFolder.fromCursor(c, 14);
                 task.resolved.context = TaskContext.fromCursor(c, 19);
                 ret.add(task);
-                c.moveToNext();
             }
             return ret;
         } finally {
@@ -148,12 +140,10 @@ public class DB {
         Cursor c = sConn.rawQuery(
             String.format(TASK_QUERY, String.format("id=%d", taskId), DEFAULT_ORDER), null);
         try {
-            c.moveToFirst();
-            while (!c.isAfterLast()) {
+            for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
                 Task task = Task.fromCursor(c, 0);
                 task.resolved.folder = TaskFolder.fromCursor(c, 14);
                 task.resolved.context = TaskContext.fromCursor(c, 19);
-                return task;
             }
             return null;
         } finally {
