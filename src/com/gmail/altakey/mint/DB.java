@@ -71,8 +71,8 @@ public class DB {
     }
 
     public List<TaskFolder> getFolders() {
-        List<TaskFolder> ret = new LinkedList<TaskFolder>();
-        Cursor c = sConn.rawQuery("SELECT folder,name,private,archived,ord FROM folders", null);
+        final List<TaskFolder> ret = new LinkedList<TaskFolder>();
+        final Cursor c = sConn.rawQuery("SELECT folder,name,private,archived,ord FROM folders", null);
         try {
             for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
                 ret.add(TaskFolder.fromCursor(c, 0));
@@ -84,8 +84,8 @@ public class DB {
     }
 
     public List<TaskContext> getContext() {
-        List<TaskContext> ret = new LinkedList<TaskContext>();
-        Cursor c = sConn.rawQuery("SELECT context,name FROM contexts", null);
+        final List<TaskContext> ret = new LinkedList<TaskContext>();
+        final Cursor c = sConn.rawQuery("SELECT context,name FROM contexts", null);
         try {
             for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
                 ret.add(TaskContext.fromCursor(c, 0));
@@ -102,8 +102,8 @@ public class DB {
     public static final String ALL_FILTER = "1=1";
 
     public List<Task> getTasks(String filter, String order) {
-        List<Task> ret = new LinkedList<Task>();
-        Cursor c = sConn.rawQuery(
+        final List<Task> ret = new LinkedList<Task>();
+        final Cursor c = sConn.rawQuery(
             String.format(TASK_QUERY, filter, DEFAULT_ORDER), null);
         try {
             for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
@@ -119,9 +119,9 @@ public class DB {
     }
 
     public List<Task> getHotTasks() {
-        List<Task> ret = new LinkedList<Task>();
-        String due = String.format("%d", (new Date().getTime() + (7 * 86400 * 1000)) / 1000);
-        Cursor c = sConn.rawQuery(
+        final List<Task> ret = new LinkedList<Task>();
+        final String due = String.format("%d", (new Date().getTime() + (7 * 86400 * 1000)) / 1000);
+        final Cursor c = sConn.rawQuery(
             String.format(TASK_QUERY, HOT_FILTER, DEFAULT_ORDER), new String[] { due });
         try {
             for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
@@ -137,7 +137,7 @@ public class DB {
     }
 
     public Task getTaskById(long taskId) {
-        Cursor c = sConn.rawQuery(
+        final Cursor c = sConn.rawQuery(
             String.format(TASK_QUERY, String.format("id=%d", taskId), DEFAULT_ORDER), null);
         try {
             for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
