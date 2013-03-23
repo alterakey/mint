@@ -17,6 +17,9 @@
     <activity android:name="LoginTroubleActivity" />
     <activity android:name="ConfigActivity" />
     <service android:name="ToodledoClientService" />
+    <provider android:authorities="com.gmail.altakey.mint.TaskProvider" android:exported="false" android:name="TaskProvider" />
+    <provider android:authorities="com.gmail.altakey.mint.TaskFolderProvider" android:exported="false" android:name="TaskFolderProvider" />
+    <provider android:authorities="com.gmail.altakey.mint.TaskContextProvider" android:exported="false" android:name="TaskContextProvider" />
   </application>
   <uses-permission android:name="android.permission.INTERNET" />
 </manifest>
