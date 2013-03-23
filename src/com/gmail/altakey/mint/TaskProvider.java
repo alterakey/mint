@@ -119,19 +119,11 @@ public class TaskProvider extends ContentProvider {
 
         if (resourceType == ProviderMap.TASKS) {
             final SQLiteStatement stmt = db.compileStatement(TASK_INSERT_QUERY);
-            stmt.bindString(1, (String)values.get("cookie"));
-            stmt.bindString(2, (String)values.get("task"));
-            stmt.bindString(3, (String)values.get("title"));
-            stmt.bindString(4, (String)values.get("note"));
-            stmt.bindString(5, (String)values.get("modified"));
-            stmt.bindString(6, (String)values.get("completed"));
-            stmt.bindString(7, (String)values.get("folder"));
-            stmt.bindString(8, (String)values.get("context"));
-            stmt.bindString(9, (String)values.get("priority"));
-            stmt.bindString(10, (String)values.get("star"));
-            stmt.bindString(11, (String)values.get("duedate"));
-            stmt.bindString(12, (String)values.get("duetime"));
-            stmt.bindString(13, (String)values.get("status"));
+            bindStringsOptionally(stmt, values, new String[] {
+                    "cookie", "task", "title", "note", "modified",
+                    "completed", "folder", "context", "priority", "star",
+                    "duedate", "duetime", "status"
+            });
             try {
                 return ContentUris.withAppendedId(uri, stmt.executeInsert());
             } finally {
@@ -139,20 +131,11 @@ public class TaskProvider extends ContentProvider {
             }
         } else if (resourceType == ProviderMap.TASKS_ID) {
             final SQLiteStatement stmt = db.compileStatement(TASK_REPLACE_QUERY);
-            stmt.bindString(1, (String)values.get("_id"));
-            stmt.bindString(2, (String)values.get("cookie"));
-            stmt.bindString(3, (String)values.get("task"));
-            stmt.bindString(4, (String)values.get("title"));
-            stmt.bindString(5, (String)values.get("note"));
-            stmt.bindString(6, (String)values.get("modified"));
-            stmt.bindString(7, (String)values.get("completed"));
-            stmt.bindString(8, (String)values.get("folder"));
-            stmt.bindString(9, (String)values.get("context"));
-            stmt.bindString(10, (String)values.get("priority"));
-            stmt.bindString(11, (String)values.get("star"));
-            stmt.bindString(12, (String)values.get("duedate"));
-            stmt.bindString(13, (String)values.get("duetime"));
-            stmt.bindString(14, (String)values.get("status"));
+            bindStringsOptionally(stmt, values, new String[] {
+                    "_id", "cookie", "task", "title", "note",
+                    "modified", "completed", "folder", "context", "priority",
+                    "star", "duedate", "duetime", "status"
+            });
             try {
                 stmt.executeInsert();
                 return uri;
@@ -175,23 +158,18 @@ public class TaskProvider extends ContentProvider {
             }
 
             final SQLiteStatement stmt = db.compileStatement(String.format(TASK_UPDATE_QUERY, selection == null ? "" : String.format("WHERE %s", selection)));
-            stmt.bindString(1, (String)values.get("cookie"));
-            stmt.bindString(2, (String)values.get("task"));
-            stmt.bindString(3, (String)values.get("title"));
-            stmt.bindString(4, (String)values.get("note"));
-            stmt.bindString(5, (String)values.get("modified"));
-            stmt.bindString(6, (String)values.get("completed"));
-            stmt.bindString(7, (String)values.get("folder"));
-            stmt.bindString(8, (String)values.get("cnotext"));
-            stmt.bindString(9, (String)values.get("priority"));
-            stmt.bindString(10, (String)values.get("star"));
-            stmt.bindString(11, (String)values.get("duedate"));
-            stmt.bindString(12, (String)values.get("duetime"));
-            stmt.bindString(13, (String)values.get("status"));
+            int offset = bindStringsOptionally(stmt, values, new String[] {
+                    "cookie", "task", "title", "note", "modified",
+                    "completed", "folder", "context", "priority", "star",
+                    "duedate", "duetime", "status"
+            });
 
-            int offset = 14;
             for (final String arg: selectionArgs) {
-                stmt.bindString(offset++, arg);
+                if (arg != null) {
+                    stmt.bindString(offset++, arg);
+                } else {
+                    stmt.bindNull(offset++);
+                }
             }
             try {
                 return stmt.executeUpdateDelete();
@@ -218,7 +196,11 @@ public class TaskProvider extends ContentProvider {
 
             int offset = 1;
             for (final String arg: selectionArgs) {
-                stmt.bindString(offset++, arg);
+                if (arg != null) {
+                    stmt.bindString(offset++, arg);
+                } else {
+                    stmt.bindNull(offset++);
+                }
             }
             try {
                 return stmt.executeUpdateDelete();
@@ -228,5 +210,17 @@ public class TaskProvider extends ContentProvider {
         default:
             return 0;
         }
+    }
+
+    private int bindStringsOptionally(final SQLiteStatement stmt, final ContentValues values, final String[] keys) {
+        int offset = 1;
+        for (final String key: keys) {
+            if (key != null) {
+                stmt.bindString(offset++, (String)values.get(key));
+            } else {
+                stmt.bindNull(offset++);
+            }
+        }
+        return offset;
     }
 }
