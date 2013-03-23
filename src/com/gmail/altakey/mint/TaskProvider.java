@@ -119,7 +119,7 @@ public class TaskProvider extends ContentProvider {
 
         if (resourceType == ProviderMap.TASKS) {
             final SQLiteStatement stmt = db.compileStatement(TASK_INSERT_QUERY);
-            bindStringsOptionally(stmt, values, new String[] {
+            bindNullableStrings(stmt, values, new String[] {
                     "cookie", "task", "title", "note", "modified",
                     "completed", "folder", "context", "priority", "star",
                     "duedate", "duetime", "status"
@@ -131,7 +131,7 @@ public class TaskProvider extends ContentProvider {
             }
         } else if (resourceType == ProviderMap.TASKS_ID) {
             final SQLiteStatement stmt = db.compileStatement(TASK_REPLACE_QUERY);
-            bindStringsOptionally(stmt, values, new String[] {
+            bindNullableStrings(stmt, values, new String[] {
                     "_id", "cookie", "task", "title", "note",
                     "modified", "completed", "folder", "context", "priority",
                     "star", "duedate", "duetime", "status"
@@ -158,7 +158,7 @@ public class TaskProvider extends ContentProvider {
             }
 
             final SQLiteStatement stmt = db.compileStatement(String.format(TASK_UPDATE_QUERY, selection == null ? "" : String.format("WHERE %s", selection)));
-            int offset = bindStringsOptionally(stmt, values, new String[] {
+            int offset = bindNullableStrings(stmt, values, new String[] {
                     "cookie", "task", "title", "note", "modified",
                     "completed", "folder", "context", "priority", "star",
                     "duedate", "duetime", "status"
@@ -212,7 +212,7 @@ public class TaskProvider extends ContentProvider {
         }
     }
 
-    private int bindStringsOptionally(final SQLiteStatement stmt, final ContentValues values, final String[] keys) {
+    private static int bindNullableStrings(final SQLiteStatement stmt, final ContentValues values, final String[] keys) {
         int offset = 1;
         for (final String key: keys) {
             if (key != null) {
