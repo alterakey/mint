@@ -29,6 +29,7 @@ public class TaskProvider extends ContentProvider {
     public static final String ID_FILTER = "tasks._id=?";
     public static final String ALL_FILTER = "1=1";
     public static final String MULTIPLE_TASKS_FILTER = "task in (%s)";
+    public static final String DIRTY_SINCE_FILTER = "tasks.task is null or tasks.modified > ?";
 
     public static final String COLUMN_ID = "_id";
     public static final String COLUMN_COOKIE = "cookie";

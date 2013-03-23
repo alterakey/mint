@@ -38,7 +38,6 @@ public class ToodledoClientService extends IntentService {
     public static final String EXTRA_TASKS = "tasks";
     public static final String EXTRA_TASK_FIELDS = "task_fields";
 
-    private DB mDB;
     private ToodledoClient mClient;
 
     public ToodledoClientService() {
@@ -239,15 +238,18 @@ public class ToodledoClientService extends IntentService {
         }
 
         public void commit() throws IOException, Authenticator.BogusException, Authenticator.FailureException, Authenticator.ErrorException {
-            final DB db = new DB(mmContext);
-            final SQLiteDatabase conn = db.open();
-            try {
-                conn.beginTransaction();
-
-                final TaskStatus st = mmClient.getStatus();
-                mmClient.commitTasks(db.getTasks(String.format("tasks.task is null or tasks.modified > %d", st.lastedit_task), null), new String[] { "note", "duedate", "duetime" });
-            } finally {
-                conn.endTransaction();
+            final TaskStatus st = mmClient.getStatus();
+            final Cursor c = mmContext.getContentResolver().query(TaskProvider.CONTENT_URI, TaskProvider.PROJECTION, TaskProvider.DIRTY_SINCE_FILTER, new String[] { String.valueOf(st.lastedit_task) }, null);
+            if (c != null) {
+                try {
+                    final List<Task> tasks = new LinkedList<Task>();
+                    for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
+                        tasks.add(Task.fromCursor(c, 0));
+                    }
+                    mmClient.commitTasks(tasks, null);
+                } finally {
+                    c.close();
+                }
             }
         }
     }
