@@ -12,9 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Date;
-import java.security.SecureRandom;
-import java.security.NoSuchAlgorithmException;
-import java.math.BigInteger;
+
+import java.util.UUID;
 
 // Primarily cares synchronizers
 public class DB {
@@ -209,12 +208,6 @@ public class DB {
     }
 
     public static String nextCookie() {
-        try {
-            final byte[] buffer = new byte[32];
-            SecureRandom.getInstance("SHA1PRNG").nextBytes(buffer);
-            return String.format("%064x", new BigInteger(buffer));
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
+        return UUID.randomUUID().toString();
     }
 }
