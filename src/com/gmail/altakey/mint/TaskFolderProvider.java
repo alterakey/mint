@@ -50,7 +50,7 @@ public class TaskFolderProvider extends ContentProvider {
 
     private static final String FOLDER_UPDATE_QUERY = "UPDATE folders set folder=?,name=?,private=?,archived=?,ord=? %s";
 
-    private static final String FOLDER_DELETE_QUERY = "DELETE folders %s";
+    private static final String FOLDER_DELETE_QUERY = "DELETE FROM folders %s";
 
     private SQLiteOpenHelper mHelper;
 

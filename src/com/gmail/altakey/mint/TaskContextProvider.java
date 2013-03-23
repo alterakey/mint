@@ -44,7 +44,7 @@ public class TaskContextProvider extends ContentProvider {
 
     private static final String CONTEXT_UPDATE_QUERY = "UPDATE contexts set context=?,name=? %s";
 
-    private static final String CONTEXT_DELETE_QUERY = "DELETE contexts %s";
+    private static final String CONTEXT_DELETE_QUERY = "DELETE FROM contexts %s";
 
     private SQLiteOpenHelper mHelper;
 

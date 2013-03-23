@@ -245,7 +245,7 @@ public class ToodledoClientService extends IntentService {
                 conn.beginTransaction();
 
                 final TaskStatus st = mmClient.getStatus();
-                mmClient.commitTasks(db.getTasks(String.format("tasks.id is null or tasks.modified > %d", st.lastedit_task), null), new String[] { "note", "duedate", "duetime" });
+                mmClient.commitTasks(db.getTasks(String.format("tasks.task is null or tasks.modified > %d", st.lastedit_task), null), new String[] { "note", "duedate", "duetime" });
             } finally {
                 conn.endTransaction();
             }

@@ -82,7 +82,7 @@ public class TaskProvider extends ContentProvider {
 
     private static final String TASK_UPDATE_QUERY = "UPDATE tasks set cookie=?,task=?,title=?,note=?,modified=?,completed=?,folder=?,context=?,priority=?,star=?,duedate=?,duetime=?,status=? %s";
 
-    private static final String TASK_DELETE_QUERY = "DELETE tasks %s";
+    private static final String TASK_DELETE_QUERY = "DELETE FROM tasks %s";
 
     private SQLiteOpenHelper mHelper;
 
