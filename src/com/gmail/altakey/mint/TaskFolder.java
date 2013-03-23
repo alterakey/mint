@@ -17,11 +17,11 @@ public class TaskFolder {
 
     public static TaskFolder fromCursor(Cursor c, int offset) {
         final TaskFolder folder = new TaskFolder();
-        folder.id = c.getLong(0 + offset);
-        folder.name = c.getString(1 + offset);
-        folder.private_ = c.getLong(2 + offset);
-        folder.archived = c.getLong(3 + offset);
-        folder.ord = c.getLong(4 + offset);
+        folder.id = c.getLong(offset++);
+        folder.name = c.getString(offset++);
+        folder.private_ = c.getLong(offset++);
+        folder.archived = c.getLong(offset++);
+        folder.ord = c.getLong(offset++);
         return folder;
     }
 

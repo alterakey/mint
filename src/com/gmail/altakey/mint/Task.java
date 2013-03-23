@@ -58,20 +58,20 @@ public class Task {
 
     public static Task fromCursor(Cursor c, int offset) {
         final Task task = new Task();
-        task._id = c.getLong(0 + offset);
-        task._cookie = c.getString(1 + offset);
-        task.id = c.getLong(2 + offset);
-        task.title = c.getString(3 + offset);
-        task.note = c.getString(4 + offset);
-        task.modified = c.getLong(5 + offset);
-        task.completed = c.getLong(6 + offset);
-        task.folder = c.getLong(7 + offset);
-        task.context = c.getLong(8 + offset);
-        task.priority = c.getLong(9 + offset);
-        task.star = c.getLong(10 + offset);
-        task.duedate = c.getLong(11 + offset);
-        task.duetime = c.getLong(12 + offset);
-        task.status = c.getString(13 + offset);
+        task._id = c.getLong(offset++);
+        task._cookie = c.getString(offset++);
+        task.id = c.getLong(offset++);
+        task.title = c.getString(offset++);
+        task.note = c.getString(offset++);
+        task.modified = c.getLong(offset++);
+        task.completed = c.getLong(offset++);
+        task.folder = c.getLong(offset++);
+        task.context = c.getLong(offset++);
+        task.priority = c.getLong(offset++);
+        task.star = c.getLong(offset++);
+        task.duedate = c.getLong(offset++);
+        task.duetime = c.getLong(offset++);
+        task.status = c.getString(offset++);
         return task;
     }
 
