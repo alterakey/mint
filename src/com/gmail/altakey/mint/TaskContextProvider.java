@@ -80,8 +80,9 @@ public class TaskContextProvider extends ContentProvider {
 
         if (resourceType == ProviderMap.CONTEXTS) {
             final SQLiteStatement stmt = db.compileStatement(CONTEXT_INSERT_QUERY);
-            stmt.bindString(1, (String)values.get("context"));
-            stmt.bindString(2, (String)values.get("name"));
+            ProviderUtils.bindNullableStrings(stmt, values, new String[] {
+                    "context", "name"
+            });
             try {
                 return ContentUris.withAppendedId(uri, stmt.executeInsert());
             } finally {
@@ -89,9 +90,9 @@ public class TaskContextProvider extends ContentProvider {
             }
         } else if (resourceType == ProviderMap.CONTEXTS_ID) {
             final SQLiteStatement stmt = db.compileStatement(CONTEXT_REPLACE_QUERY);
-            stmt.bindString(1, (String)values.get("_id"));
-            stmt.bindString(2, (String)values.get("context"));
-            stmt.bindString(3, (String)values.get("name"));
+            ProviderUtils.bindNullableStrings(stmt, values, new String[] {
+                    "_id", "context", "name"
+            });
             try {
                 stmt.executeInsert();
                 return uri;
@@ -110,16 +111,20 @@ public class TaskContextProvider extends ContentProvider {
 
         if (resourceType == ProviderMap.CONTEXTS) {
             if (MULTIPLE_CONTEXTS_FILTER.equals(selection)) {
-                selection = new FilterExpander(selection, selectionArgs).expand();
+                selection = ProviderUtils.expandFilter(selection, selectionArgs);
             }
 
             final SQLiteStatement stmt = db.compileStatement(String.format(CONTEXT_UPDATE_QUERY, selection == null ? "" : String.format("WHERE %s", selection)));
-            stmt.bindString(1, (String)values.get("context"));
-            stmt.bindString(2, (String)values.get("name"));
+            int offset = ProviderUtils.bindNullableStrings(stmt, values, new String[] {
+                    "context", "name"
+            });
 
-            int offset = 3;
             for (final String arg: selectionArgs) {
-                stmt.bindString(offset++, arg);
+                if (arg != null) {
+                    stmt.bindString(offset++, arg);
+                } else {
+                    stmt.bindNull(offset++);
+                }
             }
             try {
                 return stmt.executeUpdateDelete();
@@ -138,7 +143,7 @@ public class TaskContextProvider extends ContentProvider {
         switch (new ProviderMap(uri).getResourceType()) {
         case ProviderMap.CONTEXTS:
             if (MULTIPLE_CONTEXTS_FILTER.equals(selection)) {
-                selection = new FilterExpander(selection, selectionArgs).expand();
+                selection = ProviderUtils.expandFilter(selection, selectionArgs);
             }
 
             final SQLiteStatement stmt =
@@ -146,7 +151,11 @@ public class TaskContextProvider extends ContentProvider {
 
             int offset = 1;
             for (final String arg: selectionArgs) {
-                stmt.bindString(offset++, arg);
+                if (arg != null) {
+                    stmt.bindString(offset++, arg);
+                } else {
+                    stmt.bindNull(offset++);
+                }
             }
             try {
                 return stmt.executeUpdateDelete();

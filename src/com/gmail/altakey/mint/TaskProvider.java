@@ -119,7 +119,7 @@ public class TaskProvider extends ContentProvider {
 
         if (resourceType == ProviderMap.TASKS) {
             final SQLiteStatement stmt = db.compileStatement(TASK_INSERT_QUERY);
-            bindNullableStrings(stmt, values, new String[] {
+            ProviderUtils.bindNullableStrings(stmt, values, new String[] {
                     "cookie", "task", "title", "note", "modified",
                     "completed", "folder", "context", "priority", "star",
                     "duedate", "duetime", "status"
@@ -131,7 +131,7 @@ public class TaskProvider extends ContentProvider {
             }
         } else if (resourceType == ProviderMap.TASKS_ID) {
             final SQLiteStatement stmt = db.compileStatement(TASK_REPLACE_QUERY);
-            bindNullableStrings(stmt, values, new String[] {
+            ProviderUtils.bindNullableStrings(stmt, values, new String[] {
                     "_id", "cookie", "task", "title", "note",
                     "modified", "completed", "folder", "context", "priority",
                     "star", "duedate", "duetime", "status"
@@ -154,11 +154,11 @@ public class TaskProvider extends ContentProvider {
 
         if (resourceType == ProviderMap.TASKS) {
             if (MULTIPLE_TASKS_FILTER.equals(selection)) {
-                selection = new FilterExpander(selection, selectionArgs).expand();
+                selection = ProviderUtils.expandFilter(selection, selectionArgs);
             }
 
             final SQLiteStatement stmt = db.compileStatement(String.format(TASK_UPDATE_QUERY, selection == null ? "" : String.format("WHERE %s", selection)));
-            int offset = bindNullableStrings(stmt, values, new String[] {
+            int offset = ProviderUtils.bindNullableStrings(stmt, values, new String[] {
                     "cookie", "task", "title", "note", "modified",
                     "completed", "folder", "context", "priority", "star",
                     "duedate", "duetime", "status"
@@ -188,7 +188,7 @@ public class TaskProvider extends ContentProvider {
         switch (new ProviderMap(uri).getResourceType()) {
         case ProviderMap.TASKS:
             if (MULTIPLE_TASKS_FILTER.equals(selection)) {
-                selection = new FilterExpander(selection, selectionArgs).expand();
+                selection = ProviderUtils.expandFilter(selection, selectionArgs);
             }
 
             final SQLiteStatement stmt =
@@ -210,17 +210,5 @@ public class TaskProvider extends ContentProvider {
         default:
             return 0;
         }
-    }
-
-    private static int bindNullableStrings(final SQLiteStatement stmt, final ContentValues values, final String[] keys) {
-        int offset = 1;
-        for (final String key: keys) {
-            if (key != null) {
-                stmt.bindString(offset++, (String)values.get(key));
-            } else {
-                stmt.bindNull(offset++);
-            }
-        }
-        return offset;
     }
 }

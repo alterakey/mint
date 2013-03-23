@@ -86,11 +86,9 @@ public class TaskFolderProvider extends ContentProvider {
 
         if (resourceType == ProviderMap.FOLDERS) {
             final SQLiteStatement stmt = db.compileStatement(FOLDER_INSERT_QUERY);
-            stmt.bindString(1, (String)values.get("folder"));
-            stmt.bindString(2, (String)values.get("name"));
-            stmt.bindString(3, (String)values.get("private"));
-            stmt.bindString(4, (String)values.get("archived"));
-            stmt.bindString(5, (String)values.get("ord"));
+            ProviderUtils.bindNullableStrings(stmt, values, new String[] {
+                    "folder", "name", "private", "archived", "ord"
+            });
             try {
                 return ContentUris.withAppendedId(uri, stmt.executeInsert());
             } finally {
@@ -98,12 +96,9 @@ public class TaskFolderProvider extends ContentProvider {
             }
         } else if (resourceType == ProviderMap.FOLDERS_ID) {
             final SQLiteStatement stmt = db.compileStatement(FOLDER_REPLACE_QUERY);
-            stmt.bindString(1, (String)values.get("_id"));
-            stmt.bindString(2, (String)values.get("folder"));
-            stmt.bindString(3, (String)values.get("name"));
-            stmt.bindString(4, (String)values.get("private"));
-            stmt.bindString(5, (String)values.get("archived"));
-            stmt.bindString(6, (String)values.get("ord"));
+            ProviderUtils.bindNullableStrings(stmt, values, new String[] {
+                    "_id", "folder", "name", "private", "archived", "ord"
+            });
             try {
                 stmt.executeInsert();
                 return uri;
@@ -122,19 +117,20 @@ public class TaskFolderProvider extends ContentProvider {
 
         if (resourceType == ProviderMap.FOLDERS) {
             if (MULTIPLE_FOLDERS_FILTER.equals(selection)) {
-                selection = new FilterExpander(selection, selectionArgs).expand();
+                selection = ProviderUtils.expandFilter(selection, selectionArgs);
             }
 
             final SQLiteStatement stmt = db.compileStatement(String.format(FOLDER_UPDATE_QUERY, selection == null ? "" : String.format("WHERE %s", selection)));
-            stmt.bindString(1, (String)values.get("folder"));
-            stmt.bindString(2, (String)values.get("name"));
-            stmt.bindString(3, (String)values.get("private"));
-            stmt.bindString(4, (String)values.get("archived"));
-            stmt.bindString(5, (String)values.get("ord"));
+            int offset = ProviderUtils.bindNullableStrings(stmt, values, new String[] {
+                    "folder", "name", "private", "archived", "ord"
+            });
 
-            int offset = 6;
             for (final String arg: selectionArgs) {
-                stmt.bindString(offset++, arg);
+                if (arg != null) {
+                    stmt.bindString(offset++, arg);
+                } else {
+                    stmt.bindNull(offset++);
+                }
             }
             try {
                 return stmt.executeUpdateDelete();
@@ -153,7 +149,7 @@ public class TaskFolderProvider extends ContentProvider {
         switch (new ProviderMap(uri).getResourceType()) {
         case ProviderMap.FOLDERS:
             if (MULTIPLE_FOLDERS_FILTER.equals(selection)) {
-                selection = new FilterExpander(selection, selectionArgs).expand();
+                selection = ProviderUtils.expandFilter(selection, selectionArgs);
             }
 
             final SQLiteStatement stmt =
@@ -161,7 +157,11 @@ public class TaskFolderProvider extends ContentProvider {
 
             int offset = 1;
             for (final String arg: selectionArgs) {
-                stmt.bindString(offset++, arg);
+                if (arg != null) {
+                    stmt.bindString(offset++, arg);
+                } else {
+                    stmt.bindNull(offset++);
+                }
             }
             try {
                 return stmt.executeUpdateDelete();
