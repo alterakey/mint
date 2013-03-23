@@ -15,7 +15,6 @@ import java.util.Date;
 
 import java.util.UUID;
 
-// Primarily cares synchronizers
 public class DB {
     private static SQLiteDatabase sConn;
 
