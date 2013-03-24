@@ -18,8 +18,6 @@ import java.text.SimpleDateFormat;
 import java.util.UUID;
 
 public class DB {
-    private static SQLiteDatabase sConn;
-
     private Context mContext;
 
     public static class Filter {
@@ -49,30 +47,7 @@ public class DB {
         mContext = c;
     }
 
-    public SQLiteDatabase open() {
-        return open(false);
-    }
-
-    public SQLiteDatabase openForWriting() {
-        return open(true);
-    }
-
-    private SQLiteDatabase open(boolean writable) {
-        if (sConn == null) {
-            final SQLiteOpenHelper helper = new Schema.OpenHelper(mContext);
-            if (writable == false) {
-                sConn = helper.getReadableDatabase();
-            } else {
-                sConn = helper.getWritableDatabase();
-            }
-        }
-        return sConn;
-    }
-
-    public void close() {
-    }
-
-    public List<TaskFolder> getFolders() {
+    private List<TaskFolder> getFolders() {
         final List<TaskFolder> ret = new LinkedList<TaskFolder>();
         final Cursor c = mContext.getContentResolver().query(TaskFolderProvider.CONTENT_URI, TaskFolderProvider.PROJECTION, null, null, null);
         try {
@@ -85,7 +60,7 @@ public class DB {
         }
     }
 
-    public List<TaskContext> getContext() {
+    private List<TaskContext> getContext() {
         final List<TaskContext> ret = new LinkedList<TaskContext>();
         final Cursor c = mContext.getContentResolver().query(TaskContextProvider.CONTENT_URI, TaskContextProvider.PROJECTION, null, null, null);
         try {

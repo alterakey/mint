@@ -87,14 +87,9 @@ public class TaskEditActivity extends Activity
             super.onActivityCreated(savedInstanceState);
             final Bundle args = getArguments();
 
-            final DB db = new DB(getActivity());
-            try {
-                db.open();
-                mTask = db.getTaskById(args.getLong(KEY_TASK_ID));
-                update(getView());
-            } finally {
-                db.close();
-            }
+            mTask = new DB(getActivity()).getTaskById(args.getLong(KEY_TASK_ID));
+
+            update(getView());
         }
 
         private void update(View v) {
@@ -161,13 +156,7 @@ public class TaskEditActivity extends Activity
             if (mTask != null) {
                 commit(getView());
 
-                final DB db = new DB(getActivity());
-                try {
-                    db.openForWriting();
-                    db.commitTask(mTask);
-                } finally {
-                    db.close();
-                }
+                new DB(getActivity()).commitTask(mTask);
 
                 final Intent intent = new Intent(getActivity(), ToodledoClientService.class);
                 intent.setAction(ToodledoClientService.ACTION_SYNC);

@@ -51,14 +51,8 @@ public class TaskPostFragment extends DialogFragment {
         public void onClick(DialogInterface dialog, int which) {
             final Context context = getActivity();
             final Task task = build();
-            final DB db = new DB(context);
 
-            try {
-                db.openForWriting();
-                db.addTask(task);
-            } finally {
-                db.close();
-            }
+            new DB(context).addTask(task);
 
             final Intent intent = new Intent(context, ToodledoClientService.class);
             intent.setAction(ToodledoClientService.ACTION_SYNC);
