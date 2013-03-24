@@ -20,57 +20,8 @@ import java.util.UUID;
 public class DB {
     private Context mContext;
 
-    public static class Filter {
-        public static final int UNKNOWN = -1;
-
-        private static final Map<String, Integer> FOLDER_MAP = new HashMap<String, Integer>();
-        private String mmFilter;
-
-        public Filter(String filter) {
-            mmFilter = filter;
-            if (FOLDER_MAP.isEmpty()) {
-                FOLDER_MAP.put("inbox", 0);
-                FOLDER_MAP.put("next_action", 1);
-                FOLDER_MAP.put("reference", 10);
-                FOLDER_MAP.put("waiting", 5);
-                FOLDER_MAP.put("someday", 8);
-            }
-        }
-
-        public int getStatus() {
-            Integer ret = FOLDER_MAP.get(mmFilter);
-            return ret == null ? UNKNOWN : ret.intValue();
-        }
-    }
-
     public DB(Context c) {
         mContext = c;
-    }
-
-    private List<TaskFolder> getFolders() {
-        final List<TaskFolder> ret = new LinkedList<TaskFolder>();
-        final Cursor c = mContext.getContentResolver().query(TaskFolderProvider.CONTENT_URI, TaskFolderProvider.PROJECTION, null, null, null);
-        try {
-            for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
-                ret.add(TaskFolder.fromCursor(c, 0));
-            }
-            return ret;
-        } finally {
-            c.close();
-        }
-    }
-
-    private List<TaskContext> getContext() {
-        final List<TaskContext> ret = new LinkedList<TaskContext>();
-        final Cursor c = mContext.getContentResolver().query(TaskContextProvider.CONTENT_URI, TaskContextProvider.PROJECTION, null, null, null);
-        try {
-            for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
-                ret.add(TaskContext.fromCursor(c, 0));
-            }
-            return ret;
-        } finally {
-            c.close();
-        }
     }
 
     private List<Task> getTasks(String filter, String[] args, String order) {

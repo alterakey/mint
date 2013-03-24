@@ -48,45 +48,6 @@ public class TaskListFragment extends ListFragment
 
     private TaskLoaderManipulator mTaskLoaderManip = new TaskLoaderManipulator();
 
-    public static class Filter {
-        private static final String[] ALL = { "hotlist", "inbox", "next_action", "reference", "waiting", "someday" };
-        private static final String[] TITLES = { "Hotlist", "Inbox", "Next Action", "Reference", "Waiting", "Someday" };
-
-        private String mmFilter;
-
-        public Filter(String filter) {
-            mmFilter = filter;
-        }
-
-        public List<String> getTitles() {
-            return Arrays.asList(TITLES);
-        }
-
-        public String getTitle() {
-            try {
-                return TITLES[Arrays.asList(ALL).indexOf(mmFilter)];
-            } catch (IndexOutOfBoundsException e) {
-                return "?";
-            }
-        }
-
-        public String getSelection() {
-            if ("hotlist".equals(mmFilter)) {
-                return TaskProvider.HOTLIST_FILTER;
-            } else {
-                return null;
-            }
-        }
-
-        public String[] getSelectionArgs() {
-            if ("hotlist".equals(mmFilter)) {
-                return new String[] { String.valueOf(new Date(new Date().getTime() + 7 * 86400 * 1000).getTime()) };
-            } else {
-                return null;
-            }
-        }
-    }
-
     public String getFilter() {
         return mFilterType;
     }
@@ -108,7 +69,7 @@ public class TaskListFragment extends ListFragment
         mAdapter = new TaskListAdapter(getActivity(), null);
         mFilterType = args.getString(ARG_FILTER, "hotlist");
 
-        getActivity().setTitle(new TaskListFragment.Filter(mFilterType).getTitle());
+        getActivity().setTitle(new FilterType(mFilterType).getTitle());
 
         final ListView listView = getListView();
         final TaskSwipeDismissAction action = new TaskSwipeDismissAction(listView);
@@ -260,7 +221,7 @@ public class TaskListFragment extends ListFragment
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
             getActivity().setProgressBarIndeterminateVisibility(true);
             setListShown(false);
-            final Filter filter = new Filter(mFilterType);
+            final FilterType filter = new FilterType(mFilterType);
             return new CursorLoader(
                 getActivity(),
                 TaskProvider.CONTENT_URI,
