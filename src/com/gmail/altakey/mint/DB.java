@@ -24,35 +24,6 @@ public class DB {
         mContext = c;
     }
 
-    private List<Task> getTasks(String filter, String[] args, String order) {
-        final List<Task> ret = new LinkedList<Task>();
-        final Cursor c = mContext.getContentResolver().query(TaskProvider.CONTENT_URI, TaskProvider.PROJECTION, filter, args, order);
-        try {
-            for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
-                final Task task = Task.fromCursor(c, 0);
-                task.resolved.folder = TaskFolder.fromCursor(c, 14);
-                task.resolved.context = TaskContext.fromCursor(c, 19);
-                ret.add(task);
-            }
-            return ret;
-        } finally {
-            c.close();
-        }
-    }
-
-    public List<Task> getTasks(String filter, String order) {
-        return getTasks(filter, null, order);
-    }
-
-    public List<Task> getHotTasks() {
-        final String due = new SimpleDateFormat("yyyy-MM-dd").format(new Date(new Date().getTime() + 7 * 86400 * 1000));
-        return getTasks(TaskProvider.HOTLIST_FILTER, new String[] { due }, TaskProvider.DEFAULT_ORDER);
-    }
-
-    public Task getTaskById(long taskId) {
-        return getTasks(TaskProvider.ID_FILTER, new String[] { String.valueOf(taskId) }, TaskProvider.DEFAULT_ORDER).get(0);
-    }
-
     public void addTask(Task task) {
         final ContentValues values = new ContentValues();
         values.put(TaskProvider.COLUMN_COOKIE, nextCookie());
