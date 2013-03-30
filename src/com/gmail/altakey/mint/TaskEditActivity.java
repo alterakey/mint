@@ -18,6 +18,12 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.*;
 import android.widget.*;
+import android.content.Loader;
+import android.content.AsyncTaskLoader;
+import android.content.ContentValues;
+import android.app.LoaderManager;
+import android.database.Cursor;
+import android.content.CursorLoader;
 
 import java.io.IOException;
 import java.util.Date;
@@ -58,6 +64,7 @@ public class TaskEditActivity extends Activity
         private static final int REQ_SET_TIME = 2;
 
         private Task mTask;
+        private TaskLoaderManipulator mLoaderManip = new TaskLoaderManipulator();
 
         public static TaskEditFragment newInstance(long task) {
             final TaskEditFragment f = new TaskEditFragment();
@@ -79,17 +86,9 @@ public class TaskEditActivity extends Activity
                 }
             });
             update(v);
+
+            getLoaderManager().initLoader(1, null, mLoaderManip);
             return v;
-        }
-
-        @Override
-        public void onActivityCreated(Bundle savedInstanceState) {
-            super.onActivityCreated(savedInstanceState);
-            final Bundle args = getArguments();
-
-            mTask = new DB(getActivity()).getTaskById(args.getLong(KEY_TASK_ID));
-
-            update(getView());
         }
 
         private void update(View v) {
@@ -155,12 +154,66 @@ public class TaskEditActivity extends Activity
             super.onPause();
             if (mTask != null) {
                 commit(getView());
+                getLoaderManager().initLoader(2, null, new TaskCommitterManipulator());
+            }
+        }
 
-                new DB(getActivity()).commitTask(mTask);
+        private class TaskLoaderManipulator implements LoaderManager.LoaderCallbacks<Cursor> {
+            @Override
+            public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+                return new CursorLoader(getActivity(),
+                                        TaskProvider.CONTENT_URI,
+                                        TaskProvider.PROJECTION,
+                                        TaskProvider.ID_FILTER,
+                                        new String[] { },
+                                        null);
+            }
 
+            @Override
+            public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+                mTask = Task.fromCursor(data, 0);
+                update(getView());
+            }
+
+            @Override
+            public void onLoaderReset(Loader<Cursor> loader) {
+            }
+        }
+
+        private class TaskCommitterManipulator implements LoaderManager.LoaderCallbacks<Void> {
+            @Override
+            public Loader<Void> onCreateLoader(int id, Bundle args) {
+                return new AsyncTaskLoader<Void>(getActivity()) {
+                    @Override
+                    public Void loadInBackground() {
+                        final Task task = mTask;
+                        final ContentValues values = new ContentValues();
+                        values.put(TaskProvider.COLUMN_TITLE, task.title);
+                        values.put(TaskProvider.COLUMN_NOTE, task.note);
+                        values.put(TaskProvider.COLUMN_MODIFIED, task.modified);
+                        values.put(TaskProvider.COLUMN_COMPLETED, task.completed);
+                        values.put(TaskProvider.COLUMN_FOLDER, task.folder);
+                        values.put(TaskProvider.COLUMN_CONTEXT, task.context);
+                        values.put(TaskProvider.COLUMN_PRIORITY, task.priority);
+                        values.put(TaskProvider.COLUMN_STAR, task.star);
+                        values.put(TaskProvider.COLUMN_DUEDATE, task.duedate);
+                        values.put(TaskProvider.COLUMN_DUETIME, task.duetime);
+                        values.put(TaskProvider.COLUMN_STATUS, task.status);
+                        getContext().getContentResolver().update(TaskProvider.CONTENT_URI, values, TaskProvider.ID_FILTER, new String[] { String.valueOf(task.id) });
+                        return null;
+                    }
+                };
+            }
+
+            @Override
+            public void onLoadFinished(Loader<Void> loader, Void data) {
                 final Intent intent = new Intent(getActivity(), ToodledoClientService.class);
                 intent.setAction(ToodledoClientService.ACTION_SYNC);
                 getActivity().startService(intent);
+            }
+
+            @Override
+            public void onLoaderReset(Loader<Void> loader) {
             }
         }
     }
