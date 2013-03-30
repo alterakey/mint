@@ -161,18 +161,6 @@ public class ToodledoClientService extends IntentService {
                 data.put("task", mmClient.getTasksAfter(flags.get("task")));
             }
 
-            final SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(mmContext);
-            pref.edit()
-                .putLong("lastedit_folder", st.lastedit_folder)
-                .putLong("lastedit_context", st.lastedit_context)
-                .putLong("lastedit_goal", st.lastedit_goal)
-                .putLong("lastedit_location", st.lastedit_location)
-                .putLong("lastedit_task", st.lastedit_task)
-                .putLong("lastdelete_task", st.lastdelete_task)
-                .putLong("lastedit_notebook", st.lastedit_notebook)
-                .putLong("lastdelete_notebook", st.lastdelete_notebook)
-                .commit();
-
             final ContentResolver resolver = mmContext.getContentResolver();
             if (data.containsKey("folder_delete")) {
                 final List<String> args = new LinkedList<String>();
@@ -235,6 +223,18 @@ public class ToodledoClientService extends IntentService {
                 }
                 resolver.bulkInsert(TaskProvider.CONTENT_URI, rows.toArray(new ContentValues[] {}));
             }
+
+            final SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(mmContext);
+            pref.edit()
+                .putLong("lastedit_folder", st.lastedit_folder)
+                .putLong("lastedit_context", st.lastedit_context)
+                .putLong("lastedit_goal", st.lastedit_goal)
+                .putLong("lastedit_location", st.lastedit_location)
+                .putLong("lastedit_task", st.lastedit_task)
+                .putLong("lastdelete_task", st.lastdelete_task)
+                .putLong("lastedit_notebook", st.lastedit_notebook)
+                .putLong("lastdelete_notebook", st.lastdelete_notebook)
+                .commit();
         }
 
         public void commit() throws IOException, Authenticator.BogusException, Authenticator.FailureException, Authenticator.ErrorException {
