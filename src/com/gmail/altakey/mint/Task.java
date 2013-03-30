@@ -8,6 +8,7 @@ import com.google.gson.stream.JsonWriter;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.UUID;
 
 public class Task {
     public static final int COLUMNS = 14;
@@ -43,7 +44,7 @@ public class Task {
     }
 
     public void addCookie() {
-        note = String.format("%s\n(mint:%s)", note, DB.nextCookie());
+        note = String.format("%s\n(mint:%s)", note, nextCookie());
     }
 
     public void removeCookie() {
@@ -56,6 +57,10 @@ public class Task {
 
     public boolean isReplica() {
         return note.contains(String.format("(mint:%s)", _cookie));
+    }
+
+    public static String nextCookie() {
+        return UUID.randomUUID().toString();
     }
 
     public static Task fromCursor(Cursor c, int offset) {

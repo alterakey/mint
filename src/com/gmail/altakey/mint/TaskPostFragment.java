@@ -15,7 +15,6 @@ import android.view.LayoutInflater;
 import android.widget.TextView;
 
 import java.util.Date;
-import java.util.UUID;
 import java.io.IOException;
 
 public class TaskPostFragment extends DialogFragment {
@@ -63,7 +62,7 @@ public class TaskPostFragment extends DialogFragment {
 
         private void addTask(final Context context, final Task task) {
             final ContentValues values = new ContentValues();
-            values.put(TaskProvider.COLUMN_COOKIE, UUID.randomUUID().toString());
+            values.put(TaskProvider.COLUMN_COOKIE, Task.nextCookie());
             values.put(TaskProvider.COLUMN_TITLE, task.title);
             values.put(TaskProvider.COLUMN_NOTE, task.note);
             values.put(TaskProvider.COLUMN_MODIFIED, task.modified);
