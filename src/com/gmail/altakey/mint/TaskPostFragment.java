@@ -7,6 +7,7 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Context;
+import android.content.ContentValues;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
@@ -14,6 +15,7 @@ import android.view.LayoutInflater;
 import android.widget.TextView;
 
 import java.util.Date;
+import java.util.UUID;
 import java.io.IOException;
 
 public class TaskPostFragment extends DialogFragment {
@@ -52,11 +54,28 @@ public class TaskPostFragment extends DialogFragment {
             final Context context = getActivity();
             final Task task = build();
 
-            new DB(context).addTask(task);
+            addTask(context, task);
 
             final Intent intent = new Intent(context, ToodledoClientService.class);
             intent.setAction(ToodledoClientService.ACTION_SYNC);
             context.startService(intent);
+        }
+
+        private void addTask(final Context context, final Task task) {
+            final ContentValues values = new ContentValues();
+            values.put(TaskProvider.COLUMN_COOKIE, UUID.randomUUID().toString());
+            values.put(TaskProvider.COLUMN_TITLE, task.title);
+            values.put(TaskProvider.COLUMN_NOTE, task.note);
+            values.put(TaskProvider.COLUMN_MODIFIED, task.modified);
+            values.put(TaskProvider.COLUMN_COMPLETED, task.completed);
+            values.put(TaskProvider.COLUMN_FOLDER, task.folder);
+            values.put(TaskProvider.COLUMN_CONTEXT, task.context);
+            values.put(TaskProvider.COLUMN_PRIORITY, task.priority);
+            values.put(TaskProvider.COLUMN_STAR, task.star);
+            values.put(TaskProvider.COLUMN_DUEDATE, task.duedate);
+            values.put(TaskProvider.COLUMN_DUETIME, task.duetime);
+            values.put(TaskProvider.COLUMN_STATUS, task.status);
+            context.getContentResolver().insert(TaskProvider.CONTENT_URI, values);
         }
 
         private Task build() {
