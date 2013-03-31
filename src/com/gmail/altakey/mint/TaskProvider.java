@@ -119,7 +119,7 @@ public class TaskProvider extends ContentProvider {
 
         if (resourceType == ProviderMap.TASKS) {
             final SQLiteStatement stmt = db.compileStatement(TASK_INSERT_QUERY);
-            ProviderUtils.bindNullableStrings(stmt, values, new String[] {
+            ProviderUtils.bind(stmt, values, new String[] {
                     "cookie", "task", "title", "note", "modified",
                     "completed", "folder", "context", "priority", "star",
                     "duedate", "duetime", "status"
@@ -131,7 +131,7 @@ public class TaskProvider extends ContentProvider {
             }
         } else if (resourceType == ProviderMap.TASKS_ID) {
             final SQLiteStatement stmt = db.compileStatement(TASK_REPLACE_QUERY);
-            ProviderUtils.bindNullableStrings(stmt, values, new String[] {
+            ProviderUtils.bind(stmt, values, new String[] {
                     "_id", "cookie", "task", "title", "note",
                     "modified", "completed", "folder", "context", "priority",
                     "star", "duedate", "duetime", "status"
@@ -158,7 +158,7 @@ public class TaskProvider extends ContentProvider {
             }
 
             final SQLiteStatement stmt = db.compileStatement(String.format(TASK_UPDATE_QUERY, selection == null ? "" : String.format("WHERE %s", selection)));
-            int offset = ProviderUtils.bindNullableStrings(stmt, values, new String[] {
+            int offset = ProviderUtils.bind(stmt, values, new String[] {
                     "cookie", "task", "title", "note", "modified",
                     "completed", "folder", "context", "priority", "star",
                     "duedate", "duetime", "status"

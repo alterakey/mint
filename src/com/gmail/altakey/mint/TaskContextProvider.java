@@ -80,7 +80,7 @@ public class TaskContextProvider extends ContentProvider {
 
         if (resourceType == ProviderMap.CONTEXTS) {
             final SQLiteStatement stmt = db.compileStatement(CONTEXT_INSERT_QUERY);
-            ProviderUtils.bindNullableStrings(stmt, values, new String[] {
+            ProviderUtils.bind(stmt, values, new String[] {
                     "context", "name"
             });
             try {
@@ -90,7 +90,7 @@ public class TaskContextProvider extends ContentProvider {
             }
         } else if (resourceType == ProviderMap.CONTEXTS_ID) {
             final SQLiteStatement stmt = db.compileStatement(CONTEXT_REPLACE_QUERY);
-            ProviderUtils.bindNullableStrings(stmt, values, new String[] {
+            ProviderUtils.bind(stmt, values, new String[] {
                     "_id", "context", "name"
             });
             try {
@@ -115,7 +115,7 @@ public class TaskContextProvider extends ContentProvider {
             }
 
             final SQLiteStatement stmt = db.compileStatement(String.format(CONTEXT_UPDATE_QUERY, selection == null ? "" : String.format("WHERE %s", selection)));
-            int offset = ProviderUtils.bindNullableStrings(stmt, values, new String[] {
+            int offset = ProviderUtils.bind(stmt, values, new String[] {
                     "context", "name"
             });
 

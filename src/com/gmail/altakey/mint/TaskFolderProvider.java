@@ -86,7 +86,7 @@ public class TaskFolderProvider extends ContentProvider {
 
         if (resourceType == ProviderMap.FOLDERS) {
             final SQLiteStatement stmt = db.compileStatement(FOLDER_INSERT_QUERY);
-            ProviderUtils.bindNullableStrings(stmt, values, new String[] {
+            ProviderUtils.bind(stmt, values, new String[] {
                     "folder", "name", "private", "archived", "ord"
             });
             try {
@@ -96,7 +96,7 @@ public class TaskFolderProvider extends ContentProvider {
             }
         } else if (resourceType == ProviderMap.FOLDERS_ID) {
             final SQLiteStatement stmt = db.compileStatement(FOLDER_REPLACE_QUERY);
-            ProviderUtils.bindNullableStrings(stmt, values, new String[] {
+            ProviderUtils.bind(stmt, values, new String[] {
                     "_id", "folder", "name", "private", "archived", "ord"
             });
             try {
@@ -121,7 +121,7 @@ public class TaskFolderProvider extends ContentProvider {
             }
 
             final SQLiteStatement stmt = db.compileStatement(String.format(FOLDER_UPDATE_QUERY, selection == null ? "" : String.format("WHERE %s", selection)));
-            int offset = ProviderUtils.bindNullableStrings(stmt, values, new String[] {
+            int offset = ProviderUtils.bind(stmt, values, new String[] {
                     "folder", "name", "private", "archived", "ord"
             });
 
