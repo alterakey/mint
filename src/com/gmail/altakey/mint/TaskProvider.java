@@ -75,7 +75,7 @@ public class TaskProvider extends ContentProvider {
     public static final int COL_CONTEXT_ID = 19;
     public static final int COL_CONTEXT_NAME = 20;
 
-    private static final String TASK_QUERY = "SELECT tasks._id,tasks.cookie,task,title,note,modified,completed,priority,star,duedate,duetime,status,folder AS folder_id,folders.name AS folder_name,folders.private AS folder_private,folders.archived AS folder_archived,folders.ord AS folder_ord,context AS context_id,contexts.name AS context_name FROM tasks LEFT JOIN folders USING (folder) LEFT JOIN contexts USING (context) WHERE %s %s";
+    private static final String TASK_QUERY = "SELECT tasks._id,tasks.cookie,task,title,tasks.note,tasks.modified,tasks.completed,tasks.priority,tasks.star,tasks.duedate,tasks.duetime,status,folder AS folder_id,folders.name AS folder_name,folders.private AS folder_private,folders.archived AS folder_archived,folders.ord AS folder_ord,context AS context_id,contexts.name AS context_name FROM tasks LEFT JOIN folders USING (folder) LEFT JOIN contexts USING (context) WHERE %s %s";
 
     private static final String TASK_INSERT_QUERY = "INSERT INTO tasks (cookie,task,title,note,modified,completed,folder,context,priority,star,duedate,duetime,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
