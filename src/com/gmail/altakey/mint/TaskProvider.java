@@ -93,6 +93,17 @@ public class TaskProvider extends ContentProvider {
     }
 
     @Override
+    public int bulkInsert(Uri uri, ContentValues[] values) {
+        int affected = 0;
+        for (final ContentValues value : values) {
+            if (insert(uri, value) != null) {
+                ++affected;
+            }
+        }
+        return affected;
+    }
+
+    @Override
     public boolean onCreate() {
         mHelper = new Schema.OpenHelper(getContext());
         return true;

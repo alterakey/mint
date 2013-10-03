@@ -170,8 +170,9 @@ public class ToodledoClientService extends IntentService {
                 for (TaskFolder t : (List<TaskFolder>)data.get("folder_delete")) {
                     args.add(String.valueOf(t.id));
                 }
-                resolver.delete(TaskFolderProvider.CONTENT_URI, TaskFolderProvider.MULTIPLE_FOLDERS_FILTER, args.toArray(new String[] {}));
-                notifyNeeded.add("folder");
+                if (0 < resolver.delete(TaskFolderProvider.CONTENT_URI, TaskFolderProvider.MULTIPLE_FOLDERS_FILTER, args.toArray(new String[] {}))) {
+                    notifyNeeded.add("folder");
+                }
             }
 
             if (data.containsKey("task_delete")) {
@@ -179,8 +180,9 @@ public class ToodledoClientService extends IntentService {
                 for (Task t : (List<Task>)data.get("task_delete")) {
                     args.add(String.valueOf(t.id));
                 }
-                resolver.delete(TaskProvider.CONTENT_URI, TaskProvider.MULTIPLE_TASKS_FILTER, args.toArray(new String[] {}));
-                notifyNeeded.add("task");
+                if (0 < resolver.delete(TaskProvider.CONTENT_URI, TaskProvider.MULTIPLE_TASKS_FILTER, args.toArray(new String[] {}))) {
+                    notifyNeeded.add("task");
+                }
             }
 
             if (data.containsKey("folder")) {
@@ -194,8 +196,9 @@ public class ToodledoClientService extends IntentService {
                     row.put(TaskFolderProvider.COLUMN_ORD, t.ord);
                     rows.add(row);
                 }
-                resolver.bulkInsert(TaskFolderProvider.CONTENT_URI, rows.toArray(new ContentValues[] {}));
-                notifyNeeded.add("folder");
+                if (0 < resolver.bulkInsert(TaskFolderProvider.CONTENT_URI, rows.toArray(new ContentValues[] {}))) {
+                    notifyNeeded.add("folder");
+                }
             }
 
             if (data.containsKey("context")) {
@@ -206,8 +209,9 @@ public class ToodledoClientService extends IntentService {
                     row.put(TaskContextProvider.COLUMN_NAME, t.name);
                     rows.add(row);
                 }
-                resolver.bulkInsert(TaskContextProvider.CONTENT_URI, rows.toArray(new ContentValues[] {}));
-                notifyNeeded.add("context");
+                if (0 < resolver.bulkInsert(TaskContextProvider.CONTENT_URI, rows.toArray(new ContentValues[] {}))) {
+                    notifyNeeded.add("context");
+                }
             }
 
             if (data.containsKey("task")) {
@@ -228,8 +232,9 @@ public class ToodledoClientService extends IntentService {
                     row.put(TaskProvider.COLUMN_STATUS, t.status);
                     rows.add(row);
                 }
-                resolver.bulkInsert(TaskProvider.CONTENT_URI, rows.toArray(new ContentValues[] {}));
-                notifyNeeded.add("task");
+                if (0 < resolver.bulkInsert(TaskProvider.CONTENT_URI, rows.toArray(new ContentValues[] {}))) {
+                    notifyNeeded.add("task");
+                }
             }
 
             final SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(mmContext);
