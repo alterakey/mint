@@ -112,15 +112,22 @@ public class TaskProvider extends ContentProvider {
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         final SQLiteDatabase db = mHelper.getReadableDatabase();
+        Cursor c = null;
 
         switch (new ProviderMap(uri).getResourceType()) {
         case ProviderMap.TASKS:
-            return db.rawQuery(String.format(TASK_QUERY, selection == null ? ALL_FILTER : selection, sortOrder == null ? DEFAULT_ORDER : sortOrder), selectionArgs);
+            c = db.rawQuery(String.format(TASK_QUERY, selection == null ? ALL_FILTER : selection, sortOrder == null ? DEFAULT_ORDER : sortOrder), selectionArgs);
+            break;
         case ProviderMap.TASKS_ID:
-            return db.rawQuery(String.format(TASK_QUERY, ID_FILTER, NO_ORDER), new String[] { String.valueOf(ContentUris.parseId(uri)) });
-        default:
-            return null;
+            c = db.rawQuery(String.format(TASK_QUERY, ID_FILTER, NO_ORDER), new String[] { String.valueOf(ContentUris.parseId(uri)) });
+            break;
         }
+
+        if (c != null) {
+            c.setNotificationUri(getContext().getContentResolver(), uri);
+        }
+
+        return c;
     }
 
     @Override
