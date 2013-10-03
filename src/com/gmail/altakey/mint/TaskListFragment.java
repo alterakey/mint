@@ -42,7 +42,6 @@ public class TaskListFragment extends ListFragment
     private TaskListAdapter mAdapter;
     private String mFilterType;
     private ActionMode mActionMode;
-    private ClientStatusReceiver mClientStatusReceiver = new ClientStatusReceiver();
 
     private TaskLoaderManipulator mTaskLoaderManip = new TaskLoaderManipulator();
 
@@ -102,15 +101,8 @@ public class TaskListFragment extends ListFragment
     @Override
     public void onResume() {
         super.onResume();
-        mClientStatusReceiver.register();
         getLoaderManager().restartLoader(1, null, mTaskLoaderManip);
         update();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        mClientStatusReceiver.unregister();
     }
 
     @Override
@@ -216,7 +208,6 @@ public class TaskListFragment extends ListFragment
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
             getActivity().setProgressBarIndeterminateVisibility(true);
             setListShown(false);
-            Log.d("TLM.oCL", "begin loading");
             final FilterType filter = new FilterType(mFilterType);
             return new CursorLoader(
                 getActivity(),
@@ -232,7 +223,6 @@ public class TaskListFragment extends ListFragment
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
             getActivity().setProgressBarIndeterminateVisibility(false);
             mAdapter.changeCursor(data);
-            Log.d("TLM.oLF", "end loading");
             setListShown(true);
         }
 
@@ -272,27 +262,6 @@ public class TaskListFragment extends ListFragment
         @Override
         public void onDestroyActionMode(ActionMode mode) {
             mActionMode = null;
-        }
-    }
-
-    private class ClientStatusReceiver extends BroadcastReceiver {
-        public void register() {
-            final IntentFilter filter = new IntentFilter();
-            filter.addAction(ToodledoClientService.ACTION_SYNC_DONE);
-            LocalBroadcastManager.getInstance(getActivity()).registerReceiver(this, filter);
-        }
-
-        public void unregister() {
-            LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(this);
-        }
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            final String action = intent.getAction();
-            if (ToodledoClientService.ACTION_SYNC_DONE.equals(action)) {
-                // XXX: causes flicker
-                getLoaderManager().restartLoader(1, null, mTaskLoaderManip);
-            }
         }
     }
 }
