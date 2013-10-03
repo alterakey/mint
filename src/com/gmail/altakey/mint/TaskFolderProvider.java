@@ -44,7 +44,7 @@ public class TaskFolderProvider extends ContentProvider {
 
     private static final String FOLDER_QUERY = "SELECT _id,folder,name,private,archived,ord FROM folders WHERE %s %s";
 
-    private static final String FOLDER_INSERT_QUERY = "INSERT INTO folders (folder,name,private,archived,ord) VALUES (?,?,?,?,?)";
+    private static final String FOLDER_INSERT_QUERY = "INSERT OR IGNORE INTO folders (folder,name,private,archived,ord) VALUES (?,?,?,?,?)";
 
     private static final String FOLDER_REPLACE_QUERY = "REPLACE INTO folders (_id,folder,name,private,archived,ord) VALUES (?,?,?,?,?,?)";
 

@@ -38,7 +38,7 @@ public class TaskContextProvider extends ContentProvider {
 
     private static final String CONTEXT_QUERY = "SELECT _id,context,name FROM contexts WHERE %s %s";
 
-    private static final String CONTEXT_INSERT_QUERY = "INSERT INTO contexts (context,name) VALUES (?,?)";
+    private static final String CONTEXT_INSERT_QUERY = "INSERT OR IGNORE INTO contexts (context,name) VALUES (?,?)";
 
     private static final String CONTEXT_REPLACE_QUERY = "REPLACE INTO contexts (_id,context,name) VALUES (?,?,?)";
 
