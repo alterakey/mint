@@ -101,9 +101,9 @@ public class MainActivity extends Activity {
         private class ItemClickAction implements AdapterView.OnItemClickListener {
             @Override
             public void onItemClick(AdapterView<?> lv, View v, int pos, long id) {
-                //Intent intent = new Intent(getActivity(), TaskListActivity.class);
-                //intent.putExtra(TaskListActivity.KEY_LIST_FILTER, AdapterBuilder.FILTERS[pos]);
-                //startActivity(intent);
+                final Intent intent = new Intent(getActivity(), TaskListActivity.class);
+                intent.putExtra(TaskListActivity.KEY_LIST_FILTER, "hotlist");
+                startActivity(intent);
             }
         }
 
