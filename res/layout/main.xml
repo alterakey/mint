@@ -1,18 +1,25 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<RelativeLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-  <ListView
-      android:id="@android:id/list"
+  <include
+      layout="@layout/list_progress" />
+  <RelativeLayout
+      android:id="@+id/container"
       android:layout_width="match_parent"
-      android:layout_height="match_parent" />
-  <FrameLayout
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_alignParentBottom="true"
-      android:layout_centerHorizontal="true"
-      android:paddingBottom="24dp">
-    <include layout="@layout/tooltip" />
-  </FrameLayout>
-</RelativeLayout>
+      android:layout_height="match_parent">
+    <ListView
+	android:id="@android:id/list"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent" />
+    <FrameLayout
+	android:layout_width="wrap_content"
+	android:layout_height="wrap_content"
+	android:layout_alignParentBottom="true"
+	android:layout_centerHorizontal="true"
+	android:paddingBottom="24dp">
+      <include layout="@layout/tooltip" />
+    </FrameLayout>
+  </RelativeLayout>
+</FrameLayout>

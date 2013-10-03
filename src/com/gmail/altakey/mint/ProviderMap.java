@@ -5,8 +5,9 @@ import android.net.Uri;
 
 public class ProviderMap {
     public static final String AUTHORITY_TASK = TaskProvider.class.getCanonicalName();
-    public static final String AUTHORITY_FOLDER = TaskProvider.class.getCanonicalName();
-    public static final String AUTHORITY_CONTEXT = TaskProvider.class.getCanonicalName();
+    public static final String AUTHORITY_FOLDER = TaskFolderProvider.class.getCanonicalName();
+    public static final String AUTHORITY_CONTEXT = TaskContextProvider.class.getCanonicalName();
+    public static final String AUTHORITY_TASK_COUNT = TaskCountProvider.class.getCanonicalName();
 
     private static UriMatcher sMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
@@ -25,10 +26,10 @@ public class ProviderMap {
     static {
         sMatcher.addURI(AUTHORITY_TASK, "tasks", TASKS);
         sMatcher.addURI(AUTHORITY_TASK, "tasks/#", TASKS_ID);
-        sMatcher.addURI(AUTHORITY_TASK, "folders", FOLDERS);
-        sMatcher.addURI(AUTHORITY_TASK, "folders/#", FOLDERS_ID);
-        sMatcher.addURI(AUTHORITY_TASK, "contexts", CONTEXTS);
-        sMatcher.addURI(AUTHORITY_TASK, "contexts/#", CONTEXTS_ID);
+        sMatcher.addURI(AUTHORITY_FOLDER, "folders", FOLDERS);
+        sMatcher.addURI(AUTHORITY_FOLDER, "folders/#", FOLDERS_ID);
+        sMatcher.addURI(AUTHORITY_CONTEXT, "contexts", CONTEXTS);
+        sMatcher.addURI(AUTHORITY_CONTEXT, "contexts/#", CONTEXTS_ID);
         sMatcher.addURI(AUTHORITY_TASK, "statuses", STATUSES);
         sMatcher.addURI(AUTHORITY_TASK, "statuses/#", STATUSES_ID);
     }

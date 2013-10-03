@@ -3,7 +3,7 @@
       package="com.gmail.altakey.mint"
       android:versionCode="1"
       android:versionName="1.0">
-  <uses-sdk android:minSdkVersion="17" android:targetSdkVersion="17" />
+  <uses-sdk android:minSdkVersion="16" android:targetSdkVersion="17" />
   <application android:label="@string/app_name" android:icon="@drawable/icon" android:theme="@style/Theme.Gray">
     <activity android:name="MainActivity"
 	      android:label="@string/app_name">
@@ -20,6 +20,7 @@
     <provider android:authorities="com.gmail.altakey.mint.TaskProvider" android:exported="false" android:name="TaskProvider" />
     <provider android:authorities="com.gmail.altakey.mint.TaskFolderProvider" android:exported="false" android:name="TaskFolderProvider" />
     <provider android:authorities="com.gmail.altakey.mint.TaskContextProvider" android:exported="false" android:name="TaskContextProvider" />
+    <provider android:authorities="com.gmail.altakey.mint.TaskCountProvider" android:exported="false" android:name="TaskCountProvider" />
   </application>
   <uses-permission android:name="android.permission.INTERNET" />
 </manifest>

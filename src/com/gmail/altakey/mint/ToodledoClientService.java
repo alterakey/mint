@@ -30,6 +30,8 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Date;
 import java.io.IOException;
+import java.util.Set;
+import java.util.HashSet;
 
 public class ToodledoClientService extends IntentService {
     public static final String ACTION_SYNC = "com.gmail.altakey.mint.SYNC";
@@ -140,6 +142,7 @@ public class ToodledoClientService extends IntentService {
             final TaskStatus st = mmClient.getStatus();
             final Map<String, Long> flags = updatedSince(st);
             final Map<String, List<?>> data = new HashMap<String, List<?>>();
+            final Set<String> notifyNeeded = new HashSet<String>();
 
             if (flags.containsKey("folder_delete")) {
                 data.put("folder_delete", mmClient.getFoldersDeletedAfter(flags.get("folder_delete")));
@@ -168,6 +171,7 @@ public class ToodledoClientService extends IntentService {
                     args.add(String.valueOf(t.id));
                 }
                 resolver.delete(TaskFolderProvider.CONTENT_URI, TaskFolderProvider.MULTIPLE_FOLDERS_FILTER, args.toArray(new String[] {}));
+                notifyNeeded.add("folder");
             }
 
             if (data.containsKey("task_delete")) {
@@ -176,6 +180,7 @@ public class ToodledoClientService extends IntentService {
                     args.add(String.valueOf(t.id));
                 }
                 resolver.delete(TaskProvider.CONTENT_URI, TaskProvider.MULTIPLE_TASKS_FILTER, args.toArray(new String[] {}));
+                notifyNeeded.add("task");
             }
 
             if (data.containsKey("folder")) {
@@ -190,6 +195,7 @@ public class ToodledoClientService extends IntentService {
                     rows.add(row);
                 }
                 resolver.bulkInsert(TaskFolderProvider.CONTENT_URI, rows.toArray(new ContentValues[] {}));
+                notifyNeeded.add("folder");
             }
 
             if (data.containsKey("context")) {
@@ -201,6 +207,7 @@ public class ToodledoClientService extends IntentService {
                     rows.add(row);
                 }
                 resolver.bulkInsert(TaskContextProvider.CONTENT_URI, rows.toArray(new ContentValues[] {}));
+                notifyNeeded.add("context");
             }
 
             if (data.containsKey("task")) {
@@ -222,6 +229,7 @@ public class ToodledoClientService extends IntentService {
                     rows.add(row);
                 }
                 resolver.bulkInsert(TaskProvider.CONTENT_URI, rows.toArray(new ContentValues[] {}));
+                notifyNeeded.add("task");
             }
 
             final SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(mmContext);
@@ -235,6 +243,20 @@ public class ToodledoClientService extends IntentService {
                 .putLong("lastedit_notebook", st.lastedit_notebook)
                 .putLong("lastdelete_notebook", st.lastdelete_notebook)
                 .commit();
+
+            for (final String key: notifyNeeded) {
+                if ("task".equals(key)) {
+                    resolver.notifyChange(TaskProvider.CONTENT_URI, null);
+                    resolver.notifyChange(TaskCountProvider.CONTENT_URI, null);
+                }
+                if ("folder".equals(key)) {
+                    resolver.notifyChange(TaskCountProvider.CONTENT_URI, null);
+                    resolver.notifyChange(TaskFolderProvider.CONTENT_URI, null);
+                }
+                if ("context".equals(key)) {
+                    resolver.notifyChange(TaskContextProvider.CONTENT_URI, null);
+                }
+            }
         }
 
         public void commit() throws IOException, Authenticator.BogusException, Authenticator.FailureException, Authenticator.ErrorException {

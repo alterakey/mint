@@ -1,7 +1,5 @@
 package com.gmail.altakey.mint;
 
-import com.example.android.swipedismiss.*;
-
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Dialog;
@@ -72,9 +70,6 @@ public class TaskListFragment extends ListFragment
         getActivity().setTitle(new FilterType(mFilterType).getTitle());
 
         final ListView listView = getListView();
-        final TaskSwipeDismissAction action = new TaskSwipeDismissAction(listView);
-        listView.setOnTouchListener(action);
-        listView.setOnScrollListener(action.makeScrollListener());
         listView.setOnItemLongClickListener(new SelectionModeListener());
 
         setHasOptionsMenu(true);
@@ -295,20 +290,6 @@ public class TaskListFragment extends ListFragment
             if (ToodledoClientService.ACTION_SYNC_DONE.equals(action)) {
                 getLoaderManager().restartLoader(1, null, mTaskLoaderManip);
             }
-        }
-    }
-
-    private class TaskSwipeDismissAction extends SwipeDismissListViewTouchListener {
-        public TaskSwipeDismissAction(final ListView lv) {
-            super(lv, new SwipeDismissListViewTouchListener.OnDismissCallback() {
-                @Override
-                public void onDismiss(ListView listView, int[] reverseSortedPositions) {
-                    for (int position : reverseSortedPositions) {
-                        final long id = mAdapter.getItemId(position);
-                        Toast.makeText(getActivity(), "TBD: mark task #%d as done", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
         }
     }
 }
