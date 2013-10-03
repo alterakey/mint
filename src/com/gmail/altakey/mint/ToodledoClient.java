@@ -45,10 +45,6 @@ public class ToodledoClient {
     }
 
     public List<TaskFolder> getFolders() throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
-        return getFoldersAfter(0);
-    }
-
-    public List<TaskFolder> getFoldersAfter(long time) throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
         final ByteArrayOutputStream os = issueRequest(
             new HttpGet(
                 getServiceUrl("folders/get", null)
@@ -62,7 +58,11 @@ public class ToodledoClient {
         }
     }
 
-    public List<TaskFolder> getFoldersDeletedAfter(long time) throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
+    public List<TaskFolder> getFoldersAfter(long time) throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
+        return getFolders();
+    }
+
+    public List<TaskFolder> getFoldersDeleted() throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
         final ByteArrayOutputStream os = issueRequest(
             new HttpGet(
                 getServiceUrl("folders/deleted", null)
@@ -76,11 +76,11 @@ public class ToodledoClient {
         }
     }
 
-    public List<TaskContext> getContexts() throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
-        return getContextsAfter(0);
+    public List<TaskFolder> getFoldersDeletedAfter(long time) throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
+        return getFoldersDeleted();
     }
 
-    public List<TaskContext> getContextsAfter(long time) throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
+    public List<TaskContext> getContexts() throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
         final ByteArrayOutputStream os = issueRequest(
             new HttpGet(
                 getServiceUrl("contexts/get", null)
@@ -92,6 +92,10 @@ public class ToodledoClient {
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public List<TaskContext> getContextsAfter(long time) throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
+        return getContexts();
     }
 
     public List<Task> getTasks() throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {

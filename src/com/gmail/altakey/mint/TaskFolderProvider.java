@@ -151,13 +151,16 @@ public class TaskFolderProvider extends ContentProvider {
                     "folder", "name", "private", "archived", "ord"
             });
 
-            for (final String arg: selectionArgs) {
-                if (arg != null) {
-                    stmt.bindString(offset++, arg);
-                } else {
-                    stmt.bindNull(offset++);
+            if (selectionArgs != null) {
+                for (final String arg: selectionArgs) {
+                    if (arg != null) {
+                        stmt.bindString(offset++, arg);
+                    } else {
+                        stmt.bindNull(offset++);
+                    }
                 }
             }
+
             try {
                 return stmt.executeUpdateDelete();
             } finally {
@@ -181,14 +184,17 @@ public class TaskFolderProvider extends ContentProvider {
             final SQLiteStatement stmt =
                 db.compileStatement(String.format(FOLDER_DELETE_QUERY, selection == null ? "" : String.format("WHERE %s", selection)));
 
-            int offset = 1;
-            for (final String arg: selectionArgs) {
-                if (arg != null) {
-                    stmt.bindString(offset++, arg);
-                } else {
-                    stmt.bindNull(offset++);
+            if (selectionArgs != null) {
+                int offset = 1;
+                for (final String arg: selectionArgs) {
+                    if (arg != null) {
+                        stmt.bindString(offset++, arg);
+                    } else {
+                        stmt.bindNull(offset++);
+                    }
                 }
             }
+
             try {
                 return stmt.executeUpdateDelete();
             } finally {
