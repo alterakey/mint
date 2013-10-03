@@ -131,10 +131,25 @@ public class ToodledoClientService extends IntentService {
         private Map<String, Long> updatedSince(TaskStatus s) {
             final SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(mmContext);
             final Map<String, Long> out = new HashMap<String, Long>();
-            out.put("folder", pref.getLong("lastedit_folder", 0));
-            out.put("context", pref.getLong("lastedit_context", 0));
-            out.put("task", pref.getLong("lastedit_task", 0));
-            out.put("task_delete", pref.getLong("lastedit_task_delete", 0));
+
+            final TaskStatus known = new TaskStatus();
+            known.lastedit_task = pref.getLong("lastedit_task", 0);
+            known.lastdelete_task = pref.getLong("lastdelete_task", 0);
+            known.lastedit_context = pref.getLong("lastedit_context", 0);
+            known.lastedit_folder = pref.getLong("lastedit_folder", 0);
+
+            if (s.lastedit_folder > known.lastedit_folder) {
+                out.put("folder", 1L);
+            }
+            if (s.lastedit_context > known.lastedit_context) {
+                out.put("context", 1L);
+            }
+            if (s.lastedit_task > known.lastedit_task) {
+                out.put("task", known.lastedit_task);
+            }
+            if (s.lastdelete_task > known.lastdelete_task) {
+                out.put("task_delete", known.lastdelete_task);
+            }
             return out;
         }
 
@@ -144,20 +159,16 @@ public class ToodledoClientService extends IntentService {
             final Map<String, List<?>> data = new HashMap<String, List<?>>();
             final Set<String> notifyNeeded = new HashSet<String>();
 
-            if (flags.containsKey("folder_delete")) {
-                data.put("folder_delete", mmClient.getFoldersDeletedAfter(flags.get("folder_delete")));
+            if (flags.containsKey("folder")) {
+                data.put("folder", mmClient.getFolders());
+            }
+
+            if (flags.containsKey("context")) {
+                data.put("context", mmClient.getContexts());
             }
 
             if (flags.containsKey("task_delete")) {
                 data.put("task_delete", mmClient.getTasksDeletedAfter(flags.get("task_delete")));
-            }
-
-            if (flags.containsKey("folder")) {
-                data.put("folder", mmClient.getFoldersAfter(flags.get("folder")));
-            }
-
-            if (flags.containsKey("context")) {
-                data.put("context", mmClient.getContextsAfter(flags.get("context")));
             }
 
             if (flags.containsKey("task")) {
@@ -165,26 +176,6 @@ public class ToodledoClientService extends IntentService {
             }
 
             final ContentResolver resolver = mmContext.getContentResolver();
-            if (data.containsKey("folder_delete")) {
-                final List<String> args = new LinkedList<String>();
-                for (TaskFolder t : (List<TaskFolder>)data.get("folder_delete")) {
-                    args.add(String.valueOf(t.id));
-                }
-                if (0 < resolver.delete(TaskFolderProvider.CONTENT_URI, TaskFolderProvider.MULTIPLE_FOLDERS_FILTER, args.toArray(new String[] {}))) {
-                    notifyNeeded.add("folder");
-                }
-            }
-
-            if (data.containsKey("task_delete")) {
-                final List<String> args = new LinkedList<String>();
-                for (Task t : (List<Task>)data.get("task_delete")) {
-                    args.add(String.valueOf(t.id));
-                }
-                if (0 < resolver.delete(TaskProvider.CONTENT_URI, TaskProvider.MULTIPLE_TASKS_FILTER, args.toArray(new String[] {}))) {
-                    notifyNeeded.add("task");
-                }
-            }
-
             if (data.containsKey("folder")) {
                 final List<ContentValues> rows = new LinkedList<ContentValues>();
                 for (TaskFolder t : (List<TaskFolder>)data.get("folder")) {
@@ -196,9 +187,9 @@ public class ToodledoClientService extends IntentService {
                     row.put(TaskFolderProvider.COLUMN_ORD, t.ord);
                     rows.add(row);
                 }
-                if (0 < resolver.bulkInsert(TaskFolderProvider.CONTENT_URI, rows.toArray(new ContentValues[] {}))) {
-                    notifyNeeded.add("folder");
-                }
+                resolver.delete(TaskFolderProvider.CONTENT_URI, null, null);
+                resolver.bulkInsert(TaskFolderProvider.CONTENT_URI, rows.toArray(new ContentValues[] {}));
+                notifyNeeded.add("folder");
             }
 
             if (data.containsKey("context")) {
@@ -209,8 +200,18 @@ public class ToodledoClientService extends IntentService {
                     row.put(TaskContextProvider.COLUMN_NAME, t.name);
                     rows.add(row);
                 }
-                if (0 < resolver.bulkInsert(TaskContextProvider.CONTENT_URI, rows.toArray(new ContentValues[] {}))) {
-                    notifyNeeded.add("context");
+                resolver.delete(TaskContextProvider.CONTENT_URI, null, null);
+                resolver.bulkInsert(TaskContextProvider.CONTENT_URI, rows.toArray(new ContentValues[] {}));
+                notifyNeeded.add("context");
+            }
+
+            if (data.containsKey("task_delete")) {
+                final List<String> args = new LinkedList<String>();
+                for (Task t : (List<Task>)data.get("task_delete")) {
+                    args.add(String.valueOf(t.id));
+                }
+                if (0 < resolver.delete(TaskProvider.CONTENT_URI, TaskProvider.MULTIPLE_TASKS_FILTER, args.toArray(new String[] {}))) {
+                    notifyNeeded.add("task");
                 }
             }
 
