@@ -84,7 +84,12 @@ public class TaskContextProvider extends ContentProvider {
                     "context", "name"
             });
             try {
-                return ContentUris.withAppendedId(uri, stmt.executeInsert());
+                final long id = stmt.executeInsert();
+                if (id >= 0) {
+                    return ContentUris.withAppendedId(uri, id);
+                } else {
+                    return null;
+                }
             } finally {
                 stmt.close();
             }
@@ -94,8 +99,12 @@ public class TaskContextProvider extends ContentProvider {
                     "_id", "context", "name"
             });
             try {
-                stmt.executeInsert();
-                return uri;
+                final long id = stmt.executeInsert();
+                if (id >= 0) {
+                    return uri;
+                } else {
+                    return null;
+                }
             } finally {
                 stmt.close();
             }

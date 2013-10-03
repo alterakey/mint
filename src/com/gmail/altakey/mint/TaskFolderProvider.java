@@ -90,7 +90,12 @@ public class TaskFolderProvider extends ContentProvider {
                     "folder", "name", "private", "archived", "ord"
             });
             try {
-                return ContentUris.withAppendedId(uri, stmt.executeInsert());
+                final long id = stmt.executeInsert();
+                if (id >= 0) {
+                    return ContentUris.withAppendedId(uri, id);
+                } else {
+                    return null;
+                }
             } finally {
                 stmt.close();
             }
@@ -100,8 +105,11 @@ public class TaskFolderProvider extends ContentProvider {
                     "_id", "folder", "name", "private", "archived", "ord"
             });
             try {
-                stmt.executeInsert();
-                return uri;
+                if (stmt.executeInsert() >= 0) {
+                    return uri;
+                } else {
+                    return null;
+                }
             } finally {
                 stmt.close();
             }

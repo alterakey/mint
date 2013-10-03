@@ -125,7 +125,12 @@ public class TaskProvider extends ContentProvider {
                     "duedate", "duetime", "status"
             });
             try {
-                return ContentUris.withAppendedId(uri, stmt.executeInsert());
+                final long id = stmt.executeInsert();
+                if (id >= 0) {
+                    return ContentUris.withAppendedId(uri, id);
+                } else {
+                    return null;
+                }
             } finally {
                 stmt.close();
             }
@@ -137,8 +142,12 @@ public class TaskProvider extends ContentProvider {
                     "star", "duedate", "duetime", "status"
             });
             try {
-                stmt.executeInsert();
-                return uri;
+                final long id = stmt.executeInsert();
+                if (id >= 0) {
+                    return uri;
+                } else {
+                    return null;
+                }
             } finally {
                 stmt.close();
             }
