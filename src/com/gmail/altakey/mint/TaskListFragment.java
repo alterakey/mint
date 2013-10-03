@@ -216,6 +216,7 @@ public class TaskListFragment extends ListFragment
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
             getActivity().setProgressBarIndeterminateVisibility(true);
             setListShown(false);
+            Log.d("TLM.oCL", "begin loading");
             final FilterType filter = new FilterType(mFilterType);
             return new CursorLoader(
                 getActivity(),
@@ -231,6 +232,7 @@ public class TaskListFragment extends ListFragment
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
             getActivity().setProgressBarIndeterminateVisibility(false);
             mAdapter.changeCursor(data);
+            Log.d("TLM.oLF", "end loading");
             setListShown(true);
         }
 
@@ -288,6 +290,7 @@ public class TaskListFragment extends ListFragment
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
             if (ToodledoClientService.ACTION_SYNC_DONE.equals(action)) {
+                // XXX: causes flicker
                 getLoaderManager().restartLoader(1, null, mTaskLoaderManip);
             }
         }
