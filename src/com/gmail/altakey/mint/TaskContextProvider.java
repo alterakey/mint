@@ -1,22 +1,18 @@
 package com.gmail.altakey.mint;
 
 import android.content.Context;
-import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.net.Uri;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
-import android.database.sqlite.SQLiteStatement;
-import android.content.UriMatcher;
 import android.content.ContentUris;
-import android.database.Cursor;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class TaskContextProvider extends ContentProvider {
+public class TaskContextProvider extends BaseProvider {
     public static final Uri CONTENT_URI = Uri.parse(String.format("content://%s/contexts", ProviderMap.AUTHORITY_CONTEXT));
 
     public static final String[] PROJECTION = new String[] {
@@ -46,49 +42,18 @@ public class TaskContextProvider extends ContentProvider {
 
     private static final String CONTEXT_DELETE_QUERY = "DELETE FROM contexts %s";
 
-    private SQLiteOpenHelper mHelper;
-
     @Override
-    public String getType(Uri uri) {
-        return new ProviderMap(uri).getContentType();
-    }
-
-    @Override
-    public int bulkInsert(Uri uri, ContentValues[] values) {
-        int affected = 0;
-        for (final ContentValues value : values) {
-            if (insert(uri, value) != null) {
-                ++affected;
-            }
-        }
-        return affected;
-    }
-
-    @Override
-    public boolean onCreate() {
-        mHelper = new Schema.OpenHelper(getContext());
-        return true;
-    }
-
-    @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+    public Cursor doQuery(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         final SQLiteDatabase db = mHelper.getReadableDatabase();
-        Cursor c = null;
 
         switch (new ProviderMap(uri).getResourceType()) {
         case ProviderMap.CONTEXTS:
-            c = db.rawQuery(String.format(CONTEXT_QUERY, selection == null ? ALL_FILTER : selection, sortOrder == null ? DEFAULT_ORDER : sortOrder), selectionArgs);
-            break;
+            return db.rawQuery(String.format(CONTEXT_QUERY, selection == null ? ALL_FILTER : selection, sortOrder == null ? DEFAULT_ORDER : sortOrder), selectionArgs);
         case ProviderMap.CONTEXTS_ID:
-            c = db.rawQuery(String.format(CONTEXT_QUERY, ID_FILTER, NO_ORDER), new String[] { String.valueOf(ContentUris.parseId(uri)) });
-            break;
+            return db.rawQuery(String.format(CONTEXT_QUERY, ID_FILTER, NO_ORDER), new String[] { String.valueOf(ContentUris.parseId(uri)) });
+        default:
+            return null;
         }
-
-        if (c != null) {
-            c.setNotificationUri(getContext().getContentResolver(), uri);
-        }
-
-        return c;
     }
 
     @Override
