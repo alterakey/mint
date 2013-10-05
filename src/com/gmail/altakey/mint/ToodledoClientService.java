@@ -238,17 +238,7 @@ public class ToodledoClientService extends IntentService {
                 }
             }
 
-            final SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(mmContext);
-            pref.edit()
-                .putLong("lastedit_folder", st.lastedit_folder)
-                .putLong("lastedit_context", st.lastedit_context)
-                .putLong("lastedit_goal", st.lastedit_goal)
-                .putLong("lastedit_location", st.lastedit_location)
-                .putLong("lastedit_task", st.lastedit_task)
-                .putLong("lastdelete_task", st.lastdelete_task)
-                .putLong("lastedit_notebook", st.lastedit_notebook)
-                .putLong("lastdelete_notebook", st.lastdelete_notebook)
-                .commit();
+            recordStatus(st);
 
             for (final String key: notifyNeeded) {
                 if ("task".equals(key)) {
@@ -269,19 +259,41 @@ public class ToodledoClientService extends IntentService {
         }
 
         public void commit() throws IOException, Authenticator.BogusException, Authenticator.FailureException, Authenticator.ErrorException {
-            final TaskStatus st = mmClient.getStatus();
-            final Cursor c = mmContext.getContentResolver().query(TaskProvider.CONTENT_URI, TaskProvider.PROJECTION, TaskProvider.DIRTY_SINCE_FILTER, new String[] { String.valueOf(st.lastedit_task) }, null);
+            final SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(mmContext);
+            final long lastedit_task = pref.getLong("lastedit_task", 0L);
+            final Cursor c = mmContext.getContentResolver().query(TaskProvider.CONTENT_URI, TaskProvider.PROJECTION, TaskProvider.DIRTY_SINCE_FILTER, new String[] { String.valueOf(lastedit_task) }, null);
             if (c != null) {
                 try {
-                    final List<Task> tasks = new LinkedList<Task>();
-                    for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
-                        tasks.add(Task.fromCursor(c, 0));
+                    if (c.getCount() > 0) {
+                        final List<Task> tasks = new LinkedList<Task>();
+                        for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
+                            tasks.add(Task.fromCursor(c, 0));
+                        }
+                        mmClient.commitTasks(tasks, null);
+                        recordStatus();
                     }
-                    mmClient.commitTasks(tasks, null);
                 } finally {
                     c.close();
                 }
             }
+        }
+
+        private void recordStatus() throws IOException, Authenticator.BogusException, Authenticator.FailureException, Authenticator.ErrorException {
+            recordStatus(mmClient.getStatus());
+        }
+
+        private void recordStatus(TaskStatus st) throws IOException, Authenticator.BogusException, Authenticator.FailureException, Authenticator.ErrorException {
+            final SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(mmContext);
+            pref.edit()
+                .putLong("lastedit_folder", st.lastedit_folder)
+                .putLong("lastedit_context", st.lastedit_context)
+                .putLong("lastedit_goal", st.lastedit_goal)
+                .putLong("lastedit_location", st.lastedit_location)
+                .putLong("lastedit_task", st.lastedit_task)
+                .putLong("lastdelete_task", st.lastdelete_task)
+                .putLong("lastedit_notebook", st.lastedit_notebook)
+                .putLong("lastdelete_notebook", st.lastdelete_notebook)
+                .commit();
         }
     }
 }
