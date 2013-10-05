@@ -35,6 +35,7 @@ public class TaskCountProvider extends BaseProvider {
 
     public static final String DEFAULT_ORDER = "";
     public static final String ALL_FILTER = "1=1";
+    public static final String FOLDER_DEFAULT_ORDER = "folders.ord";
     private static final String FOLDER_ACTIVE_FILTER = "folders.archived=0";
 
     public static final String COLUMN_ID = "_id";
@@ -48,7 +49,7 @@ public class TaskCountProvider extends BaseProvider {
     public static final int COL_IS_SECTION_HEADER = 3;
 
     private static final String QUERY_BY_STATUS = "SELECT statuses.status AS _id,statuses.name AS title,(SELECT COUNT(1) FROM tasks WHERE tasks.status=status) AS count FROM statuses WHERE %s";
-    private static final String QUERY_BY_FOLDER = "SELECT folders.folder AS _id,folders.name AS title,(SELECT COUNT(1) FROM tasks WHERE tasks.folder=folder) AS count FROM folders WHERE %s";
+    private static final String QUERY_BY_FOLDER = "SELECT folders.folder AS _id,folders.name AS title,(SELECT COUNT(1) FROM tasks WHERE tasks.folder=folder) AS count FROM folders WHERE %s ORDER BY %s";
     private static final String QUERY_BY_CONTEXT = "SELECT contexts.context AS _id,contexts.name AS title,(SELECT COUNT(1) FROM tasks WHERE tasks.context=context) AS count FROM contexts WHERE %s";
 
     @Override
@@ -65,13 +66,13 @@ public class TaskCountProvider extends BaseProvider {
                     headerBuilder.build("context"),
                     db.rawQuery(String.format(QUERY_BY_CONTEXT, ALL_FILTER, DEFAULT_ORDER), null),
                     headerBuilder.build("folder"),
-                    db.rawQuery(String.format(QUERY_BY_FOLDER, FOLDER_ACTIVE_FILTER, DEFAULT_ORDER), null),
+                    db.rawQuery(String.format(QUERY_BY_FOLDER, FOLDER_ACTIVE_FILTER, FOLDER_DEFAULT_ORDER), null),
                 }
             );
         case ProviderMap.TASK_COUNT_BY_STATUS:
             return db.rawQuery(String.format(QUERY_BY_STATUS, selection == null ? ALL_FILTER : selection, sortOrder == null ? DEFAULT_ORDER : sortOrder), selectionArgs);
         case ProviderMap.TASK_COUNT_BY_FOLDER:
-            return db.rawQuery(String.format(QUERY_BY_FOLDER, selection == null ? ALL_FILTER : selection, sortOrder == null ? DEFAULT_ORDER : sortOrder), selectionArgs);
+            return db.rawQuery(String.format(QUERY_BY_FOLDER, selection == null ? ALL_FILTER : selection, sortOrder == null ? FOLDER_DEFAULT_ORDER : sortOrder), selectionArgs);
         case ProviderMap.TASK_COUNT_BY_CONTEXT:
             return db.rawQuery(String.format(QUERY_BY_CONTEXT, selection == null ? ALL_FILTER : selection, sortOrder == null ? DEFAULT_ORDER : sortOrder), selectionArgs);
         default:
