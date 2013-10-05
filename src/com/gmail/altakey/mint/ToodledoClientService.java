@@ -94,15 +94,9 @@ public class ToodledoClientService extends IntentService {
     }
 
     private void sync() throws IOException, Authenticator.Exception {
-        final Notifier notifier = new Notifier(this);
-        try {
-            notifier.notify("Syncing...", "SYNC");
-            final Synchronizer sync = new Synchronizer(this, mClient);
-            sync.update();
-            sync.commit();
-        } finally {
-            notifier.cancel();
-        }
+        final Synchronizer sync = new Synchronizer(this, mClient);
+        sync.update();
+        sync.commit();
     }
 
     private void sync_done() {
