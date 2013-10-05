@@ -205,7 +205,6 @@ public class TaskListFragment extends ListFragment
     private class TaskLoaderManipulator implements LoaderManager.LoaderCallbacks<Cursor> {
         @Override
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-            getActivity().setProgressBarIndeterminateVisibility(true);
             setListShown(false);
             return new CursorLoader(
                 getActivity(),
@@ -219,7 +218,6 @@ public class TaskListFragment extends ListFragment
 
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-            getActivity().setProgressBarIndeterminateVisibility(false);
             mAdapter.changeCursor(data);
             setListShown(true);
         }
