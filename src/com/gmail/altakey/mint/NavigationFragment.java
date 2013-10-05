@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.database.Cursor;
 import android.database.MatrixCursor;
+import android.database.CursorWrapper;
 import android.widget.ListAdapter;
 import android.widget.CursorAdapter;
 import android.widget.SimpleCursorAdapter;
@@ -41,8 +42,31 @@ public class NavigationFragment extends ListFragment {
     public void onListItemClick(ListView lv, View v, int position, long id) {
         super.onListItemClick(lv, v, position, id);
 
+        final CursorWrapper cw = (CursorWrapper)lv.getItemAtPosition(position);
+
+        final int type = cw.getInt(TaskCountProvider.COL_TYPE);
+        final String title = cw.getString(TaskCountProvider.COL_COOKIE);
+        final int id_ = cw.getInt(TaskCountProvider.COL_ID);
+
         final FilterType filter = new FilterType();
-        filter.makeHot();
+        switch (type) {
+        case TaskCountProvider.TYPE_STATUS:
+            if (id_ == -1) {
+                filter.makeHot();
+            } else {
+                filter.setTitle(title);
+                filter.setSimpleSelection(FilterType.TYPE_STATUS, id_);
+            }
+            break;
+        case TaskCountProvider.TYPE_FOLDER:
+            filter.setTitle(title);
+            filter.setSimpleSelection(FilterType.TYPE_FOLDER, id_);
+            break;
+        case TaskCountProvider.TYPE_CONTEXT:
+            filter.setTitle(title);
+            filter.setSimpleSelection(FilterType.TYPE_CONTEXT, id_);
+            break;
+        }
 
         getFragmentManager()
             .beginTransaction()
