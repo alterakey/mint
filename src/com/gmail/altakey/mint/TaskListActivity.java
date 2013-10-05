@@ -47,7 +47,10 @@ public class TaskListActivity extends Activity
         setContentView(R.layout.plate);
 
         final Intent intent = getIntent();
-        final FilterType filter = (FilterType)intent.getParcelableExtra(KEY_LIST_FILTER);
+        FilterType filter = (FilterType)intent.getParcelableExtra(KEY_LIST_FILTER);
+        if (filter == null) {
+            filter = new FilterType().makeHot();
+        }
 
         // configure the SlidingMenu
         SlidingMenu menu = new SlidingMenu(this);

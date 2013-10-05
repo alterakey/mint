@@ -33,19 +33,5 @@ import java.io.IOException;
 import android.view.Window;
 import java.util.Date;
 
-public class MainActivity extends Activity {
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-        setContentView(R.layout.plate);
-
-        final FilterType filter = new FilterType().makeHot();
-
-        getFragmentManager()
-            .beginTransaction()
-            .add(R.id.frag, TaskListFragment.newInstance(filter), TaskListFragment.TAG)
-            .commit();
-    }
-
+public class MainActivity extends TaskListActivity {
 }
