@@ -27,10 +27,7 @@ public class TaskCountProvider extends BaseProvider {
     public static final Uri CONTENT_URI_BY_CONTEXT = Uri.parse(String.format("content://%s/count/by-context", ProviderMap.AUTHORITY_TASK_COUNT));
 
     public static final String[] PROJECTION = new String[] {
-        "_id", "title", "count"
-    };
-    public static final String[] PROJECTION_TOP = new String[] {
-        "_id", "title", "count", "is_section_header"
+        "_id", "title", "count", "type"
     };
 
     public static final String DEFAULT_ORDER = "";
@@ -41,16 +38,21 @@ public class TaskCountProvider extends BaseProvider {
     public static final String COLUMN_ID = "_id";
     public static final String COLUMN_TITLE = "title";
     public static final String COLUMN_COUNT = "count";
-    public static final String COLUMN_IS_SECTION_HEADER = "is_section_header";
+    public static final String COLUMN_TYPE = "type";
 
     public static final int COL_ID = 0;
     public static final int COL_COOKIE = 1;
     public static final int COL_COUNT = 2;
-    public static final int COL_IS_SECTION_HEADER = 3;
+    public static final int COL_TYPE = 3;
 
-    private static final String QUERY_BY_STATUS = "SELECT statuses.status AS _id,statuses.name AS title,(SELECT COUNT(1) FROM tasks WHERE tasks.status=status) AS count FROM statuses WHERE %s";
-    private static final String QUERY_BY_FOLDER = "SELECT folders.folder AS _id,folders.name AS title,(SELECT COUNT(1) FROM tasks WHERE tasks.folder=folder) AS count FROM folders WHERE %s ORDER BY %s";
-    private static final String QUERY_BY_CONTEXT = "SELECT contexts.context AS _id,contexts.name AS title,(SELECT COUNT(1) FROM tasks WHERE tasks.context=context) AS count FROM contexts WHERE %s";
+    public static final int TYPE_SECTION = 0;
+    public static final int TYPE_STATUS = 1;
+    public static final int TYPE_FOLDER = 2;
+    public static final int TYPE_CONTEXT = 3;
+
+    private static final String QUERY_BY_STATUS = String.format("SELECT statuses.status AS _id,statuses.name AS title,(SELECT COUNT(1) FROM tasks WHERE tasks.status=status) AS count, %d as type FROM statuses WHERE %%s", TYPE_STATUS);
+    private static final String QUERY_BY_FOLDER = String.format("SELECT folders.folder AS _id,folders.name AS title,(SELECT COUNT(1) FROM tasks WHERE tasks.folder=folder) AS count, 2 as type FROM folders WHERE %%s ORDER BY %%s", TYPE_FOLDER);
+    private static final String QUERY_BY_CONTEXT = String.format("SELECT contexts.context AS _id,contexts.name AS title,(SELECT COUNT(1) FROM tasks WHERE tasks.context=context) AS count, 3 as type FROM contexts WHERE %%s", TYPE_CONTEXT);
 
     @Override
     public Cursor doQuery(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
@@ -85,8 +87,8 @@ public class TaskCountProvider extends BaseProvider {
         private int mNextId = 2147483600;
 
         private Cursor build(String title) {
-            final MatrixCursor c = new MatrixCursor(new String[] { COLUMN_ID, COLUMN_TITLE, COLUMN_COUNT, COLUMN_IS_SECTION_HEADER } );
-            c.addRow(new Object[] { ++mNextId, title, 0, 1 } );
+            final MatrixCursor c = new MatrixCursor(new String[] { COLUMN_ID, COLUMN_TITLE, COLUMN_COUNT, COLUMN_TYPE } );
+            c.addRow(new Object[] { ++mNextId, title, 0, TYPE_SECTION } );
             return c;
         }
     }

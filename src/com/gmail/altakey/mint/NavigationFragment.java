@@ -60,14 +60,15 @@ public class NavigationFragment extends ListFragment {
             final TextView title = (TextView)view.findViewById(R.id.title);
             final TextView section_header = (TextView)view.findViewById(R.id.section_header);
 
-            final int col_title = TaskCountProvider.COL_COOKIE;
+            final String itemTitle = cursor.getString(TaskCountProvider.COL_COOKIE);
+            final int itemType = cursor.getInt(TaskCountProvider.COL_TYPE);
 
-            if (cursor.getColumnIndex(TaskCountProvider.COLUMN_IS_SECTION_HEADER) != -1) {
-                section_header.setText(cursor.getString(col_title));
+            if (itemType == TaskCountProvider.TYPE_SECTION) {
+                section_header.setText(itemTitle);
                 section_header.setVisibility(View.VISIBLE);
                 title.setVisibility(View.GONE);
             } else {
-                title.setText(cursor.getString(col_title));
+                title.setText(itemTitle);
                 title.setVisibility(View.VISIBLE);
                 section_header.setVisibility(View.GONE);
             }
@@ -81,7 +82,7 @@ public class NavigationFragment extends ListFragment {
             return new CursorLoader(
                 getActivity(),
                 TaskCountProvider.CONTENT_URI_TOP,
-                TaskCountProvider.PROJECTION_TOP,
+                TaskCountProvider.PROJECTION,
                 null,
                 null,
                 null
