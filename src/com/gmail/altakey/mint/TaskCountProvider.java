@@ -19,8 +19,10 @@ import android.util.Log;
 import java.util.Arrays;
 import java.util.List;
 
-public class TaskCountProvider extends ContentProvider {
-    public static final Uri CONTENT_URI = Uri.parse(String.format("content://%s/count", ProviderMap.AUTHORITY_TASK_COUNT));
+public class TaskCountProvider extends BaseProvider {
+    public static final Uri CONTENT_URI_BY_STATUS = Uri.parse(String.format("content://%s/count/by-status", ProviderMap.AUTHORITY_TASK_COUNT));
+    public static final Uri CONTENT_URI_BY_FOLDER = Uri.parse(String.format("content://%s/count/by-folder", ProviderMap.AUTHORITY_TASK_COUNT));
+    public static final Uri CONTENT_URI_BY_CONTEXT = Uri.parse(String.format("content://%s/count/by-context", ProviderMap.AUTHORITY_TASK_COUNT));
 
     public static final String[] PROJECTION = new String[] {
         "_id", "title", "count"
@@ -37,25 +39,24 @@ public class TaskCountProvider extends ContentProvider {
     public static final int COL_COOKIE = 1;
     public static final int COL_COUNT = 2;
 
-    private static final String QUERY = "SELECT folders.folder AS _id,folders.name AS title,(SELECT COUNT(1) FROM tasks WHERE tasks.folder=folder) AS count FROM folders WHERE %s";
-
-    private SQLiteOpenHelper mHelper;
-
-    @Override
-    public String getType(Uri uri) {
-        return new ProviderMap(uri).getContentType();
-    }
+    private static final String QUERY_BY_STATUS = "SELECT statuses.status AS _id,statuses.name AS title,(SELECT COUNT(1) FROM tasks WHERE tasks.status=status) AS count FROM statuses WHERE %s";
+    private static final String QUERY_BY_FOLDER = "SELECT folders.folder AS _id,folders.name AS title,(SELECT COUNT(1) FROM tasks WHERE tasks.folder=folder) AS count FROM folders WHERE %s";
+    private static final String QUERY_BY_CONTEXT = "SELECT contexts.context AS _id,contexts.name AS title,(SELECT COUNT(1) FROM tasks WHERE tasks.context=context) AS count FROM contexts WHERE %s";
 
     @Override
-    public boolean onCreate() {
-        mHelper = new Schema.OpenHelper(getContext());
-        return true;
-    }
-
-    @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+    public Cursor doQuery(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         final SQLiteDatabase db = mHelper.getReadableDatabase();
-        return db.rawQuery(String.format(QUERY, selection == null ? ALL_FILTER : selection, sortOrder == null ? DEFAULT_ORDER : sortOrder), selectionArgs);
+
+        switch (new ProviderMap(uri).getResourceType()) {
+        case ProviderMap.TASK_COUNT_BY_STATUS:
+            return db.rawQuery(String.format(QUERY_BY_STATUS, selection == null ? ALL_FILTER : selection, sortOrder == null ? DEFAULT_ORDER : sortOrder), selectionArgs);
+        case ProviderMap.TASK_COUNT_BY_FOLDER:
+            return db.rawQuery(String.format(QUERY_BY_FOLDER, selection == null ? ALL_FILTER : selection, sortOrder == null ? DEFAULT_ORDER : sortOrder), selectionArgs);
+        case ProviderMap.TASK_COUNT_BY_CONTEXT:
+            return db.rawQuery(String.format(QUERY_BY_CONTEXT, selection == null ? ALL_FILTER : selection, sortOrder == null ? DEFAULT_ORDER : sortOrder), selectionArgs);
+        default:
+            return null;
+        }
     }
 
     @Override

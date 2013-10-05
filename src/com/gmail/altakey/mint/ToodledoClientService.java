@@ -253,14 +253,17 @@ public class ToodledoClientService extends IntentService {
             for (final String key: notifyNeeded) {
                 if ("task".equals(key)) {
                     resolver.notifyChange(TaskProvider.CONTENT_URI, null);
-                    resolver.notifyChange(TaskCountProvider.CONTENT_URI, null);
+                    resolver.notifyChange(TaskCountProvider.CONTENT_URI_BY_FOLDER, null);
+                    resolver.notifyChange(TaskCountProvider.CONTENT_URI_BY_CONTEXT, null);
+                    resolver.notifyChange(TaskCountProvider.CONTENT_URI_BY_STATUS, null);
                 }
                 if ("folder".equals(key)) {
-                    resolver.notifyChange(TaskCountProvider.CONTENT_URI, null);
                     resolver.notifyChange(TaskFolderProvider.CONTENT_URI, null);
+                    resolver.notifyChange(TaskCountProvider.CONTENT_URI_BY_FOLDER, null);
                 }
                 if ("context".equals(key)) {
                     resolver.notifyChange(TaskContextProvider.CONTENT_URI, null);
+                    resolver.notifyChange(TaskCountProvider.CONTENT_URI_BY_CONTEXT, null);
                 }
             }
         }
