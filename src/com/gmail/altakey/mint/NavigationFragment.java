@@ -15,6 +15,9 @@ import android.app.LoaderManager;
 import android.content.CursorLoader;
 import android.content.Context;
 import android.widget.TextView;
+import android.widget.ListView;
+
+import com.slidingmenu.lib.SlidingMenu;
 
 public class NavigationFragment extends ListFragment {
     private CursorAdapter mAdapter;
@@ -32,6 +35,24 @@ public class NavigationFragment extends ListFragment {
     public void onResume() {
         super.onResume();
         getLoaderManager().restartLoader(1, null, mContentLoaderManip);
+    }
+
+    @Override
+    public void onListItemClick(ListView lv, View v, int position, long id) {
+        super.onListItemClick(lv, v, position, id);
+
+        final FilterType filter = new FilterType();
+        filter.makeHot();
+
+        getFragmentManager()
+            .beginTransaction()
+            .replace(R.id.frag, TaskListFragment.newInstance(filter), TaskListFragment.TAG)
+            .commit();
+        try {
+            final SlidingMenu menu = ((Slidable)getActivity()).getSlidingMenu();
+            menu.toggle();
+        } catch (ClassCastException e) {
+        }
     }
 
     private static class NavigationAdapter extends CursorAdapter {

@@ -33,9 +33,11 @@ import java.util.Arrays;
 
 import com.slidingmenu.lib.SlidingMenu;
 
-public class TaskListActivity extends Activity
+public class TaskListActivity extends Activity implements Slidable
 {
     public static final String KEY_LIST_FILTER = "filter";
+
+    private SlidingMenu mSlidingMenu;
 
     /** Called when the activity is first created. */
     @Override
@@ -53,20 +55,25 @@ public class TaskListActivity extends Activity
         }
 
         // configure the SlidingMenu
-        SlidingMenu menu = new SlidingMenu(this);
-        menu.setMode(SlidingMenu.LEFT);
-        menu.setTouchModeAbove(SlidingMenu.TOUCHMODE_MARGIN);
-        menu.setShadowWidthRes(R.dimen.shadow_width);
-        menu.setShadowDrawable(R.drawable.shadow);
-        menu.setBehindOffsetRes(R.dimen.slidingmenu_offset);
-        menu.setFadeDegree(0.35f);
-        menu.attachToActivity(this, SlidingMenu.SLIDING_WINDOW);
-        menu.setMenu(R.layout.list_menu);
+        mSlidingMenu = new SlidingMenu(this);
+        mSlidingMenu.setMode(SlidingMenu.LEFT);
+        mSlidingMenu.setTouchModeAbove(SlidingMenu.TOUCHMODE_MARGIN);
+        mSlidingMenu.setShadowWidthRes(R.dimen.shadow_width);
+        mSlidingMenu.setShadowDrawable(R.drawable.shadow);
+        mSlidingMenu.setBehindOffsetRes(R.dimen.slidingmenu_offset);
+        mSlidingMenu.setFadeDegree(0.35f);
+        mSlidingMenu.attachToActivity(this, SlidingMenu.SLIDING_WINDOW);
+        mSlidingMenu.setMenu(R.layout.list_menu);
 
         getFragmentManager()
             .beginTransaction()
             .add(R.id.frag, TaskListFragment.newInstance(filter), TaskListFragment.TAG)
             .commit();
+    }
+
+    @Override
+    public SlidingMenu getSlidingMenu() {
+        return mSlidingMenu;
     }
 
 }
