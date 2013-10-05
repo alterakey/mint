@@ -25,7 +25,7 @@ public class Schema {
             db.execSQL("INSERT INTO statuses (status, name) VALUES (-1, 'Hotlist')"); // XXX
             db.execSQL("INSERT INTO statuses (status, name) VALUES (1, 'Next Action')");
             db.execSQL("INSERT INTO statuses (status, name) VALUES (10, 'Reference')");
-            db.execSQL("INSERT INTO statuses (status, name) VALUES (5, 'Wating')");
+            db.execSQL("INSERT INTO statuses (status, name) VALUES (5, 'Waiting')");
             db.execSQL("INSERT INTO statuses (status, name) VALUES (8, 'Someday')");
         }
 
