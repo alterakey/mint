@@ -68,15 +68,16 @@ public class NavigationFragment extends ListFragment {
             break;
         }
 
-        getFragmentManager()
-            .beginTransaction()
-            .replace(R.id.frag, TaskListFragment.newInstance(filter), TaskListFragment.TAG)
-            .commit();
         try {
             final SlidingMenu menu = ((Slidable)getActivity()).getSlidingMenu();
             menu.toggle();
         } catch (ClassCastException e) {
         }
+
+        getFragmentManager()
+            .beginTransaction()
+            .replace(R.id.frag, TaskListFragment.newInstance(filter), TaskListFragment.TAG)
+            .commit();
     }
 
     private static class NavigationAdapter extends CursorAdapter {
