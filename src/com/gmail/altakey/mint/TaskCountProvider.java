@@ -35,6 +35,7 @@ public class TaskCountProvider extends BaseProvider {
 
     public static final String DEFAULT_ORDER = "";
     public static final String ALL_FILTER = "1=1";
+    private static final String FOLDER_ACTIVE_FILTER = "folders.archived=0";
 
     public static final String COLUMN_ID = "_id";
     public static final String COLUMN_TITLE = "title";
@@ -64,7 +65,7 @@ public class TaskCountProvider extends BaseProvider {
                     headerBuilder.build("context"),
                     db.rawQuery(String.format(QUERY_BY_CONTEXT, ALL_FILTER, DEFAULT_ORDER), null),
                     headerBuilder.build("folder"),
-                    db.rawQuery(String.format(QUERY_BY_FOLDER, ALL_FILTER, DEFAULT_ORDER), null),
+                    db.rawQuery(String.format(QUERY_BY_FOLDER, FOLDER_ACTIVE_FILTER, DEFAULT_ORDER), null),
                 }
             );
         case ProviderMap.TASK_COUNT_BY_STATUS:
