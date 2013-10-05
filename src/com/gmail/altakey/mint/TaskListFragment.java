@@ -74,7 +74,6 @@ public class TaskListFragment extends ListFragment
         setHasOptionsMenu(true);
         setListAdapter(mAdapter);
         setListShown(false);
-        getLoaderManager().enableDebugLogging(true);
         getLoaderManager().initLoader(1, null, mTaskLoaderManip);
     }
 
