@@ -61,10 +61,10 @@ public class TaskCountProvider extends BaseProvider {
                 new Cursor[] {
                     headerBuilder.build("status"),
                     db.rawQuery(String.format(QUERY_BY_STATUS, ALL_FILTER, DEFAULT_ORDER), null),
+                    headerBuilder.build("context"),
+                    db.rawQuery(String.format(QUERY_BY_CONTEXT, ALL_FILTER, DEFAULT_ORDER), null),
                     headerBuilder.build("folder"),
                     db.rawQuery(String.format(QUERY_BY_FOLDER, ALL_FILTER, DEFAULT_ORDER), null),
-                    headerBuilder.build("context"),
-                    db.rawQuery(String.format(QUERY_BY_CONTEXT, ALL_FILTER, DEFAULT_ORDER), null)
                 }
             );
         case ProviderMap.TASK_COUNT_BY_STATUS:
