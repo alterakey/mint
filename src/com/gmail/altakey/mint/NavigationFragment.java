@@ -13,6 +13,8 @@ import android.widget.SimpleCursorAdapter;
 import android.content.Loader;
 import android.app.LoaderManager;
 import android.content.CursorLoader;
+import android.content.Context;
+import android.widget.TextView;
 
 public class NavigationFragment extends ListFragment {
     private CursorAdapter mAdapter;
@@ -21,13 +23,7 @@ public class NavigationFragment extends ListFragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mAdapter = new SimpleCursorAdapter(
-            getActivity(),
-            android.R.layout.simple_list_item_1,
-            null,
-            new String[] { TaskCountProvider.COLUMN_TITLE },
-            new int[] { android.R.id.text1 }
-        );
+        mAdapter = new NavigationAdapter(getActivity(), null);
         setListAdapter(mAdapter);
         getLoaderManager().initLoader(1, null, mContentLoaderManip);
     }
@@ -36,6 +32,34 @@ public class NavigationFragment extends ListFragment {
     public void onResume() {
         super.onResume();
         getLoaderManager().restartLoader(1, null, mContentLoaderManip);
+    }
+
+    private static class NavigationAdapter extends CursorAdapter {
+        public NavigationAdapter(Context context, Cursor c) {
+            super(context, c);
+        }
+
+        public NavigationAdapter(Context context, Cursor c, boolean autoRequery) {
+            super(context, c, autoRequery);
+        }
+
+        public NavigationAdapter(Context context, Cursor c, int flags) {
+            super(context, c, flags);
+        }
+
+        @Override
+        public View newView(Context context, Cursor cursor, ViewGroup parent) {
+            final LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            final View v = inflater.inflate(android.R.layout.simple_list_item_1, parent, false);
+            bindView(v, context, cursor);
+            return v;
+        }
+
+        @Override
+        public void bindView(View view, Context context, Cursor cursor) {
+            final TextView title = (TextView)view.findViewById(android.R.id.text1);
+            title.setText(cursor.getString(cursor.getColumnIndexOrThrow(TaskCountProvider.COLUMN_TITLE)));
+        }
     }
 
     private class ContentLoaderManipulator implements LoaderManager.LoaderCallbacks<Cursor> {
