@@ -8,37 +8,60 @@ import android.view.ViewGroup;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.widget.ListAdapter;
+import android.widget.CursorAdapter;
 import android.widget.SimpleCursorAdapter;
+import android.content.Loader;
+import android.app.LoaderManager;
+import android.content.CursorLoader;
 
 public class NavigationFragment extends ListFragment {
+    private CursorAdapter mAdapter;
+    private ContentLoaderManipulator mContentLoaderManip = new ContentLoaderManipulator();
+
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        final ListAdapter adapter = new SimpleCursorAdapter(
+        mAdapter = new SimpleCursorAdapter(
             getActivity(),
             android.R.layout.simple_list_item_1,
-            new ContentBuilder().build(),
-            new String[] { ContentBuilder.COLUMN_TITLE },
+            null,
+            new String[] { TaskCountProvider.COLUMN_TITLE },
             new int[] { android.R.id.text1 }
-            );
-        setListAdapter(adapter);
-        setListShown(true);
+        );
+        setListAdapter(mAdapter);
+        getLoaderManager().initLoader(1, null, mContentLoaderManip);
     }
 
-    private static class ContentBuilder {
-        public static final String COLUMN_ID = "_id";
-        public static final String COLUMN_TITLE = "title";
+    @Override
+    public void onResume() {
+        super.onResume();
+        getLoaderManager().restartLoader(1, null, mContentLoaderManip);
+    }
 
-        public Cursor build() {
-            final MatrixCursor c = new MatrixCursor(new String[] { COLUMN_ID, COLUMN_TITLE });
+    private class ContentLoaderManipulator implements LoaderManager.LoaderCallbacks<Cursor> {
+        @Override
+        public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+            setListShown(false);
+            return new CursorLoader(
+                getActivity(),
+                TaskCountProvider.CONTENT_URI_TOP,
+                TaskCountProvider.PROJECTION_TOP,
+                null,
+                null,
+                null
+            );
+        }
 
-            int id = 0;
+        @Override
+        public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+            getActivity().setProgressBarIndeterminateVisibility(false);
+            mAdapter.changeCursor(data);
+            setListShown(true);
+        }
 
-            for (String title : new String[] { "Status", "Folder", "Context" }) {
-                c.addRow(new Object[] { ++id, title });
-            }
-            return c;
+        @Override
+        public void onLoaderReset(Loader<Cursor> loader) {
+            mAdapter.changeCursor(null);
         }
     }
-
 }

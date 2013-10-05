@@ -22,6 +22,7 @@ public class ProviderMap {
     public static final int TASK_COUNT_BY_STATUS = 9;
     public static final int TASK_COUNT_BY_FOLDER = 10;
     public static final int TASK_COUNT_BY_CONTEXT = 11;
+    public static final int TASK_COUNT_TOP = 12;
 
     private static final String SINGLE_ITEM_TYPE = "vnd.android.cursor.item/%s";
     private static final String MULTIPLE_ITEM_TYPE = "vnd.android.cursor.dir/%s";
@@ -35,6 +36,7 @@ public class ProviderMap {
         sMatcher.addURI(AUTHORITY_CONTEXT, "contexts/#", CONTEXTS_ID);
         sMatcher.addURI(AUTHORITY_TASK, "statuses", STATUSES);
         sMatcher.addURI(AUTHORITY_TASK, "statuses/#", STATUSES_ID);
+        sMatcher.addURI(AUTHORITY_TASK_COUNT, "count/top", TASK_COUNT_TOP);
         sMatcher.addURI(AUTHORITY_TASK_COUNT, "count/by-status", TASK_COUNT_BY_STATUS);
         sMatcher.addURI(AUTHORITY_TASK_COUNT, "count/by-folder", TASK_COUNT_BY_FOLDER);
         sMatcher.addURI(AUTHORITY_TASK_COUNT, "count/by-context", TASK_COUNT_BY_CONTEXT);
@@ -68,6 +70,8 @@ public class ProviderMap {
             return String.format(MULTIPLE_ITEM_TYPE, "status");
         case STATUSES_ID:
             return String.format(SINGLE_ITEM_TYPE, "status");
+        case TASK_COUNT_TOP:
+            return String.format(SINGLE_ITEM_TYPE, "count-top");
         case TASK_COUNT_BY_STATUS:
             return String.format(SINGLE_ITEM_TYPE, "count-by-status");
         case TASK_COUNT_BY_FOLDER:
