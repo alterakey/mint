@@ -50,15 +50,27 @@ public class NavigationFragment extends ListFragment {
         @Override
         public View newView(Context context, Cursor cursor, ViewGroup parent) {
             final LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            final View v = inflater.inflate(android.R.layout.simple_list_item_1, parent, false);
+            final View v = inflater.inflate(R.layout.nav_item, parent, false);
             bindView(v, context, cursor);
             return v;
         }
 
         @Override
         public void bindView(View view, Context context, Cursor cursor) {
-            final TextView title = (TextView)view.findViewById(android.R.id.text1);
-            title.setText(cursor.getString(cursor.getColumnIndexOrThrow(TaskCountProvider.COLUMN_TITLE)));
+            final TextView title = (TextView)view.findViewById(R.id.title);
+            final TextView section_header = (TextView)view.findViewById(R.id.section_header);
+
+            final int col_title = TaskCountProvider.COL_COOKIE;
+
+            if (cursor.getColumnIndex(TaskCountProvider.COLUMN_IS_SECTION_HEADER) != -1) {
+                section_header.setText(cursor.getString(col_title));
+                section_header.setVisibility(View.VISIBLE);
+                title.setVisibility(View.GONE);
+            } else {
+                title.setText(cursor.getString(col_title));
+                title.setVisibility(View.VISIBLE);
+                section_header.setVisibility(View.GONE);
+            }
         }
     }
 
