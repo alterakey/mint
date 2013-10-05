@@ -79,7 +79,7 @@ public class TaskPostFragment extends DialogFragment {
 
         private Task build() {
             final Task t = new Task();
-            final int status = new FilterType(getActiveFilter()).getToodledoStatus();
+            final int status = getActiveFilter().getToodledoStatus();
             t.title = mmField.getText().toString();
             if (status == FilterType.UNKNOWN) {
                 t.duedate = (new Date().getTime() + DUE * 1000) / 1000;
@@ -89,7 +89,7 @@ public class TaskPostFragment extends DialogFragment {
             return t;
         }
 
-        private String getActiveFilter() {
+        private FilterType getActiveFilter() {
             final TaskListFragment f = (TaskListFragment)getTargetFragment();
             if (f == null) {
                 return null;

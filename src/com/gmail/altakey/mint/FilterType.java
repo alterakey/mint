@@ -1,5 +1,8 @@
 package com.gmail.altakey.mint;
 
+import android.os.Parcelable;
+import android.os.Parcel;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -7,58 +10,77 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Date;
 
-public class FilterType {
+public class FilterType implements Parcelable {
     public static final int UNKNOWN = -1;
-    private static final String[] ALL = { "hotlist", "inbox", "next_action", "reference", "waiting", "someday" };
-    private static final String[] TITLES = { "Hotlist", "Inbox", "Next Action", "Reference", "Waiting", "Someday" };
+    public static final String TYPE_STATUS = TaskProvider.COLUMN_STATUS;
+    public static final String TYPE_FOLDER = TaskProvider.COLUMN_FOLDER;
+    public static final String TYPE_CONTEXT = TaskProvider.COLUMN_CONTEXT;
 
-    private static final Map<String, Integer> FOLDER_MAP;
-    private String mmFilter;
+    private String mTitle;
+    private String mSelection;
+    private String[] mSelectionArgs;
 
-    static {
-        final Map<String, Integer> map = new HashMap<String, Integer>();
-        map.put("inbox", 0);
-        map.put("next_action", 1);
-        map.put("reference", 10);
-        map.put("waiting", 5);
-        map.put("someday", 8);
-        FOLDER_MAP = Collections.unmodifiableMap(map);
+    public static final Parcelable.Creator<FilterType> CREATOR = new Parcelable.Creator<FilterType>() {
+        public FilterType createFromParcel(Parcel in) {
+            return new FilterType(in);
+        }
+
+        public FilterType[] newArray(int size) {
+            return new FilterType[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
-    public FilterType(String filter) {
-        mmFilter = filter;
+    @Override
+    public void writeToParcel(Parcel out, int flags) {
+        out.writeString(mTitle);
+        out.writeString(mSelection);
+        out.writeStringArray(mSelectionArgs);
     }
 
-    public static List<String> getTitles() {
-        return Arrays.asList(TITLES);
+    public FilterType() {
+    }
+
+    private FilterType(Parcel in) {
+        mTitle = in.readString();
+        mSelection = in.readString();
+        mSelectionArgs = in.createStringArray();
     }
 
     public String getTitle() {
-        try {
-            return TITLES[Arrays.asList(ALL).indexOf(mmFilter)];
-        } catch (IndexOutOfBoundsException e) {
-            return "?";
-        }
+        return mTitle;
     }
 
     public String getSelection() {
-        if ("hotlist".equals(mmFilter)) {
-            return TaskProvider.HOTLIST_FILTER;
-        } else {
-            return null;
-        }
+        return mSelection;
     }
 
     public String[] getSelectionArgs() {
-        if ("hotlist".equals(mmFilter)) {
-            return new String[] { String.valueOf(new Date(new Date().getTime() + 7 * 86400 * 1000).getTime()) };
-        } else {
-            return null;
-        }
+        return mSelectionArgs;
     }
 
     public int getToodledoStatus() {
-        final Integer ret = FOLDER_MAP.get(mmFilter);
-        return ret == null ? UNKNOWN : ret.intValue();
+        return mSelection.equals(String.format("%s=?", TYPE_STATUS)) ? Integer.parseInt(mSelectionArgs[0]) : UNKNOWN;
+    }
+
+    public FilterType setTitle(String title) {
+        mTitle = title;
+        return this;
+    }
+
+    public FilterType setSimpleSelection(String type, int value) {
+        mSelection = String.format("%s=?", type);
+        mSelectionArgs = new String[] { String.valueOf(value) };
+        return this;
+    }
+
+    public FilterType setSelection(String selection, String[] selectionArgs) {
+        mSelection = selection;
+        mSelectionArgs = selectionArgs;
+        return this;
     }
 }

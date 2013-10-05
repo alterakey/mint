@@ -45,10 +45,7 @@ public class TaskListActivity extends Activity
         setContentView(R.layout.plate);
 
         final Intent intent = getIntent();
-        String filter = intent.getStringExtra(KEY_LIST_FILTER);
-        if (filter == null) {
-            filter = "hotlist";
-        }
+        final FilterType filter = (FilterType)intent.getParcelableExtra(KEY_LIST_FILTER);
 
         getFragmentManager()
             .beginTransaction()

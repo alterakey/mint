@@ -40,19 +40,19 @@ public class TaskListFragment extends ListFragment
     public static final String ARG_FILTER = "filter";
 
     private TaskListAdapter mAdapter;
-    private String mFilterType;
+    private FilterType mFilterType;
     private ActionMode mActionMode;
 
     private TaskLoaderManipulator mTaskLoaderManip = new TaskLoaderManipulator();
 
-    public String getFilter() {
+    public FilterType getFilter() {
         return mFilterType;
     }
 
-    public static TaskListFragment newInstance(String filter) {
+    public static TaskListFragment newInstance(FilterType filter) {
         final TaskListFragment f = new TaskListFragment();
         final Bundle args = new Bundle();
-        args.putString(ARG_FILTER, filter);
+        args.putParcelable(ARG_FILTER, filter);
         f.setArguments(args);
         return f;
     }
@@ -64,9 +64,9 @@ public class TaskListFragment extends ListFragment
         final Bundle args = getArguments();
 
         mAdapter = new TaskListAdapter(getActivity(), null);
-        mFilterType = args.getString(ARG_FILTER, "hotlist");
+        mFilterType = (FilterType)args.getParcelable(ARG_FILTER);
 
-        getActivity().setTitle(new FilterType(mFilterType).getTitle());
+        getActivity().setTitle(mFilterType.getTitle());
 
         final ListView listView = getListView();
         listView.setOnItemLongClickListener(new SelectionModeListener());
@@ -208,13 +208,12 @@ public class TaskListFragment extends ListFragment
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
             getActivity().setProgressBarIndeterminateVisibility(true);
             setListShown(false);
-            final FilterType filter = new FilterType(mFilterType);
             return new CursorLoader(
                 getActivity(),
                 TaskProvider.CONTENT_URI,
                 TaskProvider.PROJECTION,
-                filter.getSelection(),
-                filter.getSelectionArgs(),
+                mFilterType.getSelection(),
+                mFilterType.getSelectionArgs(),
                 TaskProvider.DEFAULT_ORDER
             );
         }
