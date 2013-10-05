@@ -18,15 +18,15 @@ public class Schema {
             db.execSQL("CREATE TABLE IF NOT EXISTS tasks (_id INTEGER PRIMARY KEY AUTOINCREMENT, cookie VARCHAR UNIQUE, task BIGINT UNIQUE, title TEXT, note TEXT, modified BIGINT, completed TEXT, folder BIGINT, context BIGINT, priority INTEGER, star INTEGER, duedate BIGINT, duetime BIGINT, status BIGINT)");
             db.execSQL("CREATE TABLE IF NOT EXISTS folders (_id INTEGER PRIMARY KEY AUTOINCREMENT, modified BIGINT, folder BIGINT UNIQUE, name TEXT, private TEXT, archived TEXT, ord TEXT)");
             db.execSQL("CREATE TABLE IF NOT EXISTS contexts (_id INTEGER PRIMARY KEY AUTOINCREMENT, context BIGINT UNIQUE, name TEXT)");
-            db.execSQL("CREATE TABLE IF NOT EXISTS status (_id INTEGER PRIMARY KEY AUTOINCREMENT, status TEXT UNIQUE, lastedit_folder BIGINT, lastedit_context BIGINT, lastedit_goal BIGINT, lastedit_location BIGINT, lastedit_task BIGINT, lastdelete_task BIGINT, lastedit_notebook BIGINT, lastdelete_notebook BIGINT)");
+            db.execSQL("CREATE TABLE IF NOT EXISTS statuses (_id INTEGER PRIMARY KEY AUTOINCREMENT, status BIGINT UNIQUE, name TEXT UNIQUE)");
 
-            /* Folder initial content */
-            db.execSQL("INSERT INTO folders (folder, name) VALUES (0, 'INBOX')");
-            db.execSQL("INSERT INTO folders (folder, name) VALUES (-1, 'Hotlist')"); // XXX
-            db.execSQL("INSERT INTO folders (folder, name) VALUES (1, 'Next Action')");
-            db.execSQL("INSERT INTO folders (folder, name) VALUES (10, 'Reference')");
-            db.execSQL("INSERT INTO folders (folder, name) VALUES (5, 'Wating')");
-            db.execSQL("INSERT INTO folders (folder, name) VALUES (8, 'Someday')");
+            /* Status initial content */
+            db.execSQL("INSERT INTO statuses (status, name) VALUES (0, 'INBOX')");
+            db.execSQL("INSERT INTO statuses (status, name) VALUES (-1, 'Hotlist')"); // XXX
+            db.execSQL("INSERT INTO statuses (status, name) VALUES (1, 'Next Action')");
+            db.execSQL("INSERT INTO statuses (status, name) VALUES (10, 'Reference')");
+            db.execSQL("INSERT INTO statuses (status, name) VALUES (5, 'Wating')");
+            db.execSQL("INSERT INTO statuses (status, name) VALUES (8, 'Someday')");
         }
 
         @Override
