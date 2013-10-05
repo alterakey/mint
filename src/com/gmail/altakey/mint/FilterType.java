@@ -72,6 +72,15 @@ public class FilterType implements Parcelable {
         return this;
     }
 
+    public FilterType makeHot() {
+        setTitle("Hotlist");
+        setSelection(
+            TaskProvider.HOTLIST_FILTER,
+            new String[] { String.valueOf(new Date(new Date().getTime() + 7 * 86400 * 1000).getTime()) }
+        );
+        return this;
+    }
+
     public FilterType setSimpleSelection(String type, int value) {
         mSelection = String.format("%s=?", type);
         mSelectionArgs = new String[] { String.valueOf(value) };

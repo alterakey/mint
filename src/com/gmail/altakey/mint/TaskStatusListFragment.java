@@ -62,10 +62,7 @@ public class TaskStatusListFragment extends TaskGroupListFragment {
 
             // XXX: -1: hotlist
             if (id == -1) {
-                filter.setSelection(
-                    TaskProvider.HOTLIST_FILTER,
-                    new String[] { String.valueOf(new Date(new Date().getTime() + 7 * 86400 * 1000).getTime()) }
-                );
+                filter.makeHot();
             } else {
                 filter.setSimpleSelection(FilterType.TYPE_STATUS, cw.getInt(TaskCountProvider.COL_ID));
             }
