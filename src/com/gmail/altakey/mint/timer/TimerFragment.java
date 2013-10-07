@@ -14,6 +14,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.widget.TextView;
 
+import android.app.Dialog;
+import android.app.DialogFragment;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+
 import android.util.Log;
 
 public class TimerFragment extends Fragment {
@@ -59,16 +64,65 @@ public class TimerFragment extends Fragment {
         new TimerUpdater().update();
     }
 
-    private void toggle() {
-        final Intent intent = new Intent(getActivity(), TimerService.class);
-        intent.setAction(TimerService.ACTION_TOGGLE);
-        getActivity().startService(intent);
-    }
-
     private class TimerClickListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            toggle();
+            new TimerToggler().toggle();
+        }
+    }
+
+    private class TimerToggler {
+        public void toggle() {
+            final int state = TimerService.getState();
+            if (state == TimerService.STATE_RESET) {
+                controlService(TimerService.ACTION_START);
+            } else {
+                new TimerResetConfirmFragment().show(getFragmentManager(), TimerResetConfirmFragment.TAG);
+            }
+        }
+
+        private void controlService(String action) {
+            final Context c = getActivity();
+            if (c != null) {
+                final Intent intent = new Intent(c, TimerService.class);
+                intent.setAction(action);
+                c.startService(intent);
+            }
+        }
+    }
+
+    public static class TimerResetConfirmFragment extends DialogFragment {
+        public static final String TAG = "timer_reset_confirmation";
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            return new AlertDialog.Builder(getActivity())
+                .setMessage("Are you sure to reset?")
+                .setPositiveButton(android.R.string.yes, new ConfirmAction())
+                .setNegativeButton(android.R.string.no, new NullAction())
+                .create();
+        }
+
+        private void controlService(String action) {
+            final Context c = getActivity();
+            if (c != null) {
+                final Intent intent = new Intent(c, TimerService.class);
+                intent.setAction(action);
+                c.startService(intent);
+            }
+        }
+
+        private class ConfirmAction implements DialogInterface.OnClickListener {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                controlService(TimerService.ACTION_RESET);
+            }
+        }
+
+        private class NullAction implements DialogInterface.OnClickListener {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+            }
         }
     }
 
@@ -123,8 +177,8 @@ public class TimerFragment extends Fragment {
     private class TickReceiver extends BroadcastReceiver {
         public void attach() {
             final IntentFilter filter = new IntentFilter();
-            filter.addAction(TimerService.ACTION_QUERY);
-            filter.addAction(TimerService.ACTION_TOGGLE);
+            filter.addAction(TimerService.ACTION_START);
+            filter.addAction(TimerService.ACTION_RESET);
             filter.addAction(TimerService.ACTION_TIMEOUT);
             LocalBroadcastManager.getInstance(getActivity()).registerReceiver(this, filter);
         }

@@ -17,8 +17,8 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 public class TimerService extends Service {
-    public static final String ACTION_TOGGLE = "toggle";
-    public static final String ACTION_QUERY = "query";
+    public static final String ACTION_START = "start";
+    public static final String ACTION_RESET = "reset";
     public static final String ACTION_TIMEOUT = "timeout";
     public static final String EXTRA_DUE = "due";
     public static final String EXTRA_STATE = "state";
@@ -91,12 +91,13 @@ public class TimerService extends Service {
 
         wakeUp();
 
-        if (ACTION_QUERY.equals(action)) {
+        if (ACTION_START.equals(action)) {
+            start();
             intent.putExtra(EXTRA_STATE, sState);
             intent.putExtra(EXTRA_DUE, sDueMillis);
             LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
-        } else if (ACTION_TOGGLE.equals(action)) {
-            toggle();
+        } else if (ACTION_RESET.equals(action)) {
+            reset();
             intent.putExtra(EXTRA_STATE, sState);
             intent.putExtra(EXTRA_DUE, sDueMillis);
             LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
@@ -144,11 +145,15 @@ public class TimerService extends Service {
         sDueMillis = 0;
     }
 
-    private void toggle() {
+    private void start() {
         if (sState == STATE_RESET) {
             startTimer(25 * 60 * 1000, false);
             sState = STATE_RUNNING;
-        } else {
+        }
+    }
+
+    private void reset() {
+        if (sState != STATE_RESET) {
             resetTimer();
             sState = STATE_RESET;
         }
