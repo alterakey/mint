@@ -231,7 +231,7 @@ public class TimerFragment extends Fragment {
 
         public void bell() {
             if (mmPool != null) {
-                mmPool.play(mmSoundBell, 1.0f, 1.0f, 0, 0, 1.0f);
+                mmPool.play(mmSoundBell, 1.0f, 1.0f, 0, 1, 1.0f);
             }
         }
     }
