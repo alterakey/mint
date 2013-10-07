@@ -70,8 +70,8 @@ public class TimerFragment extends Fragment {
 
                 final View root = getView();
                 if (root != null) {
-                    ((TextView)root.findViewById(R.id.min)).setText(String.valueOf(minutes));
-                    ((TextView)root.findViewById(R.id.sec)).setText(String.valueOf(seconds));
+                    ((TextView)root.findViewById(R.id.min)).setText(String.format("%02d", minutes));
+                    ((TextView)root.findViewById(R.id.sec)).setText(String.format("%02d", seconds));
                 }
             }
 
