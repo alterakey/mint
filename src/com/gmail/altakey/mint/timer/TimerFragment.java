@@ -14,8 +14,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.widget.TextView;
 
+import android.util.Log;
+
 public class TimerFragment extends Fragment {
     public static final String TAG = "timer";
+    private static final String KEY_MINUTE = "minute";
+    private static final String KEY_SECOND = "second";
 
     private TickReceiver mTickReceiver = new TickReceiver();
     private CountDownTimer mUpdateTimer = null;
@@ -23,9 +27,23 @@ public class TimerFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View v = inflater.inflate(R.layout.timer, container, false);
+        if (savedInstanceState != null) {
+            ((TextView)v.findViewById(R.id.min)).setText(savedInstanceState.getCharSequence(KEY_MINUTE));
+            ((TextView)v.findViewById(R.id.sec)).setText(savedInstanceState.getCharSequence(KEY_SECOND));
+        }
+
         final View timer = v.findViewById(R.id.timer);
         timer.setOnClickListener(new TimerClickListener());
         return v;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        final View root = getView();
+        outState.putCharSequence(KEY_MINUTE, ((TextView)root.findViewById(R.id.min)).getText());
+        outState.putCharSequence(KEY_SECOND, ((TextView)root.findViewById(R.id.sec)).getText());
     }
 
     @Override
