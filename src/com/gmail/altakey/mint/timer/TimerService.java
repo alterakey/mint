@@ -26,9 +26,9 @@ public class TimerService extends Service {
     public static final int STATE_RUNNING = 1;
     public static final int STATE_BREAKING = 2;
 
-    private int mState = STATE_RESET;
+    private static int sState = STATE_RESET;
+    private static long sDueMillis = 0;
     private PendingIntent mDueIntent = null;
-    private long mDueMillis = 0;
 
     private Looper mLooper;
     private ServiceHandler mHandler;
@@ -42,6 +42,22 @@ public class TimerService extends Service {
         public void handleMessage(Message msg) {
             final Intent intent = (Intent)msg.obj;
             handleIntent(intent);
+        }
+    }
+
+    public static int getState() {
+        return sState;
+    }
+
+    public static long getDueMillis() {
+        return sDueMillis;
+    }
+
+    public static long getRemaining(long due) {
+        if (due > 0) {
+            return getDueMillis() - SystemClock.elapsedRealtime();
+        } else {
+            return 25 * 60 * 1000;
         }
     }
 
@@ -70,23 +86,23 @@ public class TimerService extends Service {
 
     public void handleIntent(Intent intent) {
         final String action = intent.getAction();
-        Log.d("TS.oHI", String.format("state: %d, due: %d", mState, mDueMillis));
+        Log.d("TS.oHI", String.format("state: %d, due: %d", sState, sDueMillis));
         if (ACTION_QUERY.equals(action)) {
-            intent.putExtra(EXTRA_STATE, mState);
-            intent.putExtra(EXTRA_DUE, mDueMillis);
+            intent.putExtra(EXTRA_STATE, sState);
+            intent.putExtra(EXTRA_DUE, sDueMillis);
             LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
         } else if (ACTION_TOGGLE.equals(action)) {
             toggle();
-            intent.putExtra(EXTRA_STATE, mState);
-            intent.putExtra(EXTRA_DUE, mDueMillis);
+            intent.putExtra(EXTRA_STATE, sState);
+            intent.putExtra(EXTRA_DUE, sDueMillis);
             LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
         } else if (ACTION_TIMEOUT.equals(action)) {
             proceed();
-            intent.putExtra(EXTRA_STATE, mState);
-            intent.putExtra(EXTRA_DUE, mDueMillis);
+            intent.putExtra(EXTRA_STATE, sState);
+            intent.putExtra(EXTRA_DUE, sDueMillis);
             LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
         }
-        if (mState == STATE_RESET) {
+        if (sState == STATE_RESET) {
             stopSelf();
         }
     }
@@ -95,13 +111,13 @@ public class TimerService extends Service {
         final AlarmManager am = (AlarmManager)getSystemService(ALARM_SERVICE);
         resetTimer();
 
-        mDueMillis = SystemClock.elapsedRealtime() + intervalMillis;
+        sDueMillis = SystemClock.elapsedRealtime() + intervalMillis;
 
         final Intent intent = new Intent(this, TimerService.class);
         intent.setAction(ACTION_TIMEOUT);
         mDueIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
 
-        am.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, mDueMillis, mDueIntent);
+        am.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, sDueMillis, mDueIntent);
     }
 
     private void resetTimer() {
@@ -110,26 +126,26 @@ public class TimerService extends Service {
             am.cancel(mDueIntent);
             mDueIntent = null;
         }
-        mDueMillis = 0;
+        sDueMillis = 0;
     }
 
     private void toggle() {
-        if (mState == STATE_RESET) {
+        if (sState == STATE_RESET) {
             startTimer(25 * 60 * 1000, false);
-            mState = STATE_RUNNING;
+            sState = STATE_RUNNING;
         } else {
             resetTimer();
-            mState = STATE_RESET;
+            sState = STATE_RESET;
         }
     }
 
     private void proceed() {
-        if (mState == STATE_RUNNING) {
+        if (sState == STATE_RUNNING) {
             startTimer(5 * 60 * 1000, true);
-            mState = STATE_BREAKING;
+            sState = STATE_BREAKING;
         } else {
             resetTimer();
-            mState = STATE_RESET;
+            sState = STATE_RESET;
         }
     }
 }

@@ -56,19 +56,37 @@ public class TimerFragment extends Fragment {
     public void onResume() {
         super.onResume();
         mTickReceiver.attach();
-        poke();
-    }
-
-    private void poke() {
-        final Intent intent = new Intent(getActivity(), TimerService.class);
-        intent.setAction(TimerService.ACTION_QUERY);
-        getActivity().startService(intent);
+        handleTimerStateChange();
     }
 
     private void toggle() {
         final Intent intent = new Intent(getActivity(), TimerService.class);
         intent.setAction(TimerService.ACTION_TOGGLE);
         getActivity().startService(intent);
+    }
+
+    private void handleTimerStateChange() {
+        final int state = TimerService.getState();
+        final long remaining = TimerService.getRemaining(TimerService.getDueMillis());
+
+        update(remaining);
+
+        if (state != TimerService.STATE_RESET) {
+            startUpdate(remaining);
+        } else {
+            stopUpdate();
+        }
+    }
+
+    private void update(long remaining) {
+        final long seconds = remaining / 1000 % 60;
+        final long minutes = remaining / 60000;
+
+        final View root = getView();
+        if (root != null) {
+            ((TextView)root.findViewById(R.id.min)).setText(String.format("%02d", minutes));
+            ((TextView)root.findViewById(R.id.sec)).setText(String.format("%02d", seconds));
+        }
     }
 
     private void stopUpdate() {
@@ -83,14 +101,7 @@ public class TimerFragment extends Fragment {
         mUpdateTimer = new CountDownTimer(remaining, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
-                final long seconds = millisUntilFinished / 1000 % 60;
-                final long minutes = millisUntilFinished / 60000;
-
-                final View root = getView();
-                if (root != null) {
-                    ((TextView)root.findViewById(R.id.min)).setText(String.format("%02d", minutes));
-                    ((TextView)root.findViewById(R.id.sec)).setText(String.format("%02d", seconds));
-                }
+                update(millisUntilFinished);
             }
 
             @Override
@@ -122,19 +133,7 @@ public class TimerFragment extends Fragment {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            final int state = intent.getIntExtra(TimerService.EXTRA_STATE, TimerService.STATE_RESET);
-            final long due = intent.getLongExtra(TimerService.EXTRA_DUE, 0);
-            long remaining = 25 * 60 * 1000;
-
-            if (due > 0) {
-                remaining = due - SystemClock.elapsedRealtime();
-            }
-
-            if (state != TimerService.STATE_RESET) {
-                startUpdate(remaining);
-            } else {
-                stopUpdate();
-            }
+            handleTimerStateChange();
         }
     }
 }
