@@ -57,6 +57,7 @@ public class TimerFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
+        mTicker.cleanup();
         mTickReceiver.detach();
         new TimerUpdater().deactivate();
     }
@@ -64,6 +65,7 @@ public class TimerFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        mTicker.prepare();
         mTickReceiver.attach();
         new TimerUpdater().update();
     }
@@ -159,9 +161,7 @@ public class TimerFragment extends Fragment {
             if (mUpdateTimer != null) {
                 mUpdateTimer.cancel();
                 mUpdateTimer = null;
-                Log.d("TF", "cancelled");
             }
-            mTicker.cleanup();
         }
 
         private void activate(long remaining) {
@@ -179,8 +179,6 @@ public class TimerFragment extends Fragment {
                     mTicker.bell();
                 }
             }.start();
-            Log.d("TF", "started");
-            mTicker.prepare();
         }
     }
 
