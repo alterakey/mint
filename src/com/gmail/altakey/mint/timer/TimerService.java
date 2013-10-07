@@ -1,14 +1,21 @@
 package com.gmail.altakey.mint.timer;
 
-import android.app.IntentService;
+import android.app.Service;
+import android.os.IBinder;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
+import android.os.Message;
+import android.os.Process;
 import android.content.Intent;
+
 import android.app.PendingIntent;
 import android.app.AlarmManager;
 import android.os.SystemClock;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-public class TimerService extends IntentService {
+public class TimerService extends Service {
     public static final String ACTION_TOGGLE = "toggle";
     public static final String ACTION_QUERY = "query";
     public static final String ACTION_TIMEOUT = "timeout";
@@ -23,12 +30,45 @@ public class TimerService extends IntentService {
     private PendingIntent mDueIntent = null;
     private long mDueMillis = 0;
 
-    public TimerService() {
-        super("TimerService");
+    private Looper mLooper;
+    private ServiceHandler mHandler;
+
+    private class ServiceHandler extends Handler {
+        public ServiceHandler(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            final Intent intent = (Intent)msg.obj;
+            handleIntent(intent);
+        }
     }
 
     @Override
-    public void onHandleIntent(Intent intent) {
+    public void onCreate() {
+        final HandlerThread thread = new HandlerThread("worker", Process.THREAD_PRIORITY_BACKGROUND);
+        thread.start();
+
+        mLooper = thread.getLooper();
+        mHandler = new ServiceHandler(mLooper);
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        final Message msg = mHandler.obtainMessage();
+        msg.arg1 = startId;
+        msg.obj = intent;
+        mHandler.sendMessage(msg);
+        return START_STICKY;
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
+
+    public void handleIntent(Intent intent) {
         final String action = intent.getAction();
         Log.d("TS.oHI", String.format("state: %d, due: %d", mState, mDueMillis));
         if (ACTION_QUERY.equals(action)) {
@@ -45,6 +85,9 @@ public class TimerService extends IntentService {
             intent.putExtra(EXTRA_STATE, mState);
             intent.putExtra(EXTRA_DUE, mDueMillis);
             LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        }
+        if (mState == STATE_RESET) {
+            stopSelf();
         }
     }
 
