@@ -58,6 +58,7 @@ public class TimerFragment extends Fragment {
     public void onPause() {
         super.onPause();
         mTickReceiver.detach();
+        new TimerUpdater().deactivate();
     }
 
     @Override
