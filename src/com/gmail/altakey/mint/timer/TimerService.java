@@ -11,6 +11,7 @@ import android.content.Intent;
 
 import android.app.PendingIntent;
 import android.app.AlarmManager;
+import android.os.PowerManager;
 import android.os.SystemClock;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -87,6 +88,9 @@ public class TimerService extends Service {
     public void handleIntent(Intent intent) {
         final String action = intent.getAction();
         Log.d("TS.oHI", String.format("state: %d, due: %d", sState, sDueMillis));
+
+        wakeUp();
+
         if (ACTION_QUERY.equals(action)) {
             intent.putExtra(EXTRA_STATE, sState);
             intent.putExtra(EXTRA_DUE, sDueMillis);
@@ -102,8 +106,19 @@ public class TimerService extends Service {
             intent.putExtra(EXTRA_DUE, sDueMillis);
             LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
         }
+
         if (sState == STATE_RESET) {
             stopSelf();
+        }
+    }
+
+    private void wakeUp() {
+        final PowerManager pm = (PowerManager)getSystemService(POWER_SERVICE);
+        final PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK | PowerManager.ON_AFTER_RELEASE | PowerManager.ACQUIRE_CAUSES_WAKEUP, "screen_poke");
+        try {
+            wl.acquire();
+        } finally {
+            wl.release();
         }
     }
 
