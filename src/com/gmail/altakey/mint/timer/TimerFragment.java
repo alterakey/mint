@@ -56,7 +56,7 @@ public class TimerFragment extends Fragment {
     public void onResume() {
         super.onResume();
         mTickReceiver.attach();
-        handleTimerStateChange();
+        new TimerUpdater().update();
     }
 
     private void toggle() {
@@ -65,56 +65,58 @@ public class TimerFragment extends Fragment {
         getActivity().startService(intent);
     }
 
-    private void handleTimerStateChange() {
-        final int state = TimerService.getState();
-        final long remaining = TimerService.getRemaining(TimerService.getDueMillis());
-
-        update(remaining);
-
-        if (state != TimerService.STATE_RESET) {
-            startUpdate(remaining);
-        } else {
-            stopUpdate();
-        }
-    }
-
-    private void update(long remaining) {
-        final long seconds = remaining / 1000 % 60;
-        final long minutes = remaining / 60000;
-
-        final View root = getView();
-        if (root != null) {
-            ((TextView)root.findViewById(R.id.min)).setText(String.format("%02d", minutes));
-            ((TextView)root.findViewById(R.id.sec)).setText(String.format("%02d", seconds));
-        }
-    }
-
-    private void stopUpdate() {
-        if (mUpdateTimer != null) {
-            mUpdateTimer.cancel();
-            mUpdateTimer = null;
-        }
-    }
-
-    private void startUpdate(long remaining) {
-        stopUpdate();
-        mUpdateTimer = new CountDownTimer(remaining, 1000) {
-            @Override
-            public void onTick(long millisUntilFinished) {
-                update(millisUntilFinished);
-            }
-
-            @Override
-            public void onFinish() {
-                onTick(0);
-            }
-        }.start();
-    }
-
     private class TimerClickListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
             toggle();
+        }
+    }
+
+    private class TimerUpdater {
+        public void update() {
+            final int state = TimerService.getState();
+            final long remaining = TimerService.getRemaining(TimerService.getDueMillis());
+
+            refresh(remaining);
+
+            if (state != TimerService.STATE_RESET) {
+                activate(remaining);
+            } else {
+                deactivate();
+            }
+        }
+
+        private void refresh(long remaining) {
+            final long seconds = remaining / 1000 % 60;
+            final long minutes = remaining / 60000;
+
+            final View root = getView();
+            if (root != null) {
+                ((TextView)root.findViewById(R.id.min)).setText(String.format("%02d", minutes));
+                ((TextView)root.findViewById(R.id.sec)).setText(String.format("%02d", seconds));
+            }
+        }
+
+        private void deactivate() {
+            if (mUpdateTimer != null) {
+                mUpdateTimer.cancel();
+                mUpdateTimer = null;
+            }
+        }
+
+        private void activate(long remaining) {
+            deactivate();
+            mUpdateTimer = new CountDownTimer(remaining, 1000) {
+                @Override
+                public void onTick(long millisUntilFinished) {
+                    refresh(millisUntilFinished);
+                }
+
+                @Override
+                public void onFinish() {
+                    onTick(0);
+                }
+            }.start();
         }
     }
 
@@ -133,7 +135,7 @@ public class TimerFragment extends Fragment {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            handleTimerStateChange();
+            new TimerUpdater().update();
         }
     }
 }
