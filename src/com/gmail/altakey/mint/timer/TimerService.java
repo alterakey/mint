@@ -38,6 +38,7 @@ public class TimerService extends Service {
     private PendingIntent mDueIntent = null;
 
     private Timer mTimer = null;
+    private Timer mIdleTimer = null;
     private Ticker mTicker = new Ticker();
 
     private Looper mLooper;
@@ -78,6 +79,7 @@ public class TimerService extends Service {
 
         mLooper = thread.getLooper();
         mHandler = new ServiceHandler(mLooper);
+        mTicker.prepare();
     }
 
     @Override
@@ -87,6 +89,12 @@ public class TimerService extends Service {
         msg.obj = intent;
         mHandler.sendMessage(msg);
         return START_STICKY;
+    }
+
+    @Override
+    public void onDestroy() {
+        mTicker.cleanup();
+        super.onDestroy();
     }
 
     @Override
@@ -118,7 +126,21 @@ public class TimerService extends Service {
         }
 
         if (sState == STATE_RESET) {
-            stopSelf();
+            if (mIdleTimer == null) {
+                mIdleTimer = new Timer();
+                mIdleTimer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        stopSelf();
+                    }
+                }, 90000);
+            }
+        } else {
+            if (mIdleTimer != null) {
+                mIdleTimer.cancel();
+                mIdleTimer.purge();
+                mIdleTimer = null;
+            }
         }
     }
 
@@ -148,11 +170,10 @@ public class TimerService extends Service {
         mTimer.schedule(new TimerTask() {
             @Override
             public void run() {
+                mTicker.tick();
                 LocalBroadcastManager.getInstance(TimerService.this).sendBroadcast(new Intent(TimerService.ACTION_TICK));
             }
-        }, 0, 1000);
-
-        mTicker.prepare();
+        }, 1000, 1000);
     }
 
     private void resetTimer() {
@@ -167,7 +188,6 @@ public class TimerService extends Service {
             mTimer = null;
         }
         sDueMillis = 0;
-        mTicker.cleanup();
     }
 
     private void start() {
@@ -185,6 +205,7 @@ public class TimerService extends Service {
     }
 
     private void proceed() {
+        mTicker.bell();
         if (sState == STATE_RUNNING) {
             startTimer(5 * 60 * 1000, true);
             sState = STATE_BREAKING;
@@ -201,15 +222,17 @@ public class TimerService extends Service {
         private int mmSoundBell = 0;
 
         public void prepare() {
-            mmPool = new SoundPool(2, AudioManager.STREAM_MUSIC, 0);
-            mmSoundTick = mmPool.load(TimerService.this, R.raw.tick, 1);
-            mmSoundBell = mmPool.load(TimerService.this, R.raw.ring, 1);
+            if (mmPool == null) {
+                mmPool = new SoundPool(2, AudioManager.STREAM_MUSIC, 0);
+                mmSoundTick = mmPool.load(TimerService.this, R.raw.tick, 1);
+                mmSoundBell = mmPool.load(TimerService.this, R.raw.ring, 1);
+            }
         }
 
         public void cleanup() {
-            mmSoundTick = 0;
-            mmSoundBell = 0;
             if (mmPool != null) {
+                mmSoundTick = 0;
+                mmSoundBell = 0;
                 mmPool.release();
                 mmPool = null;
             }
