@@ -55,16 +55,16 @@ public class TimerFragment extends Fragment {
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
+    public void onStop() {
+        super.onStop();
         mTicker.cleanup();
         mTickReceiver.detach();
         new TimerUpdater().deactivate();
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
+    public void onStart() {
+        super.onStart();
         mTicker.prepare();
         mTickReceiver.attach();
         new TimerUpdater().update();
