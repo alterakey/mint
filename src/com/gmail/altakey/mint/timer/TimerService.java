@@ -14,12 +14,18 @@ import android.app.AlarmManager;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.support.v4.content.LocalBroadcastManager;
+
+import java.util.Timer;
+import java.util.TimerTask;
+import android.media.SoundPool;
+import android.media.AudioManager;
 import android.util.Log;
 
 public class TimerService extends Service {
     public static final String ACTION_START = "start";
     public static final String ACTION_RESET = "reset";
     public static final String ACTION_TIMEOUT = "timeout";
+    public static final String ACTION_TICK = "tick";
     public static final String EXTRA_DUE = "due";
     public static final String EXTRA_STATE = "state";
 
@@ -30,6 +36,9 @@ public class TimerService extends Service {
     private static int sState = STATE_RESET;
     private static long sDueMillis = 0;
     private PendingIntent mDueIntent = null;
+
+    private Timer mTimer = null;
+    private Ticker mTicker = new Ticker();
 
     private Looper mLooper;
     private ServiceHandler mHandler;
@@ -134,6 +143,16 @@ public class TimerService extends Service {
         mDueIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
 
         am.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, sDueMillis, mDueIntent);
+
+        mTimer = new Timer();
+        mTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                LocalBroadcastManager.getInstance(TimerService.this).sendBroadcast(new Intent(TimerService.ACTION_TICK));
+            }
+        }, 0, 1000);
+
+        mTicker.prepare();
     }
 
     private void resetTimer() {
@@ -142,7 +161,13 @@ public class TimerService extends Service {
             am.cancel(mDueIntent);
             mDueIntent = null;
         }
+        if (mTimer != null) {
+            mTimer.cancel();
+            mTimer.purge();
+            mTimer = null;
+        }
         sDueMillis = 0;
+        mTicker.cleanup();
     }
 
     private void start() {
@@ -166,6 +191,40 @@ public class TimerService extends Service {
         } else {
             resetTimer();
             sState = STATE_RESET;
+        }
+    }
+
+
+    private class Ticker {
+        private SoundPool mmPool = null;
+        private int mmSoundTick = 0;
+        private int mmSoundBell = 0;
+
+        public void prepare() {
+            mmPool = new SoundPool(2, AudioManager.STREAM_MUSIC, 0);
+            mmSoundTick = mmPool.load(TimerService.this, R.raw.tick, 1);
+            mmSoundBell = mmPool.load(TimerService.this, R.raw.ring, 1);
+        }
+
+        public void cleanup() {
+            mmSoundTick = 0;
+            mmSoundBell = 0;
+            if (mmPool != null) {
+                mmPool.release();
+                mmPool = null;
+            }
+        }
+
+        public void tick() {
+            if (mmPool != null) {
+                mmPool.play(mmSoundTick, 1.0f, 1.0f, 0, 0, 1.0f);
+            }
+        }
+
+        public void bell() {
+            if (mmPool != null) {
+                mmPool.play(mmSoundBell, 1.0f, 1.0f, 0, 1, 1.0f);
+            }
         }
     }
 }

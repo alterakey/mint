@@ -5,7 +5,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.LayoutInflater;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.content.BroadcastReceiver;
 import android.support.v4.content.LocalBroadcastManager;
 import android.content.IntentFilter;
@@ -19,8 +18,6 @@ import android.app.DialogFragment;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 
-import android.media.SoundPool;
-import android.media.AudioManager;
 import android.util.Log;
 
 public class TimerFragment extends Fragment {
@@ -29,8 +26,6 @@ public class TimerFragment extends Fragment {
     private static final String KEY_SECOND = "second";
 
     private TickReceiver mTickReceiver = new TickReceiver();
-    private Ticker mTicker = new Ticker();
-    private CountDownTimer mUpdateTimer = null;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -57,17 +52,14 @@ public class TimerFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-        mTicker.cleanup();
         mTickReceiver.detach();
-        new TimerUpdater().deactivate();
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        mTicker.prepare();
+        new TimerUpdater().refresh();
         mTickReceiver.attach();
-        new TimerUpdater().update();
     }
 
     private class TimerClickListener implements View.OnClickListener {
@@ -133,20 +125,9 @@ public class TimerFragment extends Fragment {
     }
 
     private class TimerUpdater {
-        public void update() {
-            final int state = TimerService.getState();
+        public void refresh() {
             final long remaining = TimerService.getRemaining(TimerService.getDueMillis());
 
-            refresh(remaining);
-
-            if (state != TimerService.STATE_RESET) {
-                activate(remaining);
-            } else {
-                deactivate();
-            }
-        }
-
-        private void refresh(long remaining) {
             final long seconds = remaining / 1000 % 60;
             final long minutes = remaining / 60000;
 
@@ -156,38 +137,11 @@ public class TimerFragment extends Fragment {
                 ((TextView)root.findViewById(R.id.sec)).setText(String.format("%02d", seconds));
             }
         }
-
-        private void deactivate() {
-            if (mUpdateTimer != null) {
-                mUpdateTimer.cancel();
-                mUpdateTimer = null;
-            }
-        }
-
-        private void activate(long remaining) {
-            deactivate();
-            mUpdateTimer = new CountDownTimer(remaining, 1000) {
-                @Override
-                public void onTick(long millisUntilFinished) {
-                    refresh(millisUntilFinished);
-                    mTicker.tick();
-                }
-
-                @Override
-                public void onFinish() {
-                    onTick(0);
-                    mTicker.bell();
-                }
-            }.start();
-        }
     }
 
     private class TickReceiver extends BroadcastReceiver {
         public void attach() {
-            final IntentFilter filter = new IntentFilter();
-            filter.addAction(TimerService.ACTION_START);
-            filter.addAction(TimerService.ACTION_RESET);
-            filter.addAction(TimerService.ACTION_TIMEOUT);
+            final IntentFilter filter = new IntentFilter(TimerService.ACTION_TICK);
             LocalBroadcastManager.getInstance(getActivity()).registerReceiver(this, filter);
         }
 
@@ -197,40 +151,7 @@ public class TimerFragment extends Fragment {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            new TimerUpdater().update();
-        }
-    }
-
-    private class Ticker {
-        private SoundPool mmPool = null;
-        private int mmSoundTick = 0;
-        private int mmSoundBell = 0;
-
-        public void prepare() {
-            mmPool = new SoundPool(2, AudioManager.STREAM_MUSIC, 0);
-            mmSoundTick = mmPool.load(getActivity(), R.raw.tick, 1);
-            mmSoundBell = mmPool.load(getActivity(), R.raw.ring, 1);
-        }
-
-        public void cleanup() {
-            mmSoundTick = 0;
-            mmSoundBell = 0;
-            if (mmPool != null) {
-                mmPool.release();
-                mmPool = null;
-            }
-        }
-
-        public void tick() {
-            if (mmPool != null) {
-                mmPool.play(mmSoundTick, 1.0f, 1.0f, 0, 0, 1.0f);
-            }
-        }
-
-        public void bell() {
-            if (mmPool != null) {
-                mmPool.play(mmSoundBell, 1.0f, 1.0f, 0, 1, 1.0f);
-            }
+            new TimerUpdater().refresh();
         }
     }
 }
