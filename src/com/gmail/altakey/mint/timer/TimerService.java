@@ -8,6 +8,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.content.Intent;
+import android.content.Context;
 
 import android.app.PendingIntent;
 import android.app.AlarmManager;
@@ -39,7 +40,7 @@ public class TimerService extends Service {
 
     private Timer mTimer = null;
     private Timer mIdleTimer = null;
-    private Ticker mTicker = new Ticker();
+    private Ticker mTicker = new Ticker(this);
 
     private Looper mLooper;
     private ServiceHandler mHandler;
@@ -215,38 +216,42 @@ public class TimerService extends Service {
         }
     }
 
+    private static class Ticker {
+        private final Context mContext;
+        private SoundPool mPool = null;
+        private int mSoundTick = 0;
+        private int mSoundBell = 0;
 
-    private class Ticker {
-        private SoundPool mmPool = null;
-        private int mmSoundTick = 0;
-        private int mmSoundBell = 0;
+        public Ticker(final Context c) {
+            mContext = c;
+        }
 
         public void prepare() {
-            if (mmPool == null) {
-                mmPool = new SoundPool(2, AudioManager.STREAM_MUSIC, 0);
-                mmSoundTick = mmPool.load(TimerService.this, R.raw.tick, 1);
-                mmSoundBell = mmPool.load(TimerService.this, R.raw.ring, 1);
+            if (mPool == null) {
+                mPool = new SoundPool(2, AudioManager.STREAM_MUSIC, 0);
+                mSoundTick = mPool.load(mContext, R.raw.tick, 1);
+                mSoundBell = mPool.load(mContext, R.raw.ring, 1);
             }
         }
 
         public void cleanup() {
-            if (mmPool != null) {
-                mmSoundTick = 0;
-                mmSoundBell = 0;
-                mmPool.release();
-                mmPool = null;
+            if (mPool != null) {
+                mSoundTick = 0;
+                mSoundBell = 0;
+                mPool.release();
+                mPool = null;
             }
         }
 
         public void tick() {
-            if (mmPool != null) {
-                mmPool.play(mmSoundTick, 1.0f, 1.0f, 0, 0, 1.0f);
+            if (mPool != null) {
+                mPool.play(mSoundTick, 1.0f, 1.0f, 0, 0, 1.0f);
             }
         }
 
         public void bell() {
-            if (mmPool != null) {
-                mmPool.play(mmSoundBell, 1.0f, 1.0f, 0, 1, 1.0f);
+            if (mPool != null) {
+                mPool.play(mSoundBell, 1.0f, 1.0f, 0, 1, 1.0f);
             }
         }
     }
