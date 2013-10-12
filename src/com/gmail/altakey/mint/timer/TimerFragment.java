@@ -126,16 +126,12 @@ public class TimerFragment extends Fragment {
 
     private class TimerUpdater {
         public void refresh() {
-            long remaining = TimerService.getRemaining(TimerService.getDueMillis());
-            remaining = ((long)Math.ceil(remaining / 1000.0)) * 1000;
-
-            final long seconds = remaining / 1000 % 60;
-            final long minutes = remaining / 60000;
+            final TimerReader reader = new TimerReader(TimerService.getRemaining(TimerService.getDueMillis()));
 
             final View root = getView();
             if (root != null) {
-                ((TextView)root.findViewById(R.id.min)).setText(String.format("%02d", minutes));
-                ((TextView)root.findViewById(R.id.sec)).setText(String.format("%02d", seconds));
+                ((TextView)root.findViewById(R.id.min)).setText(String.format("%02d", reader.minutes));
+                ((TextView)root.findViewById(R.id.sec)).setText(String.format("%02d", reader.seconds));
             }
         }
     }

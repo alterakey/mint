@@ -22,6 +22,9 @@ import android.media.SoundPool;
 import android.media.AudioManager;
 import android.util.Log;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+
 public class TimerService extends Service {
     public static final String ACTION_START = "start";
     public static final String ACTION_RESET = "reset";
@@ -41,6 +44,7 @@ public class TimerService extends Service {
     private Timer mTimer = null;
     private Timer mIdleTimer = null;
     private Ticker mTicker = new Ticker(this);
+    private Notifier mNotifier = new Notifier();
 
     private Looper mLooper;
     private ServiceHandler mHandler;
@@ -171,10 +175,13 @@ public class TimerService extends Service {
         mTimer.schedule(new TimerTask() {
             @Override
             public void run() {
+                mNotifier.update();
                 mTicker.tick();
                 LocalBroadcastManager.getInstance(TimerService.this).sendBroadcast(new Intent(TimerService.ACTION_TICK));
             }
         }, 1000, 1000);
+
+        startForeground(Notifier.ID, mNotifier.build());
     }
 
     private void resetTimer() {
@@ -189,6 +196,7 @@ public class TimerService extends Service {
             mTimer = null;
         }
         sDueMillis = 0;
+        stopForeground(true);
     }
 
     private void start() {
@@ -253,6 +261,52 @@ public class TimerService extends Service {
             if (mPool != null) {
                 mPool.play(mSoundBell, 1.0f, 1.0f, 0, 1, 1.0f);
             }
+        }
+    }
+
+    private class Notifier {
+        private static final int ID = 0;//1587254409;
+
+        private Notification.Builder mBuilder = new Notification.Builder(TimerService.this);
+
+        public Notification build() {
+            final Context c = TimerService.this;
+            final TimerReader reader = new TimerReader(getRemaining(getDueMillis()));
+            String status = null;
+            long due = 0;
+
+            switch (getState()) {
+            case STATE_RUNNING:
+                status = "Running";
+                due = 25 * 60 * 1000;
+                break;
+            case STATE_BREAKING:
+                status = "Breaking";
+                due = 5 * 60 * 1000;
+                break;
+            }
+
+            final Intent intent = new Intent(c, MainActivity.class);
+            intent.setAction(Intent.ACTION_MAIN);
+            intent.addCategory(Intent.CATEGORY_LAUNCHER);
+
+            final PendingIntent action = PendingIntent.getActivity(c, 0, intent, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_UPDATE_CURRENT);
+            final Notification n = mBuilder
+                .setOngoing(true)
+                .setTicker(status)
+                .setContentTitle(String.format("%02d:%02d", reader.minutes, reader.seconds))
+                .setContentText(status)
+                .setProgress((int)due, (int)reader.getElapsed(due), false)
+                .setSmallIcon(R.drawable.ic_launcher)
+                .setContentIntent(action)
+                .build();
+            return n;
+        }
+
+        public void update() {
+            final Context c = TimerService.this;
+            final NotificationManager nm = (NotificationManager)c.getSystemService(NOTIFICATION_SERVICE);
+            nm.notify(ID, build());
         }
     }
 }
