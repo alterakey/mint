@@ -196,6 +196,7 @@ public class TimerService extends Service {
             mTimer = null;
         }
         sDueMillis = 0;
+        mNotifier.cancel();
         stopForeground(true);
     }
 
@@ -307,6 +308,12 @@ public class TimerService extends Service {
             final Context c = TimerService.this;
             final NotificationManager nm = (NotificationManager)c.getSystemService(NOTIFICATION_SERVICE);
             nm.notify(ID, build());
+        }
+
+        public void cancel() {
+            final Context c = TimerService.this;
+            final NotificationManager nm = (NotificationManager)c.getSystemService(NOTIFICATION_SERVICE);
+            nm.cancel(ID);
         }
     }
 }
