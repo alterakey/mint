@@ -57,7 +57,9 @@ public class TimerService extends Service {
         @Override
         public void handleMessage(Message msg) {
             final Intent intent = (Intent)msg.obj;
-            handleIntent(intent);
+            if (intent != null) {
+                handleIntent(intent);
+            }
         }
     }
 
@@ -98,6 +100,7 @@ public class TimerService extends Service {
 
     @Override
     public void onDestroy() {
+        mNotifier.cancel();
         mTicker.cleanup();
         super.onDestroy();
     }
@@ -266,7 +269,7 @@ public class TimerService extends Service {
     }
 
     private class Notifier {
-        private static final int ID = 0;//1587254409;
+        private static final int ID = 1587254409;
 
         private Notification.Builder mBuilder = new Notification.Builder(TimerService.this);
 
