@@ -176,6 +176,7 @@ public class ToodledoClient {
         final HttpClient client = new DefaultHttpClient();
         final HttpResponse response = client.execute(req);
         final HttpEntity entity = response.getEntity();
+        Log.d("TC.iR", String.format("request: %s", req.getURI().toString()));
         entity.writeTo(os);
         entity.consumeContent();
         Log.d("TC.iR", String.format("got: %s", os.toString()));
