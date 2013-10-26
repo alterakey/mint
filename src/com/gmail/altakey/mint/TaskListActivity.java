@@ -68,6 +68,17 @@ public class TaskListActivity extends SlidingActivity
             .add(R.id.frag, TaskListFragment.newInstance(filter), TaskListFragment.TAG)
             .commit();
 
+        getActionBar().setDisplayHomeAsUpEnabled(true);
         setSlidingActionBarEnabled(true);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+        case android.R.id.home:
+            toggle();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
