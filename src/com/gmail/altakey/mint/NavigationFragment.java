@@ -19,6 +19,7 @@ import android.widget.TextView;
 import android.widget.ListView;
 
 import com.slidingmenu.lib.SlidingMenu;
+import com.slidingmenu.lib.app.SlidingActivity;
 
 public class NavigationFragment extends ListFragment {
     private CursorAdapter mAdapter;
@@ -69,7 +70,7 @@ public class NavigationFragment extends ListFragment {
         }
 
         try {
-            final SlidingMenu menu = ((Slidable)getActivity()).getSlidingMenu();
+            final SlidingMenu menu = ((SlidingActivity)getActivity()).getSlidingMenu();
             menu.toggle();
         } catch (ClassCastException e) {
         }
