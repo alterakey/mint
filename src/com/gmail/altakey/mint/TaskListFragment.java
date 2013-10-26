@@ -16,6 +16,8 @@ import android.content.IntentFilter;
 import android.content.Loader;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.database.ContentObserver;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -218,6 +220,7 @@ public class TaskListFragment extends ListFragment
 
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+            data.registerContentObserver(new Watcher());
             mAdapter.changeCursor(data);
             setListShown(true);
         }
@@ -225,6 +228,17 @@ public class TaskListFragment extends ListFragment
         @Override
         public void onLoaderReset(Loader<Cursor> loader) {
             mAdapter.changeCursor(null);
+        }
+
+        private class Watcher extends ContentObserver {
+            public Watcher() {
+                super(null);
+            }
+
+            @Override
+            public void onChange(boolean selfChange) {
+                getLoaderManager().restartLoader(1, null, TaskLoaderManipulator.this);
+            }
         }
     }
 
