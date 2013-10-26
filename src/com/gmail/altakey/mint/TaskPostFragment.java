@@ -80,7 +80,12 @@ public class TaskPostFragment extends DialogFragment {
         private Task build() {
             final Task t = new Task();
             final int status = getActiveFilter().getToodledoStatus();
-            t.title = mmField.getText().toString();
+            final String title = mmField.getText().toString();
+            if (title.length() > 0) {
+                t.title = title;
+            } else {
+                t.title = "New task";
+            }
             if (status == FilterType.UNKNOWN) {
                 t.duedate = (new Date().getTime() + DUE * 1000) / 1000;
             } else {
