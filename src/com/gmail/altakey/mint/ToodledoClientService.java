@@ -264,6 +264,7 @@ public class ToodledoClientService extends IntentService {
                             tasks.add(Task.fromCursor(c, 0));
                         }
                         mmClient.commitTasks(tasks, null);
+                        update();
                         recordStatus();
                     }
                 } finally {
