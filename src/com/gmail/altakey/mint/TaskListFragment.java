@@ -237,7 +237,15 @@ public class TaskListFragment extends ListFragment
 
             @Override
             public void onChange(boolean selfChange) {
-                getLoaderManager().restartLoader(1, null, TaskLoaderManipulator.this);
+                final Activity activity = getActivity();
+                if (activity != null) {
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            getLoaderManager().restartLoader(1, null, TaskLoaderManipulator.this);
+                        }
+                    });
+                }
             }
         }
     }
