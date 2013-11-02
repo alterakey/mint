@@ -34,7 +34,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Arrays;
-import java.text.SimpleDateFormat;
+import android.text.format.DateUtils;
 
 public class TaskListFragment extends ListFragment
 {
@@ -167,8 +167,14 @@ public class TaskListFragment extends ListFragment
             final Resources res = getResources();
 
             title.setText(task.title);
-            due.setText(new SimpleDateFormat("yyyy/MM/dd").format(task.duedate));
             timerFlag.setText("");
+
+            if (task.duedate > 0) {
+                due.setVisibility(View.VISIBLE);
+                due.setText(DateUtils.formatDateTime(getActivity(), task.duedate * 1000, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NUMERIC_DATE));
+            } else {
+                due.setVisibility(View.INVISIBLE);
+            }
 
             switch ((int)task.priority) {
             case -1:
