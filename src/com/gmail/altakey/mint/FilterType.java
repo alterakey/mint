@@ -82,7 +82,15 @@ public class FilterType implements Parcelable {
     }
 
     public FilterType setSimpleSelection(String type, int value) {
-        mSelection = String.format("%s=?", type);
+        return setSimpleSelection(type, value, false);
+    }
+
+    public FilterType setSimpleSelection(String type, int value, boolean includeCompleted) {
+        if (includeCompleted) {
+            mSelection = String.format("%s=?", type);
+        } else {
+            mSelection = String.format("%s=? and completed=0", type);
+        }
         mSelectionArgs = new String[] { String.valueOf(value) };
         return this;
     }
