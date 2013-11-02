@@ -195,13 +195,13 @@ public class TaskListFragment extends ListFragment
                 break;
             }
 
-            if (task.resolved.folder == null) {
+            if (task.resolved.folder.isNull()) {
                 taskFolder.setVisibility(View.GONE);
             } else {
                 taskFolder.setText(task.resolved.folder.name);
                 taskFolder.setVisibility(View.VISIBLE);
             }
-            if (task.resolved.context == null) {
+            if (task.resolved.context.isNull()) {
                 taskContext.setVisibility(View.GONE);
             } else {
                 taskContext.setText(task.resolved.context.name);
