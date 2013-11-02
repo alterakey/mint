@@ -10,8 +10,10 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.UUID;
 
+import android.util.Log;
+
 public class Task {
-    public static final int COLUMNS = 14;
+    public static final int COLUMNS = 11;
 
     public long _id;
     public String _cookie;
@@ -72,8 +74,6 @@ public class Task {
         task.note = c.getString(offset++);
         task.modified = c.getLong(offset++);
         task.completed = c.getLong(offset++);
-        task.folder = c.getLong(offset++);
-        task.context = c.getLong(offset++);
         task.priority = c.getLong(offset++);
         task.star = c.getLong(offset++);
         task.duedate = c.getLong(offset++);
