@@ -19,7 +19,7 @@ public class TaskProvider extends BaseProvider {
         "_id", "cookie", "task", "title", "note", "modified", "completed", "folder", "context", "priority", "star", "duedate", "duetime", "status", "folder_id", "folder_name", "folder_private", "folder_archived", "folder_ord", "context_id", "context_name"
     };
 
-    public static final String DEFAULT_ORDER = "order by duedate,priority desc";
+    public static final String DEFAULT_ORDER = "order by _duedate_sort_key,priority desc";
     public static final String NO_ORDER = "";
     public static final String HOTLIST_FILTER = "(priority=3 or (priority>=0 and duedate>0 and duedate<?)) and completed=0";
     public static final String ID_FILTER = "tasks._id=?";
@@ -71,7 +71,7 @@ public class TaskProvider extends BaseProvider {
     public static final int COL_CONTEXT_ID = 19;
     public static final int COL_CONTEXT_NAME = 20;
 
-    private static final String TASK_QUERY = "SELECT tasks._id,tasks.cookie,task,title,tasks.note,tasks.modified,tasks.completed,tasks.priority,tasks.star,tasks.duedate,tasks.duetime,status,folder AS folder_id,folders.name AS folder_name,folders.private AS folder_private,folders.archived AS folder_archived,folders.ord AS folder_ord,context AS context_id,contexts.name AS context_name FROM tasks LEFT JOIN folders USING (folder) LEFT JOIN contexts USING (context) WHERE %s %s";
+    private static final String TASK_QUERY = "SELECT tasks._id,tasks.cookie,task,title,tasks.note,tasks.modified,tasks.completed,tasks.priority,tasks.star,tasks.duedate,tasks.duetime,status,folder AS folder_id,folders.name AS folder_name,folders.private AS folder_private,folders.archived AS folder_archived,folders.ord AS folder_ord,context AS context_id,contexts.name AS context_name,(case when tasks.duedate=0 then 9223372036854775807 else tasks.duedate end) as _duedate_sort_key FROM tasks LEFT JOIN folders USING (folder) LEFT JOIN contexts USING (context) WHERE %s %s";
 
     private static final String TASK_INSERT_QUERY = "INSERT OR REPLACE INTO tasks (cookie,task,title,note,modified,completed,folder,context,priority,star,duedate,duetime,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
