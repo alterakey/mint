@@ -186,7 +186,7 @@ public class ToodledoClientService extends IntentService {
                 notifyNeeded.add("folder");
             }
 
-            if (data.containsKey("context")) {
+            if (false && data.containsKey("context")) {
                 final List<ContentValues> rows = new LinkedList<ContentValues>();
                 for (TaskContext t : (List<TaskContext>)data.get("context")) {
                     final ContentValues row = new ContentValues();
