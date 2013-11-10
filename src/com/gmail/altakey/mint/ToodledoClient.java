@@ -108,47 +108,64 @@ public class ToodledoClient {
         }
     }
 
-    public void addTask(Task t, String[] additionalFields) throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
-        addTasks(Arrays.asList(t), additionalFields);
+    public Task addTask(Task t, String[] additionalFields) throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
+        final List<Task> tasks = addTasks(Arrays.asList(t), additionalFields);
+        return tasks.get(0);
     }
 
-    public void addTasks(List<Task> tasks, String[] additionalFields) throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
+    public List<Task> addTasks(List<Task> tasks, String[] additionalFields) throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
         if (tasks.size() > 0) {
             final String fields = additionalFields == null ? "" : String.format("&fields=%s", Joiner.on(",").join(additionalFields));
-
-            issueRequest(
+            
+            final ByteArrayOutputStream os = issueRequest(
                 new HttpPost(
                     getServiceUrl("tasks/add", String.format("tasks=%s%s", URLEncoder.encode(getGson().toJson(tasks.toArray(new Task[0])), "UTF-8"), fields))
                     )
                 );
+            try {
+                return getGson().fromJson(os.toString("UTF-8"), new TypeToken<LinkedList<Task>>(){}.getType());
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            return Arrays.asList(new Task[] {});
         }
     }
 
-    public void commitTask(Task t, String[] additionalFields) throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
-        commitTasks(Arrays.asList(t), additionalFields);
+    public Task commitTask(Task t, String[] additionalFields) throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
+        final List<Task> tasks = commitTasks(Arrays.asList(t), additionalFields);
+        return tasks.get(0);
     }
 
-    public void commitTasks(List<Task> tasks, String[] additionalFields) throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
+    public List<Task> commitTasks(List<Task> tasks, String[] additionalFields) throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
         if (tasks.size() > 0) {
             final String fields = additionalFields == null ? "" : String.format("&fields=%s", Joiner.on(",").join(additionalFields));
 
             final List<Task> existingTasks = onlyExistingTasks(tasks);
             final List<Task> newTasks = onlyNewTasks(tasks);
-
+            ByteArrayOutputStream os = null;
+            
             if (existingTasks.size() > 0) {
-                issueRequest(
+                os = issueRequest(
                     new HttpPost(
                         getServiceUrl("tasks/edit", String.format("tasks=%s%s", URLEncoder.encode(getGson().toJson(existingTasks.toArray(new Task[0])), "UTF-8"), fields))
                         )
                     );
             }
             if (newTasks.size() > 0) {
-                issueRequest(
+                os = issueRequest(
                     new HttpPost(
                         getServiceUrl("tasks/add", String.format("tasks=%s%s", URLEncoder.encode(getGson().toJson(newTasks.toArray(new Task[0])), "UTF-8"), fields))
                         )
                     );
             }
+            try {
+                return getGson().fromJson(os.toString("UTF-8"), new TypeToken<LinkedList<Task>>(){}.getType());
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            return Arrays.asList(new Task[] {});
         }
     }
 
