@@ -133,7 +133,7 @@ public class ToodledoClient {
     }
 
     public Task editTask(Task t, String[] additionalFields) throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
-        final List<Task> tasks = commitTasks(Arrays.asList(t), additionalFields);
+        final List<Task> tasks = editTasks(Arrays.asList(t), additionalFields);
         return tasks.get(0);
     }
 
@@ -142,7 +142,7 @@ public class ToodledoClient {
             final String fields = additionalFields == null ? "" : String.format("&fields=%s", Joiner.on(",").join(additionalFields));
             final ByteArrayOutputStream os = issueRequest(
                 new HttpPost(
-                    getServiceUrl("tasks/edit", String.format("tasks=%s%s", URLEncoder.encode(getGson().toJson(existingTasks.toArray(new Task[0])), "UTF-8"), fields))
+                    getServiceUrl("tasks/edit", String.format("tasks=%s%s", URLEncoder.encode(getGson().toJson(tasks.toArray(new Task[0])), "UTF-8"), fields))
                     )
                 );
             try {

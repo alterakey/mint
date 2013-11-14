@@ -61,6 +61,10 @@ public class Task {
         return note.contains(String.format("(mint:%s)", _cookie));
     }
 
+    public boolean isNew() {
+        return id == 0;
+    }
+
     public static String nextCookie() {
         return UUID.randomUUID().toString();
     }
