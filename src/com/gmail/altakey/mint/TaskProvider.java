@@ -110,6 +110,7 @@ public class TaskProvider extends BaseProvider {
             try {
                 final long id = stmt.executeInsert();
                 if (id >= 0) {
+                    getContext().getContentResolver().notifyChange(uri, null);
                     return ContentUris.withAppendedId(uri, id);
                 } else {
                     return null;
@@ -127,6 +128,7 @@ public class TaskProvider extends BaseProvider {
             try {
                 final long id = stmt.executeInsert();
                 if (id >= 0) {
+                    getContext().getContentResolver().notifyChange(uri, null);
                     return uri;
                 } else {
                     return null;
@@ -167,7 +169,11 @@ public class TaskProvider extends BaseProvider {
             }
 
             try {
-                return stmt.executeUpdateDelete();
+                final int affected = stmt.executeUpdateDelete();
+                if (affected > 0) {
+                    getContext().getContentResolver().notifyChange(uri, null);
+                }
+                return affected;
             } finally {
                 stmt.close();
             }
@@ -201,7 +207,11 @@ public class TaskProvider extends BaseProvider {
             }
 
             try {
-                return stmt.executeUpdateDelete();
+                final int affected = stmt.executeUpdateDelete();
+                if (affected > 0) {
+                    getContext().getContentResolver().notifyChange(uri, null);
+                }
+                return affected;
             } finally {
                 stmt.close();
             }
