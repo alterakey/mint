@@ -132,33 +132,19 @@ public class ToodledoClient {
         }
     }
 
-    public Task commitTask(Task t, String[] additionalFields) throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
+    public Task editTask(Task t, String[] additionalFields) throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
         final List<Task> tasks = commitTasks(Arrays.asList(t), additionalFields);
         return tasks.get(0);
     }
 
-    public List<Task> commitTasks(List<Task> tasks, String[] additionalFields) throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
+    public List<Task> editTasks(List<Task> tasks, String[] additionalFields) throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
         if (tasks.size() > 0) {
             final String fields = additionalFields == null ? "" : String.format("&fields=%s", Joiner.on(",").join(additionalFields));
-
-            final List<Task> existingTasks = onlyExistingTasks(tasks);
-            final List<Task> newTasks = onlyNewTasks(tasks);
-            ByteArrayOutputStream os = null;
-            
-            if (existingTasks.size() > 0) {
-                os = issueRequest(
-                    new HttpPost(
-                        getServiceUrl("tasks/edit", String.format("tasks=%s%s", URLEncoder.encode(getGson().toJson(existingTasks.toArray(new Task[0])), "UTF-8"), fields))
-                        )
-                    );
-            }
-            if (newTasks.size() > 0) {
-                os = issueRequest(
-                    new HttpPost(
-                        getServiceUrl("tasks/add", String.format("tasks=%s%s", URLEncoder.encode(getGson().toJson(newTasks.toArray(new Task[0])), "UTF-8"), fields))
-                        )
-                    );
-            }
+            final ByteArrayOutputStream os = issueRequest(
+                new HttpPost(
+                    getServiceUrl("tasks/edit", String.format("tasks=%s%s", URLEncoder.encode(getGson().toJson(existingTasks.toArray(new Task[0])), "UTF-8"), fields))
+                    )
+                );
             try {
                 return getGson().fromJson(os.toString("UTF-8"), new TypeToken<LinkedList<Task>>(){}.getType());
             } catch (UnsupportedEncodingException e) {
@@ -167,26 +153,6 @@ public class ToodledoClient {
         } else {
             return Arrays.asList(new Task[] {});
         }
-    }
-
-    private List<Task> onlyNewTasks(final List<Task> from) {
-        final List<Task> ret = new LinkedList<Task>();
-        for (Task t: from) {
-            if (t.id == 0) {
-                ret.add(t);
-            }
-        }
-        return ret;
-    }
-
-    private List<Task> onlyExistingTasks(final List<Task> from) {
-        final List<Task> ret = new LinkedList<Task>();
-        for (Task t: from) {
-            if (t.id != 0) {
-                ret.add(t);
-            }
-        }
-        return ret;
     }
 
     public TaskStatus getStatus() throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
