@@ -8,9 +8,12 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.content.ContentUris;
+import android.util.Log;
+import android.text.TextUtils;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.LinkedList;
 
 public class TaskProvider extends BaseProvider {
     public static final Uri CONTENT_URI = Uri.parse(String.format("content://%s/tasks", ProviderMap.AUTHORITY_TASK));
@@ -77,7 +80,7 @@ public class TaskProvider extends BaseProvider {
 
     private static final String TASK_REPLACE_QUERY = "REPLACE INTO tasks (_id,cookie,task,title,note,modified,completed,folder,context,priority,star,duedate,duetime,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
-    private static final String TASK_UPDATE_QUERY = "UPDATE tasks set cookie=?,task=?,title=?,note=?,modified=?,completed=?,folder=?,context=?,priority=?,star=?,duedate=?,duetime=?,status=? %s";
+    private static final String TASK_UPDATE_QUERY = "UPDATE tasks SET %s %s";
 
     private static final String TASK_DELETE_QUERY = "DELETE FROM tasks %s";
 
@@ -151,12 +154,13 @@ public class TaskProvider extends BaseProvider {
                 selection = ProviderUtils.expandFilter(selection, selectionArgs);
             }
 
-            final SQLiteStatement stmt = db.compileStatement(String.format(TASK_UPDATE_QUERY, selection == null ? "" : String.format("WHERE %s", selection)));
-            int offset = ProviderUtils.bind(stmt, values, new String[] {
-                    "cookie", "task", "title", "note", "modified",
-                    "completed", "folder", "context", "priority", "star",
-                    "duedate", "duetime", "status"
-            });
+            final List<String> holders = new LinkedList<String>();
+            for (String k: values.keySet()) {
+                holders.add(String.format("%s=?", k));
+            }
+
+            final SQLiteStatement stmt = db.compileStatement(String.format(TASK_UPDATE_QUERY, TextUtils.join(",", holders), selection == null ? "" : String.format("WHERE %s", selection)));
+            int offset = ProviderUtils.bind(stmt, values, values.keySet());
 
             if (selectionArgs != null) {
                 for (final String arg: selectionArgs) {
