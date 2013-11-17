@@ -36,9 +36,13 @@ import java.util.HashSet;
 public class ToodledoClientService extends IntentService {
     public static final String ACTION_SYNC = "com.gmail.altakey.mint.SYNC";
     public static final String ACTION_SYNC_DONE = "com.gmail.altakey.mint.SYNC_DONE";
+    public static final String ACTION_SYNC_BEGIN = "com.gmail.altakey.mint.SYNC_BEGIN";
+    public static final String ACTION_SYNC_ABORT = "com.gmail.altakey.mint.SYNC_ABORT";
+    public static final String ACTION_LOGIN_REQUIRED = "com.gmail.altakey.mint.LOGIN_REQUIRED";
 
     public static final String EXTRA_TASKS = "tasks";
     public static final String EXTRA_TASK_FIELDS = "task_fields";
+    public static final String EXTRA_ABORT_REASON = "reason";
 
     private ToodledoClient mClient;
 
@@ -82,15 +86,23 @@ public class ToodledoClientService extends IntentService {
     }
 
     private void abort(String message) {
-        new Notifier(this).boo(String.format("sync failure: %s", message));
+        final Intent intent = new Intent(ACTION_SYNC_ABORT);
+        intent.putExtra(EXTRA_ABORT_REASON, message);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+    }
+
+    private void begin() {
+        final Intent intent = new Intent(ACTION_SYNC_BEGIN);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
     private void fail() {
-        new Notifier(this).notify("Login failed", Notifier.NOTIFY_LOGIN_FAILED);
+        abort("login failure");
     }
 
     private void require() {
-        new Notifier(this).notifyOnce("Setup synchronization", Notifier.NOTIFY_LOGIN_REQUIRED);
+        final Intent intent = new Intent(ACTION_LOGIN_REQUIRED);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
     private void sync() throws IOException, Authenticator.Exception {

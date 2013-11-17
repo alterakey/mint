@@ -34,10 +34,9 @@ import java.util.Arrays;
 import com.slidingmenu.lib.SlidingMenu;
 import com.slidingmenu.lib.app.SlidingActivity;
 
-public class TaskListActivity extends SlidingActivity
+public class WelcomeActivity extends Activity
 {
-    public static final String KEY_LIST_FILTER = "filter";
-
+    public SyncPoker mSyncPokerManip = new SyncPoker(this);
     public LoginTroubleListener mTroubleListener = new LoginTroubleListener();
 
     /** Called when the activity is first created. */
@@ -48,46 +47,19 @@ public class TaskListActivity extends SlidingActivity
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 
         setContentView(R.layout.plate);
-        setBehindContentView(R.layout.list_menu);
-
-        final Intent intent = getIntent();
-        FilterType filter = (FilterType)intent.getParcelableExtra(KEY_LIST_FILTER);
-        if (filter == null) {
-            filter = new FilterType().makeHot();
-        }
-
-        // configure the SlidingMenu
-        final SlidingMenu menu = getSlidingMenu();
-        menu.setMode(SlidingMenu.LEFT);
-        menu.setTouchModeAbove(SlidingMenu.TOUCHMODE_MARGIN);
-        menu.setShadowWidthRes(R.dimen.shadow_width);
-        menu.setShadowDrawable(R.drawable.shadow);
-        menu.setBehindOffsetRes(R.dimen.slidingmenu_offset);
-        menu.setFadeDegree(0.35f);
 
         getFragmentManager()
             .beginTransaction()
-            .add(R.id.frag, TaskListFragment.newInstance(filter), TaskListFragment.TAG)
+            .add(R.id.frag, WelcomeFragment.newInstance(), TaskListFragment.TAG)
             .commit();
-
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        setSlidingActionBarEnabled(true);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-        case android.R.id.home:
-            toggle();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
     public void onResume() {
         super.onResume();
         mTroubleListener.register();
+
+        getLoaderManager().restartLoader(0, null, mSyncPokerManip);
     }
 
     @Override
@@ -98,12 +70,12 @@ public class TaskListActivity extends SlidingActivity
 
     private class LoginTroubleListener extends BroadcastReceiver {
         private Context getContext() {
-            return TaskListActivity.this;
+            return WelcomeActivity.this;
         }
 
         public void register() {
             final IntentFilter filter = new IntentFilter();
-            filter.addAction(ToodledoClientService.ACTION_LOGIN_REQUIRED);
+            filter.addAction(ToodledoClientService.ACTION_SYNC_DONE);
             filter.addAction(ToodledoClientService.ACTION_SYNC_ABORT);
             LocalBroadcastManager.getInstance(getContext()).registerReceiver(this, filter);
         }
@@ -115,10 +87,11 @@ public class TaskListActivity extends SlidingActivity
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
-            if (ToodledoClientService.ACTION_LOGIN_REQUIRED.equals(action)) {
-                final Intent i = new Intent(getContext(), WelcomeActivity.class);
-                startActivity(i);
-                finish();
+            if (ToodledoClientService.ACTION_SYNC_DONE.equals(action)) {
+                getFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.frag, new TaskListFragment(), TaskListFragment.TAG)
+                    .commit();
             } else if (ToodledoClientService.ACTION_SYNC_ABORT.equals(action)) {
                 final String message = String.format("sync failed: %s", intent.getStringExtra(ToodledoClientService.EXTRA_ABORT_REASON));
                 Toast.makeText(context, message, Toast.LENGTH_LONG).show();

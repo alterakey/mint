@@ -32,7 +32,7 @@ import java.io.IOException;
 
 public abstract class TaskGroupListFragment extends Fragment {
     private TaskCountLoader mTaskCountLoaderManip = new TaskCountLoader();
-    private SyncPoker mSyncPokerManip = new SyncPoker();
+    private SyncPoker mSyncPokerManip = new SyncPoker(this);
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -110,45 +110,6 @@ public abstract class TaskGroupListFragment extends Fragment {
 
         @Override
         public void onLoaderReset(final Loader<Cursor> loader) {
-        }
-    }
-
-    public class SyncPoker implements LoaderManager.LoaderCallbacks<Void> {
-        @Override
-        public Loader<Void> onCreateLoader(final int id, final Bundle args) {
-            return new AsyncTaskLoader<Void>(getActivity()) {
-                @Override
-                public Void loadInBackground() {
-                    try {
-                        final Context me = getContext();
-                        final ToodledoClient client = new ToodledoClient(Authenticator.create(me), me);
-                        final ToodledoClientService.Synchronizer sync = new ToodledoClientService.Synchronizer(me, client);
-                        sync.update();
-                        sync.commit();
-                        return null;
-                    } catch (final IOException e) {
-                        Log.d("MA.SP", "ignoring", e);
-                        return null;
-                    } catch (final Authenticator.BogusException e) {
-                        Log.d("MA.SP", "ignoring", e);
-                        return null;
-                    } catch (final Authenticator.FailureException e) {
-                        Log.d("MA.SP", "ignoring", e);
-                        return null;
-                    } catch (final Authenticator.ErrorException e) {
-                        Log.d("MA.SP", "ignoring", e);
-                        return null;
-                    }
-                }
-            };
-        }
-
-        @Override
-        public void onLoadFinished(final Loader<Void> loader, final Void data) {
-        }
-
-        @Override
-        public void onLoaderReset(final Loader<Void> loader) {
         }
     }
 

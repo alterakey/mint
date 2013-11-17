@@ -14,7 +14,7 @@
     </activity>
     <activity android:name="TaskListActivity" />
     <activity android:name="TaskEditActivity" />
-    <activity android:name="LoginTroubleActivity" />
+    <activity android:name="WelcomeActivity" />
     <activity android:name="ConfigActivity" />
     <service android:name="ToodledoClientService" />
     <provider android:authorities="com.gmail.altakey.mint.TaskProvider" android:exported="false" android:name="TaskProvider" />
