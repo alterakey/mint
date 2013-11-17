@@ -71,7 +71,7 @@ public class TaskListActivity extends SlidingActivity
             .commit();
 
         getActionBar().setDisplayHomeAsUpEnabled(true);
-        setSlidingActionBarEnabled(true);
+        setSlidingActionBarEnabled(false);
     }
 
     @Override
