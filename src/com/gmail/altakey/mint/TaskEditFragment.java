@@ -69,6 +69,7 @@ public class TaskEditFragment extends Fragment
         });
         update(v);
 
+        setHasOptionsMenu(true);
         getLoaderManager().initLoader(1, getArguments(), mLoaderManip);
         return v;
     }
@@ -128,7 +129,17 @@ public class TaskEditFragment extends Fragment
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.main, menu);
+        inflater.inflate(R.menu.edit, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+        case R.id.edit_delete:
+            Toast.makeText(getActivity(), "TBD: remove tasks", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
