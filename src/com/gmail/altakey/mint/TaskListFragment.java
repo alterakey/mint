@@ -71,7 +71,9 @@ public class TaskListFragment extends ListFragment
         getActivity().setTitle(mFilterType.getTitle());
 
         final ListView listView = getListView();
-        listView.setOnItemLongClickListener(new SelectionModeListener());
+        //listView.setOnItemLongClickListener(new SelectionModeListener());
+        listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+        listView.setMultiChoiceModeListener(new TaskSelectionMode());
 
         setHasOptionsMenu(true);
         setListAdapter(mAdapter);
@@ -256,7 +258,7 @@ public class TaskListFragment extends ListFragment
         }
     }
 
-    private class TaskSelectionMode implements ActionMode.Callback {
+    private class TaskSelectionMode implements AbsListView.MultiChoiceModeListener {
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
             mActionMode = mode;
@@ -275,7 +277,7 @@ public class TaskListFragment extends ListFragment
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             switch (item.getItemId()) {
             case R.id.list_selection_delete:
-                Toast.makeText(getActivity(), "TBD: remove tasks", Toast.LENGTH_SHORT).show();
+                deleteSelectedItems();
                 mode.finish();
                 return true;
             default:
@@ -286,6 +288,31 @@ public class TaskListFragment extends ListFragment
         @Override
         public void onDestroyActionMode(ActionMode mode) {
             mActionMode = null;
+        }
+
+        @Override
+        public void onItemCheckedStateChanged(ActionMode mode,
+                int position, long id, boolean checked) {
+            setTitle(mode);
+        }
+
+        private void setTitle(ActionMode mode) {
+            final int checkedCount = getListView().getCheckedItemCount();
+            switch (checkedCount) {
+                case 0:
+                    mode.setTitle(null);
+                    break;
+                case 1:
+                    mode.setTitle("One item selected");
+                    break;
+                default:
+                    mode.setTitle(String.format("%d items selected", checkedCount));
+                    break;
+            }
+        }
+
+        private void deleteSelectedItems() {
+            Toast.makeText(getActivity(), "TBD: remove tasks", Toast.LENGTH_SHORT).show();
         }
     }
 }
