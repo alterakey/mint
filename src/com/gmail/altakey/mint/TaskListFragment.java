@@ -312,7 +312,45 @@ public class TaskListFragment extends ListFragment
         }
 
         private void deleteSelectedItems() {
-            Toast.makeText(getActivity(), "TBD: remove tasks", Toast.LENGTH_SHORT).show();
+            final long[] ids = getListView().getCheckedItemIds();
+
+            new AsyncTask<Void, Integer, Void> () {
+                private final ProgressDialog mDialog = new ProgressDialog(getActivity());
+
+                @Override
+                protected void onPreExecute() {
+                    mDialog.setMessage("Removing tasks");
+                    mDialog.setIndeterminate(false);
+                    mDialog.setCancelable(false);
+                    mDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                    mDialog.setMax(ids.length);
+                    mDialog.show();
+                }
+                 
+                @Override
+                protected Void doInBackground(Void... params) {
+                    Log.d("TLF", "started to load");
+                    try {
+                        for (int i=0; i<ids.length; ++i) {
+                            publishProgress(i);
+                            Thread.sleep(1000);
+                        }
+                    } catch (InterruptedException e) {
+                        Log.d("TLF", "interrupted", e);
+                    }
+                    return null;
+                }
+
+                @Override
+                protected void onPostExecute(Void ret) {
+                    mDialog.dismiss();
+                }
+
+                @Override
+                protected void onProgressUpdate(Integer... progress) {
+                    mDialog.setProgress(progress[0]);
+                }
+            }.execute();
         }
     }
 }
