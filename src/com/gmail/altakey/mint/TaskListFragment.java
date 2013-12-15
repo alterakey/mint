@@ -36,6 +36,8 @@ import java.util.Queue;
 import java.util.Arrays;
 import android.text.format.DateUtils;
 
+import android.app.Fragment;
+
 public class TaskListFragment extends ListFragment
 {
     public static final String TAG = "task_list";
@@ -315,18 +317,12 @@ public class TaskListFragment extends ListFragment
             final long[] ids = getListView().getCheckedItemIds();
 
             new AsyncTask<Void, Integer, Void> () {
-                private final ProgressDialog mDialog = new ProgressDialog(getActivity());
-
                 @Override
                 protected void onPreExecute() {
-                    mDialog.setMessage("Removing tasks");
-                    mDialog.setIndeterminate(false);
-                    mDialog.setCancelable(false);
-                    mDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-                    mDialog.setMax(ids.length);
-                    mDialog.show();
+                    final RemoveTaskDialog dialog = RemoveTaskDialog.newInstance(ids.length);
+                    dialog.show(getFragmentManager(), RemoveTaskDialog.TAG);
                 }
-                 
+
                 @Override
                 protected Void doInBackground(Void... params) {
                     Log.d("TLF", "started to load");
@@ -343,14 +339,49 @@ public class TaskListFragment extends ListFragment
 
                 @Override
                 protected void onPostExecute(Void ret) {
-                    mDialog.dismiss();
+                    getDialog().dismissAllowingStateLoss();
                 }
 
                 @Override
                 protected void onProgressUpdate(Integer... progress) {
-                    mDialog.setProgress(progress[0]);
+                    getDialog().setProgress(progress[0]);
+                }
+
+                private RemoveTaskDialog getDialog() {
+                    return (RemoveTaskDialog)getFragmentManager().findFragmentByTag(RemoveTaskDialog.TAG);
                 }
             }.execute();
+        }
+    }
+
+    public static class RemoveTaskDialog extends DialogFragment {
+        public static final String TAG = "remove_task_dialog";
+
+        private static final String KEY_LENGTH = "length";
+
+        public static RemoveTaskDialog newInstance(final int length) {
+            final RemoveTaskDialog f = new RemoveTaskDialog();
+            final Bundle args = new Bundle();
+            args.putInt(KEY_LENGTH, length);
+            f.setArguments(args);
+            return f;
+        }
+
+        @Override
+        public Dialog onCreateDialog(final Bundle savedInstanceState) {
+            final Bundle args = getArguments();
+            final ProgressDialog dialog = new ProgressDialog(getActivity());
+            dialog.setMessage("Removing tasks");
+            dialog.setIndeterminate(false);
+            dialog.setCancelable(false);
+            dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            dialog.setMax(args.getInt(KEY_LENGTH));
+            return dialog;
+        }
+
+        public void setProgress(final int progress) {
+            final ProgressDialog dialog = (ProgressDialog)getDialog();
+            dialog.setProgress(progress);
         }
     }
 }
