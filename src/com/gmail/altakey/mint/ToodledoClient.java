@@ -20,6 +20,7 @@ import com.google.gson.reflect.TypeToken;
 import java.util.Arrays;
 import java.util.List;
 import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 import java.io.UnsupportedEncodingException;
@@ -153,6 +154,31 @@ public class ToodledoClient {
         } else {
             return Arrays.asList(new Task[] {});
         }
+    }
+
+    public List<Task> deleteTasks(List<Task> tasks) throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
+        if (tasks.size() > 0) {
+            final List<String> ids = new ArrayList<String>();
+            for (Task t : tasks) {
+                ids.add(String.valueOf(t.id));
+            }
+
+            final ByteArrayOutputStream os = issueRequest(
+                new HttpPost(
+                    getServiceUrl("tasks/delete", String.format("tasks=%s", URLEncoder.encode(getGson().toJson(ids.toArray(new String[0])), "UTF-8")))
+                    )
+                );
+
+            final String str = os.toString();
+            return tasks;
+        } else {
+            return Arrays.asList(new Task[] {});
+        }
+    }
+
+    public Task deleteTask(Task t) throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {
+        final List<Task> tasks = deleteTasks(Arrays.asList(t));
+        return tasks.get(0);
     }
 
     public TaskStatus getStatus() throws IOException, Authenticator.BogusException, Authenticator.ErrorException, Authenticator.FailureException {

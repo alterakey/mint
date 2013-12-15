@@ -31,6 +31,7 @@ import java.util.Formatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Arrays;
@@ -315,7 +316,7 @@ public class TaskListFragment extends ListFragment
         }
 
         private void deleteSelectedItems() {
-            private final long[] ids = getListView().getCheckedItemIds();
+            final long[] ids = getListView().getCheckedItemIds();
 
             new AsyncTask<Void, Integer, Void> () {
                 @Override
@@ -328,7 +329,29 @@ public class TaskListFragment extends ListFragment
                 protected Void doInBackground(Void... params) {
                     final ContentResolver resolver = getActivity().getContentResolver();
                     for (int i=0; i<ids.length; ++i) {
-                        resolver.delete(TaskProvider.CONTENT_URI, TaskProvider.ID_FILTER, new String[] { String.valueOf(ids[i]) });
+                        final String id = String.valueOf(ids[i]);
+                        final Cursor c = resolver.query(
+                            TaskProvider.CONTENT_URI,
+                            TaskProvider.PROJECTION,
+                            TaskProvider.ID_FILTER,
+                            new String[] { id },
+                            TaskProvider.DEFAULT_ORDER
+                            );
+                        if (c != null) { 
+                            final List<Task> tasks = new ArrayList<Task>();
+                            for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
+                                final Task t = Task.fromCursor(c, 0);
+                                tasks.add(t);
+                            }
+                            
+                            if (tasks.size() > 0) {
+                                final Intent intent = new Intent(getActivity(), ToodledoClientService.class);
+                                intent.setAction(ToodledoClientService.ACTION_DELETE);
+                                intent.putExtra(ToodledoClientService.EXTRA_TASK, ToodledoClientService.asListOfTasks(tasks));
+                                getActivity().startService(intent);
+                            }
+                        }
+                        resolver.delete(TaskProvider.CONTENT_URI, TaskProvider.ID_FILTER, new String[] { id });
                         publishProgress(i);
                     }
                     return null;
