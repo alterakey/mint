@@ -37,6 +37,7 @@ import java.util.Arrays;
 import android.text.format.DateUtils;
 
 import android.app.Fragment;
+import android.content.ContentResolver;
 
 public class TaskListFragment extends ListFragment
 {
@@ -314,7 +315,7 @@ public class TaskListFragment extends ListFragment
         }
 
         private void deleteSelectedItems() {
-            final long[] ids = getListView().getCheckedItemIds();
+            private final long[] ids = getListView().getCheckedItemIds();
 
             new AsyncTask<Void, Integer, Void> () {
                 @Override
@@ -325,14 +326,10 @@ public class TaskListFragment extends ListFragment
 
                 @Override
                 protected Void doInBackground(Void... params) {
-                    Log.d("TLF", "started to load");
-                    try {
-                        for (int i=0; i<ids.length; ++i) {
-                            publishProgress(i);
-                            Thread.sleep(1000);
-                        }
-                    } catch (InterruptedException e) {
-                        Log.d("TLF", "interrupted", e);
+                    final ContentResolver resolver = getActivity().getContentResolver();
+                    for (int i=0; i<ids.length; ++i) {
+                        resolver.delete(TaskProvider.CONTENT_URI, TaskProvider.ID_FILTER, new String[] { String.valueOf(ids[i]) });
+                        publishProgress(i);
                     }
                     return null;
                 }
