@@ -34,12 +34,16 @@ import java.util.Set;
 import java.util.HashSet;
 
 public class ToodledoClientService extends IntentService {
+    public static final String ACTION_ADD = "com.gmail.altakey.mint.ADD";
+    public static final String ACTION_REMOVE = "com.gmail.altakey.mint.REMOVE";
+    public static final String ACTION_UPDATE = "com.gmail.altakey.mint.UPDATE";
     public static final String ACTION_SYNC = "com.gmail.altakey.mint.SYNC";
     public static final String ACTION_SYNC_DONE = "com.gmail.altakey.mint.SYNC_DONE";
     public static final String ACTION_SYNC_BEGIN = "com.gmail.altakey.mint.SYNC_BEGIN";
     public static final String ACTION_SYNC_ABORT = "com.gmail.altakey.mint.SYNC_ABORT";
     public static final String ACTION_LOGIN_REQUIRED = "com.gmail.altakey.mint.LOGIN_REQUIRED";
 
+    public static final String EXTRA_TASK = "task";
     public static final String EXTRA_TASKS = "tasks";
     public static final String EXTRA_TASK_FIELDS = "task_fields";
     public static final String EXTRA_ABORT_REASON = "reason";
@@ -70,6 +74,18 @@ public class ToodledoClientService extends IntentService {
         final String action = intent.getAction();
 
         try {
+            if (ACTION_ADD.equals(action)) {
+                add(extractTask(intent));
+                sync_done();
+            }
+            if (ACTION_REMOVE.equals(action)) {
+                remove(extractTask(intent));
+                sync_done();
+            }
+            if (ACTION_UPDATE.equals(action)) {
+                update(extractTask(intent));
+                sync_done();
+            }
             if (ACTION_SYNC.equals(action)) {
                 sync();
                 sync_done();
@@ -83,6 +99,20 @@ public class ToodledoClientService extends IntentService {
         } catch (Authenticator.Exception e) {
             abort(e.getMessage());
         }
+    }
+
+    private Task extractTask(final Intent intent) {
+        final String json = intent.getExtraString(EXTRA_TASK);
+        return getGson().fromJson(json, new TypeToken<Task>(){}.getType());
+    }
+
+    private static Gson getGson() {
+        final GsonBuilder builder = new GsonBuilder();
+        builder.registerTypeAdapter(TaskStatus.class, new TaskStatus.JsonAdapter());
+        builder.registerTypeAdapter(TaskFolder.class, new TaskFolder.JsonAdapter());
+        builder.registerTypeAdapter(Task.class, new Task.JsonAdapter());
+        builder.registerTypeAdapter(TaskContext.class, new TaskContext.JsonAdapter());
+        return builder.create();
     }
 
     private void abort(String message) {
@@ -103,6 +133,18 @@ public class ToodledoClientService extends IntentService {
     private void require() {
         final Intent intent = new Intent(ACTION_LOGIN_REQUIRED);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+    }
+
+    private void add(final Task t) {
+        Log.d("TCS", "adding task");
+    }
+
+    private void remove(final Task t) {
+        Log.d("TCS", "removing task");
+    }
+
+    private void update(final Task t) {
+        Log.d("TCS", "updating task");
     }
 
     private void sync() throws IOException, Authenticator.Exception {
