@@ -54,10 +54,6 @@ public class TaskPostFragment extends DialogFragment {
             final Task task = build();
 
             addTask(context, task);
-
-            final Intent intent = new Intent(context, ToodledoClientService.class);
-            intent.setAction(ToodledoClientService.ACTION_SYNC);
-            context.startService(intent);
         }
 
         private void addTask(final Context context, final Task task) {
@@ -75,6 +71,11 @@ public class TaskPostFragment extends DialogFragment {
             values.put(TaskProvider.COLUMN_DUETIME, task.duetime);
             values.put(TaskProvider.COLUMN_STATUS, task.status);
             context.getContentResolver().insert(TaskProvider.CONTENT_URI, values);
+            
+            final Intent intent = new Intent(getActivity(), ToodledoClientService.class);
+            intent.setAction(ToodledoClientService.ACTION_ADD);
+            intent.putExtra(ToodledoClientService.EXTRA_TASK, ToodledoClientService.asListOfTasks(task));
+            getActivity().startService(intent);
         }
 
         private Task build() {

@@ -46,7 +46,6 @@ public class TaskEditFragment extends Fragment
 
     private Task mTask;
     private TaskLoaderManipulator mLoaderManip = new TaskLoaderManipulator();
-    private TaskCommitterManipulator mCommitterManip = new TaskCommitterManipulator();
 
     public static TaskEditFragment newInstance(long task) {
         final TaskEditFragment f = new TaskEditFragment();
@@ -93,7 +92,7 @@ public class TaskEditFragment extends Fragment
         }
     }
 
-    private void commit(View v) {
+    private void edit(View v) {
         final TextView title = (TextView)v.findViewById(R.id.title);
         final TextView note = (TextView)v.findViewById(R.id.note);
         if (mTask != null) {
@@ -146,8 +145,8 @@ public class TaskEditFragment extends Fragment
     public void onPause() {
         super.onPause();
         if (mTask != null) {
-            commit(getView());
-            getLoaderManager().initLoader(2, null, mCommitterManip);
+            edit(getView());
+            commit();
         }
     }
 
@@ -177,41 +176,25 @@ public class TaskEditFragment extends Fragment
         }
     }
 
-    private class TaskCommitterManipulator implements LoaderManager.LoaderCallbacks<Void> {
-        @Override
-        public Loader<Void> onCreateLoader(int id, Bundle args) {
-            return new AsyncTaskLoader<Void>(getActivity()) {
-                @Override
-                public Void loadInBackground() {
-                    final Task task = mTask;
-                    final ContentValues values = new ContentValues();
-                    values.put(TaskProvider.COLUMN_TITLE, task.title);
-                    values.put(TaskProvider.COLUMN_NOTE, task.note);
-                    values.put(TaskProvider.COLUMN_MODIFIED, task.modified);
-                    values.put(TaskProvider.COLUMN_COMPLETED, task.completed);
-                    values.put(TaskProvider.COLUMN_FOLDER, task.folder);
-                    values.put(TaskProvider.COLUMN_CONTEXT, task.context);
-                    values.put(TaskProvider.COLUMN_PRIORITY, task.priority);
-                    values.put(TaskProvider.COLUMN_STAR, task.star);
-                    values.put(TaskProvider.COLUMN_DUEDATE, task.duedate);
-                    values.put(TaskProvider.COLUMN_DUETIME, task.duetime);
-                    values.put(TaskProvider.COLUMN_STATUS, task.status);
-                    getContext().getContentResolver().update(TaskProvider.CONTENT_URI, values, TaskProvider.ID_FILTER, new String[] { String.valueOf(task.id) });
-                    return null;
-                }
-            };
-        }
+    private void commit() {
+        final ContentValues values = new ContentValues();
+        values.put(TaskProvider.COLUMN_TITLE, mTask.title);
+        values.put(TaskProvider.COLUMN_NOTE, mTask.note);
+        values.put(TaskProvider.COLUMN_MODIFIED, mTask.modified);
+        values.put(TaskProvider.COLUMN_COMPLETED, mTask.completed);
+        values.put(TaskProvider.COLUMN_FOLDER, mTask.folder);
+        values.put(TaskProvider.COLUMN_CONTEXT, mTask.context);
+        values.put(TaskProvider.COLUMN_PRIORITY, mTask.priority);
+        values.put(TaskProvider.COLUMN_STAR, mTask.star);
+        values.put(TaskProvider.COLUMN_DUEDATE, mTask.duedate);
+        values.put(TaskProvider.COLUMN_DUETIME, mTask.duetime);
+        values.put(TaskProvider.COLUMN_STATUS, mTask.status);
+        getActivity().getContentResolver().update(TaskProvider.CONTENT_URI, values, TaskProvider.ID_FILTER, new String[] { String.valueOf(mTask.id) });
 
-        @Override
-        public void onLoadFinished(Loader<Void> loader, Void data) {
-            final Intent intent = new Intent(getActivity(), ToodledoClientService.class);
-            intent.setAction(ToodledoClientService.ACTION_SYNC);
-            getActivity().startService(intent);
-        }
-
-        @Override
-        public void onLoaderReset(Loader<Void> loader) {
-        }
+        final Intent intent = new Intent(getActivity(), ToodledoClientService.class);
+        intent.setAction(ToodledoClientService.ACTION_UPDATE);
+        intent.putExtra(ToodledoClientService.EXTRA_TASK, ToodledoClientService.asListOfTasks(mTask));
+        getActivity().startService(intent);
     }
 
     public static class DueDatePicker extends DialogFragment implements DatePickerDialog.OnDateSetListener {
