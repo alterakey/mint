@@ -151,7 +151,6 @@ public class ToodledoClientService extends IntentService {
     private void sync() throws IOException, Authenticator.Exception {
         final Synchronizer sync = new Synchronizer(this, mClient);
         sync.update();
-        sync.commit();
     }
 
     private void sync_done() {
@@ -303,45 +302,6 @@ public class ToodledoClientService extends IntentService {
                 if ("context".equals(key)) {
                     resolver.notifyChange(TaskContextProvider.CONTENT_URI, null);
                     resolver.notifyChange(TaskCountProvider.CONTENT_URI_BY_CONTEXT, null);
-                }
-            }
-        }
-
-        public void commit() throws IOException, Authenticator.BogusException, Authenticator.FailureException, Authenticator.ErrorException {
-            final SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(mmContext);
-            final long lastedit_task = pref.getLong("lastedit_task", 0L);
-            final Cursor c = mmContext.getContentResolver().query(TaskProvider.CONTENT_URI, TaskProvider.PROJECTION, TaskProvider.DIRTY_SINCE_FILTER, new String[] { String.valueOf(lastedit_task) }, null);
-            
-            if (c != null) {
-                try {
-                    if (c.getCount() > 0) {
-                        final List<Task> newTasks = new LinkedList<Task>();
-                        final List<Task> modifiedTasks = new LinkedList<Task>();
-                        for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
-                            final Task t = Task.fromCursor(c, 0);
-                            if (t.isNew()) {
-                                newTasks.add(t);
-                            } else {
-                                modifiedTasks.add(t);
-                            }
-                        }
-                        
-                        for (Task t : modifiedTasks) {
-                            final Task ret = mmClient.editTask(t, null);
-                        }
-                        for (Task t : newTasks) {
-                            final Task ret = mmClient.addTask(t, null);
-                            final ContentValues values = new ContentValues();
-                            values.put(TaskProvider.COLUMN_TASK, ret.id);
-                            final int affected = mmContext.getContentResolver().update(TaskProvider.CONTENT_URI, values, TaskProvider.ID_FILTER, new String[] { String.valueOf(t._id) });
-                            if (affected == 0) {
-                                Log.d("TCS.S.commit", String.format("inserting #%d: cannot write task ID", t._id));
-                            }
-                        }
-                        recordStatus();
-                    }
-                } finally {
-                    c.close();
                 }
             }
         }
