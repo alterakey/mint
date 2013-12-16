@@ -45,6 +45,7 @@ public class TaskEditFragment extends Fragment
     private static final int REQ_SET_TIME = 2;
 
     private Task mTask;
+    private String mTargetContentKey;
     private TaskLoaderManipulator mLoaderManip = new TaskLoaderManipulator();
 
     public static TaskEditFragment newInstance(long task) {
@@ -167,6 +168,7 @@ public class TaskEditFragment extends Fragment
             if (data.getCount() > 0) {
                 data.moveToFirst();
                 mTask = Task.fromCursor(data, 0);
+                mTargetContentKey = mTask.getContentKey();
                 update(getView());
             }
         }
@@ -190,7 +192,7 @@ public class TaskEditFragment extends Fragment
         values.put(TaskProvider.COLUMN_DUEDATE, mTask.duedate);
         values.put(TaskProvider.COLUMN_DUETIME, mTask.duetime);
         values.put(TaskProvider.COLUMN_STATUS, mTask.status);
-        getActivity().getContentResolver().update(TaskProvider.CONTENT_URI, values, TaskProvider.ID_FILTER, new String[] { String.valueOf(mTask.id) });
+        getActivity().getContentResolver().update(TaskProvider.CONTENT_URI, values, TaskProvider.COOKIE_FILTER, new String[] { mTargetContentKey });
 
         final Intent intent = new Intent(getActivity(), ToodledoClientService.class);
         intent.setAction(ToodledoClientService.ACTION_UPDATE);
