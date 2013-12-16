@@ -26,6 +26,7 @@ public class TaskProvider extends BaseProvider {
     public static final String NO_ORDER = "";
     public static final String HOTLIST_FILTER = "(priority=3 or (priority>=0 and duedate>0 and duedate<?)) and completed=0";
     public static final String ID_FILTER = "tasks._id=?";
+    public static final String COOKIE_FILTER = "tasks.cookie=?";
     public static final String ALL_FILTER = "1=1";
     public static final String MULTIPLE_TASKS_FILTER = "task in (%s)";
     public static final String DIRTY_SINCE_FILTER = "tasks.task is null or tasks.modified > ?";

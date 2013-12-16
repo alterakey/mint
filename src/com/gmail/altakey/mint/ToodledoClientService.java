@@ -136,7 +136,11 @@ public class ToodledoClientService extends IntentService {
 
     private void add(final List<Task> tasks) throws IOException, Authenticator.Exception {
         Log.d("TCS", "adding task");
-        mClient.addTasks(tasks, null);
+        for (Task t : mClient.addTasks(tasks, null)) {
+            final ContentValues row = new ContentValues();
+            row.put(TaskProvider.COLUMN_TASK, t.id);
+            getContentResolver().update(TaskProvider.CONTENT_URI, row, TaskProvider.COOKIE_FILTER, new String[] { t.getContentKey() });
+        }
     }
 
     private void delete(final List<Task> tasks) throws IOException, Authenticator.Exception {
