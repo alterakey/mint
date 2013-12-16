@@ -46,39 +46,41 @@ public class NavigationFragment extends ListFragment {
         final CursorWrapper cw = (CursorWrapper)lv.getItemAtPosition(position);
 
         final int type = cw.getInt(TaskCountProvider.COL_TYPE);
-        final String title = cw.getString(TaskCountProvider.COL_COOKIE);
-        final int id_ = cw.getInt(TaskCountProvider.COL_ID);
+        if (type != TaskCountProvider.TYPE_SECTION) {
+            final String title = cw.getString(TaskCountProvider.COL_COOKIE);
+            final int id_ = cw.getInt(TaskCountProvider.COL_ID);
 
-        final FilterType filter = new FilterType();
-        switch (type) {
-        case TaskCountProvider.TYPE_STATUS:
-            if (id_ == -1) {
-                filter.makeHot();
-            } else {
+            final FilterType filter = new FilterType();
+            switch (type) {
+            case TaskCountProvider.TYPE_STATUS:
+                if (id_ == -1) {
+                    filter.makeHot();
+                } else {
+                    filter.setTitle(title);
+                    filter.setSimpleSelection(FilterType.TYPE_STATUS, id_);
+                }
+                break;
+            case TaskCountProvider.TYPE_FOLDER:
                 filter.setTitle(title);
-                filter.setSimpleSelection(FilterType.TYPE_STATUS, id_);
+                filter.setSimpleSelection(FilterType.TYPE_FOLDER, id_);
+                break;
+            case TaskCountProvider.TYPE_CONTEXT:
+                filter.setTitle(title);
+                filter.setSimpleSelection(FilterType.TYPE_CONTEXT, id_);
+                break;
             }
-            break;
-        case TaskCountProvider.TYPE_FOLDER:
-            filter.setTitle(title);
-            filter.setSimpleSelection(FilterType.TYPE_FOLDER, id_);
-            break;
-        case TaskCountProvider.TYPE_CONTEXT:
-            filter.setTitle(title);
-            filter.setSimpleSelection(FilterType.TYPE_CONTEXT, id_);
-            break;
-        }
 
-        try {
-            final SlidingMenu menu = ((SlidingActivity)getActivity()).getSlidingMenu();
-            menu.toggle();
-        } catch (ClassCastException e) {
-        }
+            try {
+                final SlidingMenu menu = ((SlidingActivity)getActivity()).getSlidingMenu();
+                menu.toggle();
+            } catch (ClassCastException e) {
+            }
 
-        getFragmentManager()
-            .beginTransaction()
-            .replace(R.id.frag, TaskListFragment.newInstance(filter), TaskListFragment.TAG)
-            .commit();
+            getFragmentManager()
+                .beginTransaction()
+                .replace(R.id.frag, TaskListFragment.newInstance(filter), TaskListFragment.TAG)
+                .commit();
+        }
     }
 
     private static class NavigationAdapter extends CursorAdapter {
