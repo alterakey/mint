@@ -179,6 +179,7 @@ public class TaskEditFragment extends Fragment
     private void commit() {
         final ContentValues values = new ContentValues();
         values.put(TaskProvider.COLUMN_TITLE, mTask.title);
+        values.put(TaskProvider.COLUMN_COOKIE, mTask.getContentKey());
         values.put(TaskProvider.COLUMN_NOTE, mTask.note);
         values.put(TaskProvider.COLUMN_MODIFIED, mTask.modified);
         values.put(TaskProvider.COLUMN_COMPLETED, mTask.completed);

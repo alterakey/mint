@@ -12,7 +12,8 @@ import java.util.UUID;
 
 import android.util.Log;
 import java.security.MessageDigest;
-import org.apache.commons.codec.binary.Hex;
+import java.security.NoSuchAlgorithmException;
+import com.apache.commons.codec.binary.Hex;
 
 public class Task {
     public static final int COLUMNS = 11;
@@ -48,9 +49,17 @@ public class Task {
     }
 
     public String getContentKey() {
-        final MessageDigest md = MessageDigest.getInstance("MD5");
-        final byte[] bytes = String.format("%d.%d.%d.%s", context, folder, status, title).getBytes();
-        return Hex.encodeHexString(md.digest());
+        try {
+            final MessageDigest md = MessageDigest.getInstance("MD5");
+            final String base = String.format("%s.%s.%s.%s", String.valueOf(context), String.valueOf(folder), String.valueOf(status == null ? 0 : status), title);
+            final byte[] bytes = base.getBytes();
+            md.update(bytes, 0, bytes.length);
+            final String ret =  Hex.encodeHexString(md.digest());
+            Log.d("Task", String.format("content key: %s (<- %s)", ret, base));
+            return ret;
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static Task fromCursor(Cursor c, int offset) {

@@ -268,6 +268,7 @@ public class ToodledoClientService extends IntentService {
                 for (Task t : (List<Task>)data.get("task")) {
                     final ContentValues row = new ContentValues();
                     row.put(TaskProvider.COLUMN_TASK, t.id);
+                    row.put(TaskProvider.COLUMN_COOKIE, t.getContentKey());
                     row.put(TaskProvider.COLUMN_TITLE, t.title);
                     row.put(TaskProvider.COLUMN_NOTE, t.note);
                     row.put(TaskProvider.COLUMN_MODIFIED, t.modified);

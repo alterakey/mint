@@ -40,7 +40,6 @@ public class SyncPoker implements LoaderManager.LoaderCallbacks<Void> {
                     final ToodledoClient client = new ToodledoClient(Authenticator.create(me), me);
                     final ToodledoClientService.Synchronizer sync = new ToodledoClientService.Synchronizer(me, client);
                     sync.update();
-                    sync.commit();
                     return null;
                 } catch (final IOException e) {
                     Log.d("MA.SP", "ignoring", e);
