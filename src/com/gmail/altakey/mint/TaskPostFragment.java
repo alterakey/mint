@@ -14,6 +14,8 @@ import android.view.View;
 import android.view.LayoutInflater;
 import android.widget.TextView;
 
+import android.util.Log;
+
 import java.util.Date;
 import java.io.IOException;
 
@@ -87,6 +89,7 @@ public class TaskPostFragment extends DialogFragment {
             } else {
                 t.title = "New task";
             }
+            Log.d("TPF", String.format("status guessed: %d", status));
             if (status == FilterType.UNKNOWN) {
                 t.duedate = (new Date().getTime() + DUE * 1000) / 1000;
             } else {

@@ -64,7 +64,11 @@ public class FilterType implements Parcelable {
     }
 
     public int getToodledoStatus() {
-        return mSelection.equals(String.format("%s=?", TYPE_STATUS)) ? Integer.parseInt(mSelectionArgs[0]) : UNKNOWN;
+        if (mSelection.startsWith(String.format("%s=?", TYPE_STATUS))) {
+            return Integer.parseInt(mSelectionArgs[0]);
+        } else {
+            return UNKNOWN;
+        }
     }
 
     public FilterType setTitle(String title) {

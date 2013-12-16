@@ -148,8 +148,9 @@ public class ToodledoClientService extends IntentService {
         mClient.deleteTasks(tasks);
     }
 
-    private void update(final List<Task> tasks) {
+    private void update(final List<Task> tasks) throws IOException, Authenticator.Exception {
         Log.d("TCS", "updating task");
+        mClient.editTasks(tasks, null);
     }
 
     private void sync() throws IOException, Authenticator.Exception {
