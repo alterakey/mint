@@ -82,7 +82,7 @@ public class TaskListFragment extends ListFragment
         setHasOptionsMenu(true);
         setListAdapter(mAdapter);
         setListShown(false);
-        getLoaderManager().initLoader(1, null, mTaskLoaderManip);
+        LoaderUtil.initLoader(1, null, mTaskLoaderManip, getLoaderManager());
     }
 
     @Override
@@ -108,7 +108,7 @@ public class TaskListFragment extends ListFragment
     @Override
     public void onResume() {
         super.onResume();
-        getLoaderManager().restartLoader(1, null, mTaskLoaderManip);
+        LoaderUtil.initLoader(1, null, mTaskLoaderManip, getLoaderManager());
         update();
     }
 
@@ -254,7 +254,7 @@ public class TaskListFragment extends ListFragment
                     activity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            getLoaderManager().restartLoader(1, null, TaskLoaderManipulator.this);
+                            LoaderUtil.initLoader(1, null, mTaskLoaderManip, getLoaderManager());
                         }
                     });
                 }

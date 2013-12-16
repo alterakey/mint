@@ -58,8 +58,7 @@ public class WelcomeActivity extends Activity
     public void onResume() {
         super.onResume();
         mTroubleListener.register();
-
-        getLoaderManager().restartLoader(0, null, mSyncPokerManip);
+        LoaderUtil.initLoader(0, null, mSyncPokerManip, getLoaderManager());
     }
 
     @Override

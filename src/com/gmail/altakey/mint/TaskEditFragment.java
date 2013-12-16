@@ -69,7 +69,7 @@ public class TaskEditFragment extends Fragment
         update(v);
 
         setHasOptionsMenu(true);
-        getLoaderManager().initLoader(1, getArguments(), mLoaderManip);
+        LoaderUtil.initLoader(1, getArguments(), mLoaderManip, getLoaderManager());
         return v;
     }
 

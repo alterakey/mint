@@ -30,13 +30,13 @@ public class NavigationFragment extends ListFragment {
         super.onActivityCreated(savedInstanceState);
         mAdapter = new NavigationAdapter(getActivity(), null);
         setListAdapter(mAdapter);
-        getLoaderManager().initLoader(1, null, mContentLoaderManip);
+        LoaderUtil.initLoader(1, null, mContentLoaderManip, getLoaderManager());
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        getLoaderManager().restartLoader(1, null, mContentLoaderManip);
+        LoaderUtil.initLoader(1, null, mContentLoaderManip, getLoaderManager());
     }
 
     @Override

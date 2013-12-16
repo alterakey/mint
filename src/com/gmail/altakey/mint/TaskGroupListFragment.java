@@ -46,8 +46,8 @@ public abstract class TaskGroupListFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        getLoaderManager().restartLoader(0, null, mTaskCountLoaderManip);
-        getLoaderManager().restartLoader(1, null, mSyncPokerManip);
+        LoaderUtil.initLoader(0, null, mTaskCountLoaderManip, getLoaderManager());
+        LoaderUtil.initLoader(1, null, mSyncPokerManip, getLoaderManager());
     }
 
     private void setListShown(final boolean shown) {
