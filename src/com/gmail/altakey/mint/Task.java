@@ -11,6 +11,8 @@ import java.util.Date;
 import java.util.UUID;
 
 import android.util.Log;
+import java.security.MessageDigest;
+import org.apache.commons.codec.binary.Hex;
 
 public class Task {
     public static final int COLUMNS = 11;
@@ -45,28 +47,10 @@ public class Task {
         completed = at / 1000;
     }
 
-    public void addCookie() {
-        note = String.format("%s\n(mint:%s)", note, nextCookie());
-    }
-
-    public void removeCookie() {
-        note = note.replaceAll("\n?(mint:[0-9a-f]{32,})", "");
-    }
-
     public String getContentKey() {
-        return String.format("%d.%d.%d.%s", context, folder, status, title);
-    }
-
-    public boolean isReplica() {
-        return note.contains(String.format("(mint:%s)", _cookie));
-    }
-
-    public boolean isNew() {
-        return id == 0;
-    }
-
-    public static String nextCookie() {
-        return UUID.randomUUID().toString();
+        final MessageDigest md = MessageDigest.getInstance("MD5");
+        final byte[] bytes = String.format("%d.%d.%d.%s", context, folder, status, title).getBytes();
+        return Hex.encodeHexString(md.digest());
     }
 
     public static Task fromCursor(Cursor c, int offset) {
