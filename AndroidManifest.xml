@@ -5,22 +5,22 @@
       android:versionName="1.0">
   <uses-sdk android:minSdkVersion="14" android:targetSdkVersion="14" />
   <application android:label="@string/app_name" android:icon="@drawable/icon" android:theme="@style/Theme.Gray">
-    <activity android:name="MainActivity"
+    <activity android:name=".activity.MainActivity"
 	      android:label="@string/app_name">
       <intent-filter>
 	<action android:name="android.intent.action.MAIN" />
 	<category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
     </activity>
-    <activity android:name="TaskListActivity" />
-    <activity android:name="TaskEditActivity" />
-    <activity android:name="WelcomeActivity" />
-    <activity android:name="ConfigActivity" />
-    <service android:name="ToodledoClientService" />
-    <provider android:authorities="com.gmail.altakey.mint.TaskProvider" android:exported="false" android:name="TaskProvider" />
-    <provider android:authorities="com.gmail.altakey.mint.TaskFolderProvider" android:exported="false" android:name="TaskFolderProvider" />
-    <provider android:authorities="com.gmail.altakey.mint.TaskContextProvider" android:exported="false" android:name="TaskContextProvider" />
-    <provider android:authorities="com.gmail.altakey.mint.TaskCountProvider" android:exported="false" android:name="TaskCountProvider" />
+    <activity android:name=".activity.TaskListActivity" />
+    <activity android:name=".activity.TaskEditActivity" />
+    <activity android:name=".activity.WelcomeActivity" />
+    <activity android:name=".activity.ConfigActivity" />
+    <service android:name=".activity.ToodledoClientService" />
+    <provider android:authorities="com.gmail.altakey.mint.provider.TaskProvider" android:exported="false" android:name=".provider.TaskProvider" />
+    <provider android:authorities="com.gmail.altakey.mint.provider.TaskFolderProvider" android:exported="false" android:name=".provider.TaskFolderProvider" />
+    <provider android:authorities="com.gmail.altakey.mint.provider.TaskContextProvider" android:exported="false" android:name=".provider.TaskContextProvider" />
+    <provider android:authorities="com.gmail.altakey.mint.provider.TaskCountProvider" android:exported="false" android:name=".provider.TaskCountProvider" />
   </application>
   <uses-permission android:name="android.permission.INTERNET" />
 </manifest>
