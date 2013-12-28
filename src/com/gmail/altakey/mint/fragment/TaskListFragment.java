@@ -4,50 +4,58 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.app.Fragment;
 import android.app.ListFragment;
-import android.app.ProgressDialog;
 import android.app.LoaderManager;
-import android.content.CursorLoader;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.Loader;
 import android.content.res.Resources;
-import android.database.Cursor;
 import android.database.ContentObserver;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.*;
-import android.widget.*;
 import android.support.v4.content.LocalBroadcastManager;
-
-import java.io.IOException;
-import java.util.Date;
-import java.util.Formatter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.LinkedList;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Arrays;
 import android.text.format.DateUtils;
-
-import android.app.Fragment;
-import android.content.ContentResolver;
-
+import android.util.Log;
+import android.view.ActionMode;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
+import android.widget.CursorAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
+import com.example.android.swipedismiss.SwipeDismissListViewTouchListener;
 import com.gmail.altakey.mint.R;
+import com.gmail.altakey.mint.activity.ConfigActivity;
+import com.gmail.altakey.mint.activity.TaskEditActivity;
+import com.gmail.altakey.mint.model.Task;
 import com.gmail.altakey.mint.provider.TaskProvider;
 import com.gmail.altakey.mint.service.ToodledoClientService;
 import com.gmail.altakey.mint.util.FilterType;
-import com.gmail.altakey.mint.activity.TaskEditActivity;
-import com.gmail.altakey.mint.model.Task;
-import com.gmail.altakey.mint.activity.ConfigActivity;
 import com.gmail.altakey.mint.util.LoaderUtil;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Formatter;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
 
 public class TaskListFragment extends ListFragment
 {
@@ -87,6 +95,26 @@ public class TaskListFragment extends ListFragment
         //listView.setOnItemLongClickListener(new SelectionModeListener());
         listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
         listView.setMultiChoiceModeListener(new TaskSelectionMode());
+
+        final SwipeDismissListViewTouchListener touchListener =
+                new SwipeDismissListViewTouchListener(
+                        listView,
+                        new SwipeDismissListViewTouchListener.DismissCallbacks() {
+                            @Override
+                            public boolean canDismiss(int position) {
+                                return true;
+                            }
+
+                            @Override
+                            public void onDismiss(ListView listView, int[] reverseSortedPositions) {
+                                for (int position : reverseSortedPositions) {
+                                    //mAdapter.remove(mAdapter.getItem(position));
+                                }
+                                //mAdapter.notifyDataSetChanged();
+                            }
+                        });
+        listView.setOnTouchListener(touchListener);
+        listView.setOnScrollListener(touchListener.makeScrollListener());
 
         setHasOptionsMenu(true);
         setListAdapter(mAdapter);
