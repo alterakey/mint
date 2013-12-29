@@ -47,6 +47,7 @@ public class ToodledoClientService extends IntentService {
     public static final String ACTION_ADD = "com.gmail.altakey.mint.ADD";
     public static final String ACTION_DELETE = "com.gmail.altakey.mint.DELETE";
     public static final String ACTION_UPDATE = "com.gmail.altakey.mint.UPDATE";
+    public static final String ACTION_COMPLETE = "com.gmail.altakey.mint.COMPLETE";
     public static final String ACTION_SYNC = "com.gmail.altakey.mint.SYNC";
     public static final String ACTION_SYNC_DONE = "com.gmail.altakey.mint.SYNC_DONE";
     public static final String ACTION_SYNC_BEGIN = "com.gmail.altakey.mint.SYNC_BEGIN";
@@ -57,6 +58,8 @@ public class ToodledoClientService extends IntentService {
     public static final String EXTRA_TASKS = "tasks";
     public static final String EXTRA_TASK_FIELDS = "task_fields";
     public static final String EXTRA_ABORT_REASON = "reason";
+
+    public static final String KEY_COMPLETE_QUEUE = "complete_queue";
 
     private ToodledoClient mClient;
 
@@ -102,6 +105,12 @@ public class ToodledoClientService extends IntentService {
             }
             if (ACTION_UPDATE.equals(action)) {
                 update(extractTasks(intent));
+                sync_done();
+            }
+            if (ACTION_COMPLETE.equals(action)) {
+                final List<Task> targets = extractCompleteQueue();
+                complete(targets);
+                update(targets);
                 sync_done();
             }
             if (ACTION_SYNC.equals(action)) {
@@ -161,6 +170,44 @@ public class ToodledoClientService extends IntentService {
     private void update(final List<Task> tasks) throws IOException, Authenticator.Exception {
         Log.d("TCS", "updating task");
         mClient.editTasks(tasks, null);
+    }
+
+    private List<Task> extractCompleteQueue() {
+        final SharedPreferences sp = getSharedPreferences("com.gmail.altakey.mint", Context.MODE_PRIVATE);
+        final Set<String> queue = sp.getStringSet(KEY_COMPLETE_QUEUE, null);
+        if (queue == null) {
+            return null;
+        } else {
+            final List<Task> ret = new LinkedList();
+            for (String key: queue) {
+                final Cursor c = getContentResolver().query(TaskProvider.CONTENT_URI, TaskProvider.PROJECTION, TaskProvider.COOKIE_FILTER, new String[] { key }, TaskProvider.NO_ORDER);
+                for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
+                    ret.add(Task.fromCursor(c, 0));
+                }
+            }
+            return ret;
+        }
+    }
+
+    private void complete(final List<Task> tasks) throws IOException, Authenticator.Exception {
+        final SharedPreferences sp = getSharedPreferences("com.gmail.altakey.mint", Context.MODE_PRIVATE);
+        final Set<String> queue = sp.getStringSet(KEY_COMPLETE_QUEUE, null);
+        Log.d("TCS", "completing tasks");
+        final ContentResolver resolver = getContentResolver();
+        for (Task t : tasks) {
+            t.markAsDone();
+            final String contentKey = t.getContentKey();
+            final ContentValues values = new ContentValues();
+            values.put(TaskProvider.COLUMN_COMPLETED, t.completed);
+            final int affected = resolver.update(TaskProvider.CONTENT_URI, values, TaskProvider.COOKIE_FILTER, new String[] { contentKey });
+            if (queue != null) {
+                queue.remove(contentKey);
+            }
+        }
+        if (queue != null) {
+            sp.edit().putStringSet(KEY_COMPLETE_QUEUE, queue).commit();
+        }
+        resolver.notifyChange(TaskProvider.CONTENT_URI, null);
     }
 
     private void sync() throws IOException, Authenticator.Exception {

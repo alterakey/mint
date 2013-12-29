@@ -16,12 +16,14 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.Loader;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.format.DateUtils;
 import android.util.Log;
@@ -37,6 +39,7 @@ import android.widget.AdapterView;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 import com.example.android.swipedismiss.SwipeDismissListViewTouchListener;
 import com.gmail.altakey.mint.R;
 import com.gmail.altakey.mint.activity.ConfigActivity;
@@ -52,10 +55,12 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Formatter;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 
 public class TaskListFragment extends ListFragment
 {
@@ -107,8 +112,13 @@ public class TaskListFragment extends ListFragment
 
                             @Override
                             public void onDismiss(ListView listView, int[] reverseSortedPositions) {
-                                for (int position : reverseSortedPositions) {
-                                    //mAdapter.remove(mAdapter.getItem(position));
+                                final Context context = getActivity();
+                                if (context != null) {
+                                    for (int position : reverseSortedPositions) {
+                                        final Cursor c = (Cursor)mAdapter.getItem(position);
+                                        final Task t = Task.fromCursor(c, 0);
+                                        mAdapter.markToBeRemoved(context, t);
+                                    }
                                 }
                                 //mAdapter.notifyDataSetChanged();
                             }
@@ -178,16 +188,47 @@ public class TaskListFragment extends ListFragment
     }
 
     private class TaskListAdapter extends CursorAdapter {
+        private Set<String> mCompleteQueue;
+
         public TaskListAdapter(Context context, Cursor c) {
             super(context, c);
+            init(context);
         }
 
         public TaskListAdapter(Context context, Cursor c, boolean autoRequery) {
             super(context, c, autoRequery);
+            init(context);
         }
 
         public TaskListAdapter(Context context, Cursor c, int flags) {
             super(context, c, flags);
+            init(context);
+        }
+
+        private void init(final Context context) {
+            final SharedPreferences sp = context.getSharedPreferences("com.gmail.altakey.mint", Context.MODE_PRIVATE);
+            mCompleteQueue = sp.getStringSet(ToodledoClientService.KEY_COMPLETE_QUEUE, null);
+            if (mCompleteQueue == null) {
+                mCompleteQueue = new HashSet<String>();
+            }
+            processCompleteQueue(context);
+        }
+
+        public void markToBeRemoved(final Context context, final Task task) {
+            final String contentKey = task.getContentKey();
+            mCompleteQueue.add(contentKey);
+            final SharedPreferences sp = context.getSharedPreferences("com.gmail.altakey.mint", Context.MODE_PRIVATE);
+            sp.edit()
+                .putStringSet(ToodledoClientService.KEY_COMPLETE_QUEUE, mCompleteQueue)
+                .commit();
+            notifyDataSetChanged();
+            processCompleteQueue(context);
+        }
+
+        private void processCompleteQueue(final Context context) {
+            final Intent intent = new Intent(getActivity(), ToodledoClientService.class);
+            intent.setAction(ToodledoClientService.ACTION_COMPLETE);
+            context.startService(intent);
         }
 
         @Override
@@ -208,6 +249,16 @@ public class TaskListFragment extends ListFragment
             final View priority = view.findViewById(R.id.list_task_prio);
             final Task task = Task.fromCursor(cursor, 0);
             final Resources res = getResources();
+
+            if (mCompleteQueue.contains(task.getContentKey())) {
+                final ViewGroup.LayoutParams lp = view.getLayoutParams();
+                lp.height = 1;
+                view.setLayoutParams(lp);
+            } else {
+                final ViewGroup.LayoutParams lp = view.getLayoutParams();
+                lp.height = ViewGroup.LayoutParams.MATCH_PARENT;
+                view.setLayoutParams(lp);
+            }
 
             title.setText(task.title);
             timerFlag.setText("");
