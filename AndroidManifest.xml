@@ -16,7 +16,7 @@
     <activity android:name=".activity.TaskEditActivity" />
     <activity android:name=".activity.WelcomeActivity" />
     <activity android:name=".activity.ConfigActivity" />
-    <service android:name=".activity.ToodledoClientService" />
+    <service android:name=".service.ToodledoClientService" />
     <provider android:authorities="com.gmail.altakey.mint.provider.TaskProvider" android:exported="false" android:name=".provider.TaskProvider" />
     <provider android:authorities="com.gmail.altakey.mint.provider.TaskFolderProvider" android:exported="false" android:name=".provider.TaskFolderProvider" />
     <provider android:authorities="com.gmail.altakey.mint.provider.TaskContextProvider" android:exported="false" android:name=".provider.TaskContextProvider" />
