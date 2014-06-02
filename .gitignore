@@ -6,3 +6,6 @@ tmp
 *.orig
 *.keystore
 .DS_Store
+build
+.gradle
+*.iml
