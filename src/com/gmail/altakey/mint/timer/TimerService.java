@@ -1,5 +1,6 @@
 package com.gmail.altakey.mint.timer;
 
+import android.app.IntentService;
 import android.app.Service;
 import android.os.IBinder;
 import android.os.Handler;
@@ -24,14 +25,16 @@ import android.util.Log;
 
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.widget.RemoteViews;
+
+import com.google.android.glass.app.VoiceTriggers;
+import com.google.android.glass.timeline.LiveCard;
 
 public class TimerService extends Service {
     public static final String ACTION_START = "start";
     public static final String ACTION_RESET = "reset";
     public static final String ACTION_TIMEOUT = "timeout";
     public static final String ACTION_TICK = "tick";
-    public static final String EXTRA_DUE = "due";
-    public static final String EXTRA_STATE = "state";
 
     public static final int STATE_RESET = 0;
     public static final int STATE_RUNNING = 1;
@@ -44,24 +47,6 @@ public class TimerService extends Service {
     private Timer mTimer = null;
     private Timer mIdleTimer = null;
     private Ticker mTicker = new Ticker(this);
-    private Notifier mNotifier = new Notifier();
-
-    private Looper mLooper;
-    private ServiceHandler mHandler;
-
-    private class ServiceHandler extends Handler {
-        public ServiceHandler(Looper looper) {
-            super(looper);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            final Intent intent = (Intent)msg.obj;
-            if (intent != null) {
-                handleIntent(intent);
-            }
-        }
-    }
 
     public static int getState() {
         return sState;
@@ -79,29 +64,29 @@ public class TimerService extends Service {
         }
     }
 
+    private static String TAG = "com.gmail.altakey.mint.timer.main";
+    private LiveCard mLiveCard;
+    private RemoteViews mViews;
+
     @Override
     public void onCreate() {
-        final HandlerThread thread = new HandlerThread("worker", Process.THREAD_PRIORITY_BACKGROUND);
-        thread.start();
-
-        mLooper = thread.getLooper();
-        mHandler = new ServiceHandler(mLooper);
-        mTicker.prepare();
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        final Message msg = mHandler.obtainMessage();
-        msg.arg1 = startId;
-        msg.obj = intent;
-        mHandler.sendMessage(msg);
-        return START_STICKY;
+        super.onCreate();
+        mViews = new RemoteViews(getPackageName(), R.layout.card_timer);
+        mLiveCard = new LiveCard(this, TAG);
+        mLiveCard.attach(this);
+        mLiveCard.setViews(mViews);
+        mLiveCard.setAction(PendingIntent.getService(this, 1, new Intent(ACTION_START), 0));
+        mLiveCard.publish(LiveCard.PublishMode.REVEAL);
+        Log.d("TS", "created");
     }
 
     @Override
     public void onDestroy() {
-        mNotifier.cancel();
-        mTicker.cleanup();
+        Log.d("TS", "destroying", new Exception());
+        mLiveCard.unpublish();
+        mLiveCard = null;
+
+        //mTicker.cleanup();
         super.onDestroy();
     }
 
@@ -110,27 +95,22 @@ public class TimerService extends Service {
         return null;
     }
 
-    public void handleIntent(Intent intent) {
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
         final String action = intent.getAction();
         Log.d("TS.oHI", String.format("state: %d, due: %d", sState, sDueMillis));
 
+        updateView();
         wakeUp();
 
         if (ACTION_START.equals(action)) {
             start();
-            intent.putExtra(EXTRA_STATE, sState);
-            intent.putExtra(EXTRA_DUE, sDueMillis);
-            LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
         } else if (ACTION_RESET.equals(action)) {
             reset();
-            intent.putExtra(EXTRA_STATE, sState);
-            intent.putExtra(EXTRA_DUE, sDueMillis);
-            LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
         } else if (ACTION_TIMEOUT.equals(action)) {
             proceed();
-            intent.putExtra(EXTRA_STATE, sState);
-            intent.putExtra(EXTRA_DUE, sDueMillis);
-            LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        } else if (VoiceTriggers.ACTION_VOICE_TRIGGER.equals(action)) {
+            start();
         }
 
         if (sState == STATE_RESET) {
@@ -150,6 +130,7 @@ public class TimerService extends Service {
                 mIdleTimer = null;
             }
         }
+        return START_STICKY;
     }
 
     private void wakeUp() {
@@ -178,13 +159,10 @@ public class TimerService extends Service {
         mTimer.schedule(new TimerTask() {
             @Override
             public void run() {
-                mNotifier.update();
-                mTicker.tick();
-                LocalBroadcastManager.getInstance(TimerService.this).sendBroadcast(new Intent(TimerService.ACTION_TICK));
+                updateView();
+                //mTicker.tick();
             }
         }, 1000, 1000);
-
-        startForeground(Notifier.ID, mNotifier.build());
     }
 
     private void resetTimer() {
@@ -199,8 +177,14 @@ public class TimerService extends Service {
             mTimer = null;
         }
         sDueMillis = 0;
-        mNotifier.cancel();
-        stopForeground(true);
+        updateView();
+    }
+
+    private void updateView() {
+        final TimerReader reader = new TimerReader(getRemaining(getDueMillis()));
+        mViews.setTextViewText(R.id.min, String.valueOf(reader.minutes));
+        mViews.setTextViewText(R.id.sec, String.valueOf(reader.seconds));
+        mLiveCard.setViews(mViews);
     }
 
     private void start() {
@@ -265,58 +249,6 @@ public class TimerService extends Service {
             if (mPool != null) {
                 mPool.play(mSoundBell, 1.0f, 1.0f, 0, 1, 1.0f);
             }
-        }
-    }
-
-    private class Notifier {
-        private static final int ID = 1587254409;
-
-        private Notification.Builder mBuilder = new Notification.Builder(TimerService.this);
-
-        public Notification build() {
-            final Context c = TimerService.this;
-            final TimerReader reader = new TimerReader(getRemaining(getDueMillis()));
-            String status = null;
-            long due = 0;
-
-            switch (getState()) {
-            case STATE_RUNNING:
-                status = "Running";
-                due = 25 * 60 * 1000;
-                break;
-            case STATE_BREAKING:
-                status = "Breaking";
-                due = 5 * 60 * 1000;
-                break;
-            }
-
-            final Intent intent = new Intent(c, MainActivity.class);
-            intent.setAction(Intent.ACTION_MAIN);
-            intent.addCategory(Intent.CATEGORY_LAUNCHER);
-
-            final PendingIntent action = PendingIntent.getActivity(c, 0, intent, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_UPDATE_CURRENT);
-            final Notification n = mBuilder
-                .setOngoing(true)
-                .setTicker(status)
-                .setContentTitle(String.format("%02d:%02d", reader.minutes, reader.seconds))
-                .setContentText(status)
-                .setProgress((int)due, (int)reader.getElapsed(due), false)
-                .setSmallIcon(R.drawable.ic_launcher)
-                .setContentIntent(action)
-                .build();
-            return n;
-        }
-
-        public void update() {
-            final Context c = TimerService.this;
-            final NotificationManager nm = (NotificationManager)c.getSystemService(NOTIFICATION_SERVICE);
-            nm.notify(ID, build());
-        }
-
-        public void cancel() {
-            final Context c = TimerService.this;
-            final NotificationManager nm = (NotificationManager)c.getSystemService(NOTIFICATION_SERVICE);
-            nm.cancel(ID);
         }
     }
 }
