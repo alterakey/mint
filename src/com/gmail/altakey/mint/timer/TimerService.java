@@ -182,8 +182,8 @@ public class TimerService extends Service {
 
     private void updateView() {
         final TimerReader reader = new TimerReader(getRemaining(getDueMillis()));
-        mViews.setTextViewText(R.id.min, String.valueOf(reader.minutes));
-        mViews.setTextViewText(R.id.sec, String.valueOf(reader.seconds));
+        mViews.setTextViewText(R.id.min, String.format("%02d", reader.minutes));
+        mViews.setTextViewText(R.id.sec, String.format("%02d", reader.seconds));
         mLiveCard.setViews(mViews);
     }
 
