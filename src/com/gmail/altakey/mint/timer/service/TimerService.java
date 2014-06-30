@@ -65,6 +65,7 @@ public class TimerService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        mTicker.prepare();
         mLiveCard = new TimerCard(this, TAG);
         mLiveCard.attach(this);
         final Intent launch = new Intent(this, TimerMenuActivity.class);
@@ -80,7 +81,7 @@ public class TimerService extends Service {
         mLiveCard.unpublish();
         mLiveCard = null;
 
-        //mTicker.cleanup();
+        mTicker.cleanup();
         super.onDestroy();
     }
 
@@ -155,7 +156,7 @@ public class TimerService extends Service {
             @Override
             public void run() {
                 updateView();
-                //mTicker.tick();
+                mTicker.tick();
             }
         }, 1000, 1000);
     }
@@ -216,7 +217,7 @@ public class TimerService extends Service {
 
         public void prepare() {
             if (mPool == null) {
-                mPool = new SoundPool(2, AudioManager.STREAM_MUSIC, 0);
+                mPool = new SoundPool(2, AudioManager.STREAM_NOTIFICATION, 0);
                 mSoundTick = mPool.load(mContext, R.raw.tick, 1);
                 mSoundBell = mPool.load(mContext, R.raw.ring, 1);
             }
@@ -233,7 +234,7 @@ public class TimerService extends Service {
 
         public void tick() {
             if (mPool != null) {
-                mPool.play(mSoundTick, 1.0f, 1.0f, 0, 0, 1.0f);
+                mPool.play(mSoundTick, 1.0f, 1.0f, 0, 0, 0.2f);
             }
         }
 
