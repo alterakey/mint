@@ -1,13 +1,7 @@
-package com.gmail.altakey.mint.timer;
+package com.gmail.altakey.mint.timer.service;
 
-import android.app.IntentService;
 import android.app.Service;
 import android.os.IBinder;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Looper;
-import android.os.Message;
-import android.os.Process;
 import android.content.Intent;
 import android.content.Context;
 
@@ -15,7 +9,6 @@ import android.app.PendingIntent;
 import android.app.AlarmManager;
 import android.os.PowerManager;
 import android.os.SystemClock;
-import android.support.v4.content.LocalBroadcastManager;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -23,10 +16,11 @@ import android.media.SoundPool;
 import android.media.AudioManager;
 import android.util.Log;
 
-import android.app.Notification;
-import android.app.NotificationManager;
 import android.widget.RemoteViews;
 
+import com.gmail.altakey.mint.timer.R;
+import com.gmail.altakey.mint.timer.activity.TimerMenuActivity;
+import com.gmail.altakey.mint.timer.util.TimerReader;
 import com.google.android.glass.app.VoiceTriggers;
 import com.google.android.glass.timeline.LiveCard;
 
@@ -65,17 +59,17 @@ public class TimerService extends Service {
     }
 
     private static String TAG = "com.gmail.altakey.mint.timer.main";
-    private LiveCard mLiveCard;
+    private TimerCard mLiveCard;
     private RemoteViews mViews;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        mViews = new RemoteViews(getPackageName(), R.layout.card_timer);
-        mLiveCard = new LiveCard(this, TAG);
+        mLiveCard = new TimerCard(this, TAG);
         mLiveCard.attach(this);
-        mLiveCard.setViews(mViews);
-        mLiveCard.setAction(PendingIntent.getService(this, 1, new Intent(ACTION_START), 0));
+        final Intent launch = new Intent(this, TimerMenuActivity.class);
+        launch.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NO_HISTORY);
+        mLiveCard.setAction(PendingIntent.getActivity(this, 1, launch, 0));
         mLiveCard.publish(LiveCard.PublishMode.REVEAL);
         Log.d("TS", "created");
     }
@@ -107,6 +101,7 @@ public class TimerService extends Service {
             start();
         } else if (ACTION_RESET.equals(action)) {
             reset();
+            start();
         } else if (ACTION_TIMEOUT.equals(action)) {
             proceed();
         } else if (VoiceTriggers.ACTION_VOICE_TRIGGER.equals(action)) {
@@ -181,10 +176,7 @@ public class TimerService extends Service {
     }
 
     private void updateView() {
-        final TimerReader reader = new TimerReader(getRemaining(getDueMillis()));
-        mViews.setTextViewText(R.id.min, String.format("%02d", reader.minutes));
-        mViews.setTextViewText(R.id.sec, String.format("%02d", reader.seconds));
-        mLiveCard.setViews(mViews);
+        mLiveCard.setRemaining(getRemaining(getDueMillis()));
     }
 
     private void start() {

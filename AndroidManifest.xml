@@ -3,14 +3,15 @@
       package="com.gmail.altakey.mint.timer"
       android:versionCode="1"
       android:versionName="1.0">
-  <uses-sdk android:minSdkVersion="11" android:targetSdkVersion="19" />
+  <uses-sdk android:minSdkVersion="14" android:targetSdkVersion="19" />
   <uses-permission android:name="android.permission.WAKE_LOCK" />
   <application android:label="@string/app_name" android:icon="@drawable/ic_launcher">
-    <service android:name=".TimerService">
+    <service android:name=".service.TimerService">
         <intent-filter>
             <action android:name="com.google.android.glass.action.VOICE_TRIGGER" />
         </intent-filter>
         <meta-data android:name="com.google.android.glass.VoiceTrigger" android:resource="@xml/voice" />
     </service>
+      <activity android:name=".activity.TimerMenuActivity" android:theme="@style/Theme.Menu" />
   </application>
 </manifest>

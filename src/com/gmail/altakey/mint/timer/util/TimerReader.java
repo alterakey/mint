@@ -1,4 +1,4 @@
-package com.gmail.altakey.mint.timer;
+package com.gmail.altakey.mint.timer.util;
 
 public class TimerReader {
     public long seconds;
