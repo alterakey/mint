@@ -13,7 +13,7 @@
 	android:layout_width="wrap_content"
 	android:layout_height="wrap_content"
 	android:layout_gravity="center_vertical"
-	android:fontFamily="sans-serif-light"
+	android:fontFamily="sans-serif-thin"
 	android:textSize="96sp"
 	android:text="25" />
     <TextView
@@ -22,7 +22,7 @@
 	android:layout_gravity="center_vertical"
 	android:paddingLeft="12dp"
 	android:paddingRight="12dp"
-	android:fontFamily="sans-serif-light"
+	android:fontFamily="sans-serif-thin"
 	android:textSize="96sp"
 	android:text=":" />
     <TextView
@@ -30,7 +30,7 @@
 	android:layout_width="wrap_content"
 	android:layout_height="wrap_content"
 	android:layout_gravity="center_vertical"
-	android:fontFamily="sans-serif-light"
+	android:fontFamily="sans-serif-thin"
 	android:textSize="96sp"
 	android:text="00" />
   </LinearLayout>
