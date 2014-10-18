@@ -41,10 +41,10 @@ public class TimerService extends Service {
     private static long sDueMillis = 0;
     private PendingIntent mDueIntent = null;
 
-    private Timer mTimer = null;
-    private Timer mIdleTimer = null;
-    private Ticker mTicker = new Ticker(this);
-    private Notifier mNotifier = new Notifier();
+    private Timer mTimer;
+    private Timer mIdleTimer;
+    private Ticker mTicker;
+    private Notifier mNotifier;
 
     private Looper mLooper;
     private ServiceHandler mHandler;
@@ -86,6 +86,8 @@ public class TimerService extends Service {
 
         mLooper = thread.getLooper();
         mHandler = new ServiceHandler(mLooper);
+        mTicker = new Ticker(this);
+        mNotifier = new Notifier();
         mTicker.prepare();
     }
 
