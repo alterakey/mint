@@ -297,16 +297,22 @@ public class TimerService extends Service {
             intent.addCategory(Intent.CATEGORY_LAUNCHER);
 
             final PendingIntent action = PendingIntent.getActivity(c, 0, intent, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_UPDATE_CURRENT);
-            final Notification n = mBuilder
+            mBuilder
                 .setOngoing(true)
                 .setTicker(status)
                 .setContentTitle(String.format("%02d:%02d", reader.minutes, reader.seconds))
                 .setContentText(status)
                 .setProgress((int)due, (int)reader.getElapsed(due), false)
                 .setSmallIcon(R.drawable.ic_launcher)
-                .setContentIntent(action)
-                .build();
-            return n;
+                .setContentIntent(action);
+
+            try {
+                mBuilder.setVisibility(Notification.VISIBILITY_PUBLIC);
+            } catch (final NoSuchMethodError | NoSuchFieldError e) {
+
+            }
+
+            return mBuilder.build();
         }
 
         public void update() {
