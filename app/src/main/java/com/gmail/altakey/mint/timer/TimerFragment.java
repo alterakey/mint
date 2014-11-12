@@ -135,17 +135,11 @@ public class TimerFragment extends Fragment {
 
             final View root = getView();
             if (root != null) {
+                final TimerProgressView tpv = (TimerProgressView)root.findViewById(R.id.progress);
                 ((TextView)root.findViewById(R.id.min)).setText(String.format("%02d", reader.minutes));
                 ((TextView)root.findViewById(R.id.sec)).setText(String.format("%02d", reader.seconds));
-                final ProgressBar progress = (ProgressBar)root.findViewById(R.id.progress);
-
-                if (duration > 0) {
-                    progress.setMax((int)duration);
-                    progress.setProgress((int)remaining);
-                } else {
-                    progress.setMax(1);
-                    progress.setProgress(1);
-                }
+                tpv.setBreaking(TimerService.getState() == TimerService.STATE_BREAKING);
+                tpv.setProgress(remaining, duration);
             }
         }
     }

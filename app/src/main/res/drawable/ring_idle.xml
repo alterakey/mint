@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item android:id="@android:id/background">
+        <shape
+            android:innerRadiusRatio="2.5"
+            android:shape="ring"
+            android:useLevel="false"
+            android:thicknessRatio="25.0" >
+            <gradient
+                android:centerColor="@color/idle_spent"
+                android:endColor="@color/idle_spent"
+                android:startColor="@color/idle_spent"
+                android:type="sweep" />
+        </shape>
+    </item>
+    <item android:id="@android:id/progress">
+        <shape
+            android:innerRadiusRatio="2.5"
+            android:shape="ring"
+            android:useLevel="true"
+            android:thicknessRatio="25.0" >
+            <gradient
+                android:centerColor="@color/idle_remaining"
+                android:endColor="@color/idle_remaining"
+                android:startColor="@color/idle_remaining"
+                android:type="sweep" />
+        </shape>
+    </item>
+</layer-list>

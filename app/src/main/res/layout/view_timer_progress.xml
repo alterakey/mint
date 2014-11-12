@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="350dp"
+    android:layout_height="350dp"
+    android:rotation="-90">
+    <ProgressBar
+        android:id="@+id/idle"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:indeterminate="false"
+        android:progressDrawable="@drawable/ring_idle"
+        android:interpolator="@android:anim/linear_interpolator"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:max="1"
+        android:progress="1"
+        android:visibility="gone" />
+    <ProgressBar
+        android:id="@+id/busy"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:indeterminate="false"
+        android:progressDrawable="@drawable/ring"
+        android:interpolator="@android:anim/linear_interpolator"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:max="1"
+        android:progress="1"
+        android:visibility="visible" />
+</FrameLayout>

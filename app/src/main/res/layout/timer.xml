@@ -3,18 +3,11 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-  <ProgressBar
+  <com.gmail.altakey.mint.timer.TimerProgressView
       android:id="@+id/progress"
       android:layout_width="350dp"
       android:layout_height="350dp"
-      android:indeterminate="false"
-      android:progressDrawable="@drawable/ring"
-      android:interpolator="@android:anim/linear_interpolator"
-      style="?android:attr/progressBarStyleHorizontal"
-      android:layout_gravity="center"
-      android:max="1"
-      android:progress="1"
-      android:rotation="-90"/>
+      android:layout_gravity="center"/>
   <LinearLayout
       android:id="@+id/timer"
       android:layout_width="wrap_content"
