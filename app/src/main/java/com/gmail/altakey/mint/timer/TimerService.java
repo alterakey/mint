@@ -38,6 +38,7 @@ public class TimerService extends Service {
     public static final int STATE_BREAKING = 2;
 
     private static int sState = STATE_RESET;
+    private static long sDuration = 0;
     private static long sDueMillis = 0;
     private PendingIntent mDueIntent = null;
 
@@ -77,6 +78,10 @@ public class TimerService extends Service {
         } else {
             return 25 * 60 * 1000;
         }
+    }
+
+    public static long getDuration() {
+        return sDuration;
     }
 
     @Override
@@ -168,6 +173,7 @@ public class TimerService extends Service {
         final AlarmManager am = (AlarmManager)getSystemService(ALARM_SERVICE);
         resetTimer();
 
+        sDuration = intervalMillis;
         sDueMillis = SystemClock.elapsedRealtime() + intervalMillis;
 
         final Intent intent = new Intent(this, TimerService.class);
@@ -200,6 +206,7 @@ public class TimerService extends Service {
             mTimer.purge();
             mTimer = null;
         }
+        sDuration = 0;
         sDueMillis = 0;
         mNotifier.cancel();
         stopForeground(true);

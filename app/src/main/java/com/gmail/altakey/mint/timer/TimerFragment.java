@@ -11,6 +11,7 @@ import android.content.IntentFilter;
 import android.os.SystemClock;
 import android.content.Context;
 import android.content.Intent;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import android.app.Dialog;
@@ -19,6 +20,8 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 
 import android.util.Log;
+
+import java.util.Timer;
 
 public class TimerFragment extends Fragment {
     public static final String TAG = "timer";
@@ -126,12 +129,23 @@ public class TimerFragment extends Fragment {
 
     private class TimerUpdater {
         public void refresh() {
-            final TimerReader reader = new TimerReader(TimerService.getRemaining(TimerService.getDueMillis()));
+            final long duration = TimerService.getDuration();
+            final long remaining = TimerService.getRemaining(TimerService.getDueMillis());
+            final TimerReader reader = new TimerReader(remaining);
 
             final View root = getView();
             if (root != null) {
                 ((TextView)root.findViewById(R.id.min)).setText(String.format("%02d", reader.minutes));
                 ((TextView)root.findViewById(R.id.sec)).setText(String.format("%02d", reader.seconds));
+                final ProgressBar progress = (ProgressBar)root.findViewById(R.id.progress);
+
+                if (duration > 0) {
+                    progress.setMax((int)duration);
+                    progress.setProgress((int)remaining);
+                } else {
+                    progress.setMax(1);
+                    progress.setProgress(1);
+                }
             }
         }
     }
